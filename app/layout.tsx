@@ -13,17 +13,20 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ForgeFlow Content Engine | Industrial SEO SaaS",
-  description: "A light-themed industrial SEO SaaS workspace for generating and reviewing technical landing pages.",
+  title: "ForgeFlow | Enterprise Industrial SEO & AEO Content Engine",
+  description:
+    "Pre-built industrial taxonomies, closed-loop structural QA validation, and native AEO/GEO schema for manufacturing and industrial B2B companies.",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col font-sans bg-slate-50 text-slate-900 selection:bg-sky-100 selection:text-sky-900">
+        {children}
+      </body>
     </html>
   );
 }
