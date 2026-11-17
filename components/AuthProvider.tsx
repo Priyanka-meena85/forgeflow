@@ -31,11 +31,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     async function loadSession() {
       try {
         const response = await fetch("/api/auth/me", { cache: "no-store" });
-        if (!response.ok) throw new Error("Could not verify the current session.");
-        const data = (await response.json()) as { user: AuthUser | null };
-        if (active) setUser(data.user);
+        if (!response.ok) return;
+        const text = await response.text();
+        const data = (text ? JSON.parse(text) : {}) as { user?: AuthUser | null };
+        if (active && data.user) setUser(data.user);
       } catch (error) {
-        console.error(error);
+        console.error("Session load error:", error);
       } finally {
         if (active) setLoading(false);
       }
@@ -103,8 +104,16 @@ function AuthScreen({ onAuthenticated }: { onAuthenticated: (user: AuthUser) => 
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password, companyName }),
       });
-      const data = (await response.json()) as { user?: AuthUser; error?: string };
-      if (!response.ok || !data.user) throw new Error(data.error ?? "Could not authenticate.");
+      const text = await response.text();
+      let data: { user?: AuthUser; error?: string } = {};
+      try {
+        data = text ? (JSON.parse(text) as { user?: AuthUser; error?: string }) : {};
+      } catch {
+        throw new Error("Server returned an invalid response. Please try again.");
+      }
+      if (!response.ok || !data.user) {
+        throw new Error(data.error ?? "Authentication failed. Please verify your details.");
+      }
       onAuthenticated(data.user);
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : "Could not authenticate.");
