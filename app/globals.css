@@ -72,12 +72,12 @@ select {
 
 /* Micro-animations */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(4px); }
+  from { opacity: 0; transform: translateY(6px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 .animate-fade-in {
-  animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 @keyframes pulseGlow {
@@ -87,4 +87,111 @@ select {
 
 .animate-pulse-glow {
   animation: pulseGlow 2s infinite ease-in-out;
+}
+
+@keyframes radarPing {
+  0% { transform: scale(0.9); opacity: 0.8; }
+  100% { transform: scale(2.4); opacity: 0; }
+}
+
+.radar-ping {
+  animation: radarPing 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+/* Sober card hover interactions */
+.card-interactive {
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.18s ease;
+}
+
+.card-interactive:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.06), 0 8px 10px -6px rgba(15, 23, 42, 0.03);
+  border-color: #cbd5e1;
+}
+
+/* Animated bar transition */
+.chart-bar-anim {
+  transition: height 0.75s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.25s ease;
+}
+
+/* Industrial Scanner Animation for QA Auto-Patch */
+@keyframes scanline {
+  0% { top: 0%; opacity: 0; }
+  15% { opacity: 0.85; }
+  85% { opacity: 0.85; }
+  100% { top: 100%; opacity: 0; }
+}
+
+.animate-scanline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #0284c7, #059669, #0284c7, transparent);
+  box-shadow: 0 0 14px rgba(2, 132, 199, 0.7);
+  animation: scanline 1.6s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* Badge confirmation pop */
+@keyframes badgePop {
+  0% { transform: scale(0.92); }
+  50% { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
+
+.animate-badge-pop {
+  animation: badgePop 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Shimmer wave across progress bars */
+@keyframes shimmerWave {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.shimmer-bar {
+  position: relative;
+  overflow: hidden;
+}
+
+.shimmer-bar::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.45), transparent);
+  animation: shimmerWave 1.8s infinite;
+}
+
+/* SVG Line Draw Animation for Radar Graphs */
+@keyframes drawSvgLine {
+  from { stroke-dashoffset: 1000; }
+  to { stroke-dashoffset: 0; }
+}
+
+.animate-draw-line {
+  stroke-dasharray: 1000;
+  animation: drawSvgLine 1.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Staggered node entry for taxonomy matrices */
+@keyframes staggerFade {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-stagger-1 { animation: staggerFade 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.04s both; }
+.animate-stagger-2 { animation: staggerFade 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.10s both; }
+.animate-stagger-3 { animation: staggerFade 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.16s both; }
+.animate-stagger-4 { animation: staggerFade 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.22s both; }
+
+/* Pulse live indicator */
+@keyframes pulseLiveGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.5); }
+  70% { box-shadow: 0 0 0 7px rgba(5, 150, 105, 0); }
+}
+
+.animate-pulse-live {
+  animation: pulseLiveGlow 2s cubic-bezier(0, 0, 0.2, 1) infinite;
 }

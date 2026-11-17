@@ -119,14 +119,14 @@ function AuthScreen({ onAuthenticated }: { onAuthenticated: (user: AuthUser) => 
         <div className="mb-6 flex items-center justify-between border-b border-slate-100 pb-5">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-600 text-lg font-bold text-white shadow-md shadow-sky-600/20">
-              FR
+              FF
             </div>
             <div>
-              <p className="text-[10px] font-mono font-bold uppercase tracking-[0.24em] text-sky-700">Industrial SEO & AEO</p>
+              <p className="text-xs font-mono font-bold uppercase tracking-wider text-sky-700">Industrial SEO & AEO</p>
               <h1 className="text-xl font-extrabold text-slate-900 tracking-tight">ForgeFlow</h1>
             </div>
           </div>
-          <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-slate-100 text-slate-600 border border-slate-200">
+          <span className="px-2 py-0.5 rounded text-xs font-mono font-bold bg-slate-100 text-slate-600 border border-slate-200">
             Enterprise Console
           </span>
         </div>
@@ -183,7 +183,7 @@ function AuthScreen({ onAuthenticated }: { onAuthenticated: (user: AuthUser) => 
                 autoComplete={mode === "register" ? "new-password" : "current-password"}
                 type={showPassword ? "text" : "password"}
                 required
-                minLength={mode === "register" ? 12 : undefined}
+                minLength={mode === "register" ? 8 : undefined}
                 maxLength={128}
                 placeholder="••••••••••••"
                 value={password}
@@ -200,7 +200,12 @@ function AuthScreen({ onAuthenticated }: { onAuthenticated: (user: AuthUser) => 
               </button>
             </div>
             {mode === "register" ? (
-              <span className="mt-1 block text-[11px] text-slate-500">Requires minimum 12 characters.</span>
+              <div className="mt-1 flex items-center justify-between text-xs">
+                <span className={password.length >= 8 ? "text-emerald-700 font-medium" : "text-slate-500"}>
+                  {password.length >= 8 ? "✓ Minimum 8 characters met" : "Requires minimum 8 characters"}
+                </span>
+                <span className="font-mono text-slate-400">{password.length}/8+</span>
+              </div>
             ) : null}
           </div>
 
@@ -214,7 +219,7 @@ function AuthScreen({ onAuthenticated }: { onAuthenticated: (user: AuthUser) => 
                 autoComplete="new-password"
                 type={showPassword ? "text" : "password"}
                 required
-                minLength={12}
+                minLength={8}
                 maxLength={128}
                 placeholder="••••••••••••"
                 value={confirmPassword}
@@ -277,7 +282,7 @@ function AuthScreen({ onAuthenticated }: { onAuthenticated: (user: AuthUser) => 
           )}
         </div>
 
-        <div className="mt-6 border-t border-slate-100 pt-4 text-center text-[10px] text-slate-400">
+        <div className="mt-6 border-t border-slate-100 pt-4 text-center text-xs text-slate-400">
           Your password is kept masked unless you choose to reveal it.
         </div>
       </section>

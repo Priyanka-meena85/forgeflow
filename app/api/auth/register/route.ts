@@ -13,13 +13,13 @@ export async function POST(request: Request) {
     typeof email !== "string" ||
     !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ||
     typeof password !== "string" ||
-    password.length < 12 ||
+    password.length < 8 ||
     password.length > 128 ||
     typeof companyName !== "string" ||
     companyName.trim().length < 2 ||
     companyName.trim().length > 100
   ) {
-    return errorResponse("Enter a valid email, company name, and password (12–128 characters).", 400);
+    return errorResponse("Enter a valid email, company name, and password (8–128 characters).", 400);
   }
 
   const normalizedEmail = email.trim().toLowerCase();
