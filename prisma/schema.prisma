@@ -1,0 +1,63 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Organization {
+  id                    String   @id @default(cuid())
+  name                  String
+  website               String?
+  productDescription    String?
+  industry              String?
+  keywords              String?
+  plan                  String   @default("free")
+  stripeCustomerId      String?  @unique
+  stripeSubscriptionId  String?  @unique
+  createdAt             DateTime @default(now())
+  users                 User[]
+  drafts                Draft[]
+}
+
+model User {
+  id             String        @id @default(cuid())
+  email          String        @unique
+  passwordHash   String
+  role           String        @default("owner")
+  organizationId String
+  organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  sessions       Session[]
+  createdAt      DateTime      @default(now())
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model Draft {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  title          String
+  keyword        String
+  summary        String
+  sectionsJson   String
+  faqsJson       String
+  schemaJson     String
+  status         String       @default("in_review")
+  reviewComment  String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([organizationId, createdAt])
+}
