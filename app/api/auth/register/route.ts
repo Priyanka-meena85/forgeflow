@@ -45,7 +45,10 @@ export async function POST(request: Request) {
       },
     });
   } catch (error) {
-    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+    if (
+      (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") ||
+      (Boolean(error) && typeof error === "object" && (error as { code?: string }).code === "P2002")
+    ) {
       return errorResponse("An account with this email already exists. Please sign in instead.", 409);
     }
     console.error("Register error:", error);
