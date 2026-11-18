@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AuthProvider, useAuth } from "@/components/AuthProvider";
 
 type TabKey =
@@ -519,10 +519,128 @@ function ForgeFlowWorkspace() {
   const [selectedSchemaType, setSelectedSchemaType] = useState<"FAQPage" | "HowTo" | "TechSpec">("FAQPage");
   const [previewTab, setPreviewTab] = useState<"HumanView" | "StructuredNodes" | "SchemaJSON">("HumanView");
   const [showAnnouncement, setShowAnnouncement] = useState(true);
-  const [workflowViewMode, setWorkflowViewMode] = useState<"flowchart" | "stepper">("flowchart");
   const [selectedEquipmentIndex, setSelectedEquipmentIndex] = useState(0);
   const [selectedFailureIndex, setSelectedFailureIndex] = useState(0);
   const [selectedStandardIndex, setSelectedStandardIndex] = useState(0);
+
+  // Email Verification & Team Collaboration State
+  const [resendingVerification, setResendingVerification] = useState(false);
+  const [workspaceMembers, setWorkspaceMembers] = useState<
+    Array<{
+      id: string;
+      email: string;
+      name: string | null;
+      role: string;
+      emailVerified: string | null;
+      createdAt: string;
+      isCurrentUser?: boolean;
+    }>
+  >([]);
+  const [workspaceInvites, setWorkspaceInvites] = useState<
+    Array<{
+      id: string;
+      email: string;
+      role: string;
+      status: string;
+      expiresAt: string;
+      createdAt: string;
+    }>
+  >([]);
+  const [inviteModalOpen, setInviteModalOpen] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteRole, setInviteRole] = useState("MEMBER");
+  const [inviteSending, setInviteSending] = useState(false);
+  const [inviteError, setInviteError] = useState("");
+
+  const loadWorkspaceTeam = useCallback(async () => {
+    try {
+      const res = await fetch("/api/workspace/members");
+      if (res.ok) {
+        const data = await res.json();
+        if (data.members) setWorkspaceMembers(data.members);
+        if (data.invitations) setWorkspaceInvites(data.invitations);
+      }
+    } catch (e) {
+      console.warn("Failed to load workspace team members:", e);
+    }
+  }, []);
+
+  useEffect(() => {
+    let ignore = false;
+    if (activeTab === "Workspace & Rules") {
+      fetch("/api/workspace/members")
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (ignore || !data) return;
+          if (data.members) setWorkspaceMembers(data.members);
+          if (data.invitations) setWorkspaceInvites(data.invitations);
+        })
+        .catch((e) => console.warn("Failed to load workspace team members:", e));
+    }
+    return () => {
+      ignore = true;
+    };
+  }, [activeTab]);
+
+  async function handleResendVerification() {
+    setResendingVerification(true);
+    try {
+      const res = await fetch("/api/auth/resend-verification", { method: "POST" });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok) {
+        setActionMessage(data.message || `Verification link sent to ${userEmail}. Please check your inbox.`);
+      } else {
+        setActionMessage(data.error || "Failed to resend verification link.");
+      }
+    } catch {
+      setActionMessage("Network error resending verification email.");
+    } finally {
+      setResendingVerification(false);
+    }
+  }
+
+  async function handleSendInvite(e: React.FormEvent) {
+    e.preventDefault();
+    setInviteSending(true);
+    setInviteError("");
+    try {
+      const res = await fetch("/api/workspace/invites", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: inviteEmail, role: inviteRole }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok) {
+        setActionMessage(data.message || `Invitation sent to ${inviteEmail}.`);
+        setInviteModalOpen(false);
+        setInviteEmail("");
+        void loadWorkspaceTeam();
+      } else {
+        setInviteError(data.error || "Failed to send invitation.");
+      }
+    } catch {
+      setInviteError("Network error sending invite.");
+    } finally {
+      setInviteSending(false);
+    }
+  }
+
+  async function handleRevokeInvite(inviteId: string) {
+    try {
+      const res = await fetch(`/api/workspace/invites/${encodeURIComponent(inviteId)}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        setActionMessage("Invitation revoked.");
+        void loadWorkspaceTeam();
+      } else {
+        const data = await res.json().catch(() => ({}));
+        setActionMessage(data.error || "Failed to revoke invitation.");
+      }
+    } catch {
+      setActionMessage("Network error revoking invitation.");
+    }
+  }
 
   // Load real drafts and settings from API
   useEffect(() => {
@@ -828,6 +946,13 @@ function ForgeFlowWorkspace() {
       setIsPatching(false);
       setPatchStep(0);
       setActionMessage(`✔ Auto-Patch Successful: Injected ${draftEquipment} (${draftStandard}) CTA and validated QA rules.`);
+
+      // Sync auto-patch to PostgreSQL
+      if (selectedDraft?.id && !String(selectedDraft.id).startsWith("demo-")) {
+        fetch(`/api/drafts/${encodeURIComponent(String(selectedDraft.id))}/auto-patch`, {
+          method: "POST",
+        }).catch((err) => console.warn("Auto-patch DB sync deferred:", err));
+      }
     }, 1600);
   }
 
@@ -857,8 +982,17 @@ function ForgeFlowWorkspace() {
       setReviewDrafts((current) =>
         current.map((d) => (d.id === selectedDraft.id ? { ...d, stage } : d)),
       );
-      setActionMessage(`Draft stage updated: ${stage}`);
       setReviewComment("");
+
+      // Closed-loop workflow: "Changes requested" routes back to AI engine
+      if (action === "request_changes") {
+        setActionMessage(`Changes requested. Routing back to AI engine to fix rule violations and regenerate compliant sections…`);
+        setTimeout(() => {
+          void runAutoPatch();
+        }, 350);
+      } else {
+        setActionMessage(`Draft stage updated: ${stage}`);
+      }
     } catch (error) {
       setActionMessage(error instanceof Error ? error.message : "Update failed.");
     } finally {
@@ -988,7 +1122,81 @@ function ForgeFlowWorkspace() {
     setActionMessage(`✔ Generated programmatic slice: "${dynamicTopicTitle}". Switched to QA Review Studio.`);
     setGenerationBusy(false);
 
-    // Optional background API sync if configured
+    // Persist to PostgreSQL Database
+    try {
+      fetch("/api/drafts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: dynamicDraft.title,
+          keyword: dynamicDraft.keyword,
+          vertical: dynamicDraft.vertical,
+          targetEquipment: dynamicDraft.equipment,
+          complianceStandard: dynamicDraft.standard,
+          summary: dynamicDraft.summary,
+          sections: dynamicDraft.sections,
+          faqs: dynamicDraft.faqs,
+          schema: JSON.parse(dynamicDraft.schema),
+          status: "IN_REVIEW",
+          qaScores: dynamicDraft.qa,
+          specRiskScore: dynamicSpecRisk ? parseFloat(dynamicSpecRisk) : 1.4,
+          pipelineValueMin: 95000,
+          pipelineValueMax: 380000,
+          searchVolume: dynamicSearchVolume,
+        }),
+      })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((saved) => {
+          if (saved?.draft?.id) {
+            setReviewDrafts((cur) =>
+              cur.map((d) => (d.id === dynamicDraft.id ? { ...d, id: saved.draft.id } : d)),
+            );
+            setSelectedDraftId(saved.draft.id);
+          }
+        })
+        .catch((err) => console.warn("Draft database persist deferred:", err));
+    } catch (err) {
+      console.warn("Draft persist error:", err);
+    }
+
+    // Optional background AI batch provider call if configured
+    try {
+      fetch("/api/drafts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: dynamicDraft.title,
+          keyword: dynamicDraft.keyword,
+          vertical: dynamicDraft.vertical,
+          targetEquipment: dynamicDraft.equipment,
+          complianceStandard: dynamicDraft.standard,
+          summary: dynamicDraft.summary,
+          sections: dynamicDraft.sections,
+          faqs: dynamicDraft.faqs,
+          schema: JSON.parse(dynamicDraft.schema),
+          status: "IN_REVIEW",
+          qaScores: dynamicDraft.qa,
+          specRiskScore: dynamicSpecRisk ? parseFloat(dynamicSpecRisk) : 1.4,
+          pipelineValueMin: 95000,
+          pipelineValueMax: 380000,
+          searchVolume: dynamicSearchVolume,
+        }),
+      })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((saved) => {
+          if (saved?.draft?.id) {
+            setReviewDrafts((cur) =>
+              cur.map((d) => (d.id === dynamicDraft.id ? { ...d, id: saved.draft.id } : d)),
+            );
+            setSelectedDraftId(saved.draft.id);
+          }
+        })
+        .catch((err) => console.warn("Draft database persist deferred:", err));
+    } catch (err) {
+      console.warn("Draft persist error:", err);
+    }
+
+    // Optional background AI batch provider call if configured
     try {
       fetch("/api/generate", {
         method: "POST",
@@ -1190,6 +1398,26 @@ function ForgeFlowWorkspace() {
           ))}
         </nav>
 
+        {/* Email Verification Alert Banner */}
+        {user && !user.emailVerified && (
+          <div className="mx-6 mt-4 p-3.5 rounded-xl border border-amber-300 bg-amber-50 text-xs text-amber-950 flex flex-wrap items-center justify-between gap-3 shadow-xs animate-fade-in">
+            <div className="flex items-center gap-2.5">
+              <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+              <span>
+                <strong>Email verification pending:</strong> A verification link was sent to <strong>{user.email}</strong>. Please verify to ensure full publishing access.
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={handleResendVerification}
+              disabled={resendingVerification}
+              className="px-3 py-1 rounded-lg bg-amber-200/80 hover:bg-amber-200 text-amber-900 font-bold text-xs transition cursor-pointer disabled:opacity-50"
+            >
+              {resendingVerification ? "Sending link…" : "Resend Verification Email →"}
+            </button>
+          </div>
+        )}
+
         {/* Global Feedback Banner */}
         {actionMessage ? (
           <div className="mx-6 mt-4 p-3.5 rounded-xl border border-sky-200 bg-sky-50 text-xs text-sky-900 flex items-center justify-between shadow-xs animate-fade-in">
@@ -1202,387 +1430,6 @@ function ForgeFlowWorkspace() {
             </button>
           </div>
         ) : null}
-
-        {/* END-TO-END WORKFLOW PIPELINE (EXACT SYSTEM WORKFLOW) */}
-        <div className="px-6 pt-5">
-          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-4">
-            {/* Header, Legend & Mode Switcher */}
-            <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3 border-b border-slate-100 pb-3.5">
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-mono font-bold uppercase tracking-wider text-slate-700">
-                    Industrial SEO & AEO Workflow
-                  </span>
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-mono font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                    Closed-Loop Active
-                  </span>
-                </div>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Follow the deterministic 8-step pipeline from client intake to ranking analytics.
-                </p>
-              </div>
-
-              {/* Legend & View Toggle */}
-              <div className="flex flex-wrap items-center gap-3">
-                {/* Exact Legend as shown in user's workflow diagram */}
-                <div className="flex items-center gap-4 text-xs">
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-3.5 h-3.5 rounded border border-[#0f6e56] bg-[#e1f5ee] inline-block shadow-2xs"></span>
-                    <span className="text-[#444441] font-medium">Client action</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-3.5 h-3.5 rounded border border-[#534ab7] bg-[#eeedfe] inline-block shadow-2xs"></span>
-                    <span className="text-[#444441] font-medium">System/AI action</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-3.5 h-3.5 rounded border border-[#5f5e5a] bg-[#f1efe8] inline-block shadow-2xs"></span>
-                    <span className="text-[#444441] font-medium">Output</span>
-                  </div>
-                </div>
-
-                {/* View Switcher */}
-                <div className="flex items-center rounded-xl bg-slate-100 p-1 border border-slate-200 text-xs font-medium">
-                  <button
-                    type="button"
-                    onClick={() => setWorkflowViewMode("flowchart")}
-                    className={`px-2.5 py-1 rounded-lg transition ${
-                      workflowViewMode === "flowchart"
-                        ? "bg-white text-slate-900 font-bold shadow-xs"
-                        : "text-slate-600 hover:text-slate-900"
-                    }`}
-                  >
-                    Flowchart Diagram
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setWorkflowViewMode("stepper")}
-                    className={`px-2.5 py-1 rounded-lg transition ${
-                      workflowViewMode === "stepper"
-                        ? "bg-white text-slate-900 font-bold shadow-xs"
-                        : "text-slate-600 hover:text-slate-900"
-                    }`}
-                  >
-                    Stepper View
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* VIEW MODE A: EXACT VERTICAL FLOWCHART DIAGRAM (MATCHES PDF SPECIFICATION EXACTLY) */}
-            {workflowViewMode === "flowchart" && (
-              <div className="relative py-4 flex flex-col items-center">
-                {/* Step 1: Client sign-up [Client action] */}
-                <button
-                  type="button"
-                  onClick={() => setActiveTab("Workspace & Rules")}
-                  style={{ backgroundColor: "#e1f5ee", borderColor: "#0f6e56" }}
-                  className={`w-full max-w-md py-3 px-5 rounded-xl border text-center transition shadow-xs card-interactive cursor-pointer ${
-                    activeTab === "Workspace & Rules" ? "ring-2 ring-[#0f6e56] shadow-sm" : "hover:brightness-98"
-                  }`}
-                >
-                  <div className="text-sm font-bold text-[#085041]">Client sign-up</div>
-                  <div className="text-xs text-[#0f6e56] mt-0.5">Company, website, target industry</div>
-                </button>
-
-                {/* Arrow 1 -> 2 */}
-                <div className="h-8 flex flex-col items-center justify-center my-0.5">
-                  <div className="w-[1.5px] h-4 bg-[#5f5e5a]"></div>
-                  <svg className="w-3.5 h-3.5 text-[#5f5e5a] -mt-1" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 18l-6-6h12l-6 6z" />
-                  </svg>
-                </div>
-
-                {/* Step 2: Topic suggestions [System/AI action] */}
-                <button
-                  type="button"
-                  onClick={() => setActiveTab("Taxonomy Matrix")}
-                  style={{ backgroundColor: "#eeedfe", borderColor: "#534ab7" }}
-                  className={`w-full max-w-md py-3 px-5 rounded-xl border text-center transition shadow-xs card-interactive cursor-pointer ${
-                    activeTab === "Taxonomy Matrix" ? "ring-2 ring-[#534ab7] shadow-sm" : "hover:brightness-98"
-                  }`}
-                >
-                  <div className="text-sm font-bold text-[#3c3489]">Topic suggestions</div>
-                  <div className="text-xs text-[#534ab7] mt-0.5">Auto-generated from vertical taxonomy</div>
-                </button>
-
-                {/* Arrow 2 -> 3 */}
-                <div className="h-8 flex flex-col items-center justify-center my-0.5">
-                  <div className="w-[1.5px] h-4 bg-[#5f5e5a]"></div>
-                  <svg className="w-3.5 h-3.5 text-[#5f5e5a] -mt-1" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 18l-6-6h12l-6 6z" />
-                  </svg>
-                </div>
-
-                {/* Step 3: Client approves topics [Client action] */}
-                <button
-                  type="button"
-                  onClick={() => setActiveTab("Taxonomy Matrix")}
-                  style={{ backgroundColor: "#e1f5ee", borderColor: "#0f6e56" }}
-                  className={`w-full max-w-md py-3 px-5 rounded-xl border text-center transition shadow-xs card-interactive cursor-pointer ${
-                    activeTab === "Taxonomy Matrix" ? "ring-2 ring-[#0f6e56] shadow-sm" : "hover:brightness-98"
-                  }`}
-                >
-                  <div className="text-sm font-bold text-[#085041]">Client approves topics</div>
-                  <div className="text-xs text-[#0f6e56] mt-0.5">Forms an approved batch</div>
-                </button>
-
-                {/* Arrow 3 -> 4 */}
-                <div className="h-8 flex flex-col items-center justify-center my-0.5">
-                  <div className="w-[1.5px] h-4 bg-[#5f5e5a]"></div>
-                  <svg className="w-3.5 h-3.5 text-[#5f5e5a] -mt-1" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 18l-6-6h12l-6 6z" />
-                  </svg>
-                </div>
-
-                {/* Step 4: AI generates pages [System/AI action] */}
-                <button
-                  type="button"
-                  onClick={() => generateProgrammaticBatch()}
-                  disabled={generationBusy}
-                  style={{ backgroundColor: "#eeedfe", borderColor: "#534ab7" }}
-                  className="w-full max-w-md py-3 px-5 rounded-xl border text-center transition shadow-xs card-interactive cursor-pointer hover:brightness-98 disabled:opacity-50"
-                >
-                  <div className="text-sm font-bold text-[#3c3489]">AI generates pages</div>
-                  <div className="text-xs text-[#534ab7] mt-0.5">Headline, sections, FAQs, schema</div>
-                </button>
-
-                {/* Arrow 4 -> 5 */}
-                <div className="h-8 flex flex-col items-center justify-center my-0.5">
-                  <div className="w-[1.5px] h-4 bg-[#5f5e5a]"></div>
-                  <svg className="w-3.5 h-3.5 text-[#5f5e5a] -mt-1" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 18l-6-6h12l-6 6z" />
-                  </svg>
-                </div>
-
-                {/* Step 5: Validate & auto-patch [System/AI action] */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    setActiveTab("QA Review Studio");
-                    runAutoPatch();
-                  }}
-                  style={{ backgroundColor: "#eeedfe", borderColor: "#534ab7" }}
-                  className={`w-full max-w-md py-3 px-5 rounded-xl border text-center transition shadow-xs card-interactive cursor-pointer ${
-                    isPatching ? "ring-2 ring-[#534ab7] animate-pulse" : "hover:brightness-98"
-                  }`}
-                >
-                  <div className="text-sm font-bold text-[#3c3489]">
-                    {isPatching ? `Validate & auto-patch (Step ${patchStep}/4)…` : "Validate & auto-patch"}
-                  </div>
-                  <div className="text-xs text-[#534ab7] mt-0.5">Checks rules, fixes violations</div>
-                </button>
-
-                {/* Arrow 5 -> 6 */}
-                <div className="h-8 flex flex-col items-center justify-center my-0.5">
-                  <div className="w-[1.5px] h-4 bg-[#5f5e5a]"></div>
-                  <svg className="w-3.5 h-3.5 text-[#5f5e5a] -mt-1" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 18l-6-6h12l-6 6z" />
-                  </svg>
-                </div>
-
-                {/* Step 6: Human review [Client action] with back to AI loop */}
-                <div className="w-full max-w-md relative flex items-center justify-center">
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab("QA Review Studio")}
-                    style={{ backgroundColor: "#e1f5ee", borderColor: "#0f6e56" }}
-                    className={`w-full py-3 px-5 rounded-xl border text-center transition shadow-xs card-interactive cursor-pointer ${
-                      activeTab === "QA Review Studio" ? "ring-2 ring-[#0f6e56] shadow-sm" : "hover:brightness-98"
-                    }`}
-                  >
-                    <div className="text-sm font-bold text-[#085041]">Human review</div>
-                    <div className="text-xs text-[#0f6e56] mt-0.5">QA strip, approve or request changes</div>
-                  </button>
-
-                  {/* Exact "↻ back to AI" feedback loop badge from workflow diagram */}
-                  <div
-                    onClick={() => {
-                      setActiveTab("QA Review Studio");
-                      runAutoPatch();
-                    }}
-                    title="Human review changes loop back to AI auto-patch"
-                    className="absolute -right-2 sm:-right-32 top-1/2 -translate-y-1/2 flex items-center gap-1.5 px-3 py-1 rounded-full border border-[#5f5e5a] bg-white text-[#444441] text-xs font-mono font-semibold shadow-xs cursor-pointer hover:bg-slate-50 transition whitespace-nowrap"
-                  >
-                    <span className="text-sm leading-none font-bold">↻</span>
-                    <span>back to AI</span>
-                  </div>
-                </div>
-
-                {/* Arrow 6 -> 7 */}
-                <div className="h-8 flex flex-col items-center justify-center my-0.5">
-                  <div className="w-[1.5px] h-4 bg-[#5f5e5a]"></div>
-                  <svg className="w-3.5 h-3.5 text-[#5f5e5a] -mt-1" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 18l-6-6h12l-6 6z" />
-                  </svg>
-                </div>
-
-                {/* Step 7: Publish or export [System/AI action] */}
-                <button
-                  type="button"
-                  onClick={() => setActiveTab("Publishing Pipeline")}
-                  style={{ backgroundColor: "#eeedfe", borderColor: "#534ab7" }}
-                  className={`w-full max-w-md py-3 px-5 rounded-xl border text-center transition shadow-xs card-interactive cursor-pointer ${
-                    activeTab === "Publishing Pipeline" ? "ring-2 ring-[#534ab7] shadow-sm" : "hover:brightness-98"
-                  }`}
-                >
-                  <div className="text-sm font-bold text-[#3c3489]">Publish or export</div>
-                  <div className="text-xs text-[#534ab7] mt-0.5">Clean HTML or direct CMS publish</div>
-                </button>
-
-                {/* Arrow 7 -> 8 */}
-                <div className="h-8 flex flex-col items-center justify-center my-0.5">
-                  <div className="w-[1.5px] h-4 bg-[#5f5e5a]"></div>
-                  <svg className="w-3.5 h-3.5 text-[#5f5e5a] -mt-1" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 18l-6-6h12l-6 6z" />
-                  </svg>
-                </div>
-
-                {/* Step 8: Track results [Output] */}
-                <button
-                  type="button"
-                  onClick={() => setActiveTab("Industrial Analytics")}
-                  style={{ backgroundColor: "#f1efe8", borderColor: "#5f5e5a" }}
-                  className={`w-full max-w-md py-3 px-5 rounded-xl border text-center transition shadow-xs card-interactive cursor-pointer ${
-                    activeTab === "Industrial Analytics" ? "ring-2 ring-[#5f5e5a] shadow-sm" : "hover:brightness-98"
-                  }`}
-                >
-                  <div className="text-sm font-bold text-[#444441]">Track results</div>
-                  <div className="text-xs text-[#5f5e5a] mt-0.5">Traffic and ranking dashboard</div>
-                </button>
-              </div>
-            )}
-
-            {/* VIEW MODE B: HORIZONTAL STEPPER GRID */}
-            {workflowViewMode === "stepper" && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
-                {/* 1 */}
-                <button
-                  type="button"
-                  onClick={() => setActiveTab("Workspace & Rules")}
-                  style={{ backgroundColor: "#e1f5ee", borderColor: "#0f6e56" }}
-                  className="p-3 rounded-xl border text-left transition hover:brightness-98 card-interactive cursor-pointer shadow-2xs"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono text-xs font-bold text-[#085041]">01. CLIENT ACTION</span>
-                    <span className="w-4 h-4 rounded-full bg-[#0f6e56] text-white flex items-center justify-center text-xs font-mono">1</span>
-                  </div>
-                  <div className="text-xs font-bold text-[#085041] mt-1">Client sign-up</div>
-                  <div className="text-xs text-[#0f6e56] mt-0.5">Company, website, target industry</div>
-                </button>
-
-                {/* 2 */}
-                <button
-                  type="button"
-                  onClick={() => setActiveTab("Taxonomy Matrix")}
-                  style={{ backgroundColor: "#eeedfe", borderColor: "#534ab7" }}
-                  className="p-3 rounded-xl border text-left transition hover:brightness-98 card-interactive cursor-pointer shadow-2xs"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono text-xs font-bold text-[#3c3489]">02. SYSTEM/AI</span>
-                    <span className="w-4 h-4 rounded-full bg-[#534ab7] text-white flex items-center justify-center text-xs font-mono">2</span>
-                  </div>
-                  <div className="text-xs font-bold text-[#3c3489] mt-1">Topic suggestions</div>
-                  <div className="text-xs text-[#534ab7] mt-0.5">Auto-generated from taxonomy</div>
-                </button>
-
-                {/* 3 */}
-                <button
-                  type="button"
-                  onClick={() => setActiveTab("Taxonomy Matrix")}
-                  style={{ backgroundColor: "#e1f5ee", borderColor: "#0f6e56" }}
-                  className="p-3 rounded-xl border text-left transition hover:brightness-98 card-interactive cursor-pointer shadow-2xs"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono text-xs font-bold text-[#085041]">03. CLIENT ACTION</span>
-                    <span className="w-4 h-4 rounded-full bg-[#0f6e56] text-white flex items-center justify-center text-xs font-mono">3</span>
-                  </div>
-                  <div className="text-xs font-bold text-[#085041] mt-1">Client approves topics</div>
-                  <div className="text-xs text-[#0f6e56] mt-0.5">Forms an approved batch</div>
-                </button>
-
-                {/* 4 */}
-                <button
-                  type="button"
-                  onClick={() => generateProgrammaticBatch()}
-                  disabled={generationBusy}
-                  style={{ backgroundColor: "#eeedfe", borderColor: "#534ab7" }}
-                  className="p-3 rounded-xl border text-left transition hover:brightness-98 card-interactive cursor-pointer shadow-2xs disabled:opacity-50"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono text-xs font-bold text-[#3c3489]">04. SYSTEM/AI</span>
-                    <span className="w-4 h-4 rounded-full bg-[#534ab7] text-white flex items-center justify-center text-xs font-mono">4</span>
-                  </div>
-                  <div className="text-xs font-bold text-[#3c3489] mt-1">AI generates pages</div>
-                  <div className="text-xs text-[#534ab7] mt-0.5">Headline, sections, FAQs, schema</div>
-                </button>
-
-                {/* 5 */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    setActiveTab("QA Review Studio");
-                    runAutoPatch();
-                  }}
-                  style={{ backgroundColor: "#eeedfe", borderColor: "#534ab7" }}
-                  className="p-3 rounded-xl border text-left transition hover:brightness-98 card-interactive cursor-pointer shadow-2xs"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono text-xs font-bold text-[#3c3489]">05. SYSTEM/AI</span>
-                    <span className="w-4 h-4 rounded-full bg-[#534ab7] text-white flex items-center justify-center text-xs font-mono">5</span>
-                  </div>
-                  <div className="text-xs font-bold text-[#3c3489] mt-1">Validate & auto-patch</div>
-                  <div className="text-xs text-[#534ab7] mt-0.5">Checks rules, fixes violations</div>
-                </button>
-
-                {/* 6 */}
-                <button
-                  type="button"
-                  onClick={() => setActiveTab("QA Review Studio")}
-                  style={{ backgroundColor: "#e1f5ee", borderColor: "#0f6e56" }}
-                  className="p-3 rounded-xl border text-left transition hover:brightness-98 card-interactive cursor-pointer shadow-2xs"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono text-xs font-bold text-[#085041]">06. CLIENT ACTION</span>
-                    <span className="text-xs font-mono font-bold text-[#444441] border border-[#5f5e5a] bg-white px-1.5 py-0.2 rounded-full">↺ loop</span>
-                  </div>
-                  <div className="text-xs font-bold text-[#085041] mt-1">Human review</div>
-                  <div className="text-xs text-[#0f6e56] mt-0.5">QA strip, approve or request changes</div>
-                </button>
-
-                {/* 7 */}
-                <button
-                  type="button"
-                  onClick={() => setActiveTab("Publishing Pipeline")}
-                  style={{ backgroundColor: "#eeedfe", borderColor: "#534ab7" }}
-                  className="p-3 rounded-xl border text-left transition hover:brightness-98 card-interactive cursor-pointer shadow-2xs"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono text-xs font-bold text-[#3c3489]">07. SYSTEM/AI</span>
-                    <span className="w-4 h-4 rounded-full bg-[#534ab7] text-white flex items-center justify-center text-xs font-mono">7</span>
-                  </div>
-                  <div className="text-xs font-bold text-[#3c3489] mt-1">Publish or export</div>
-                  <div className="text-xs text-[#534ab7] mt-0.5">Clean HTML or direct CMS publish</div>
-                </button>
-
-                {/* 8 */}
-                <button
-                  type="button"
-                  onClick={() => setActiveTab("Industrial Analytics")}
-                  style={{ backgroundColor: "#f1efe8", borderColor: "#5f5e5a" }}
-                  className="p-3 rounded-xl border text-left transition hover:brightness-98 card-interactive cursor-pointer shadow-2xs"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono text-xs font-bold text-[#444441]">08. OUTPUT</span>
-                    <span className="w-4 h-4 rounded-full bg-[#5f5e5a] text-white flex items-center justify-center text-xs font-mono">8</span>
-                  </div>
-                  <div className="text-xs font-bold text-[#444441] mt-1">Track results</div>
-                  <div className="text-xs text-[#5f5e5a] mt-0.5">Traffic and ranking dashboard</div>
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
 
         {/* TAB 1: MISSION CONTROL */}
         {activeTab === "Mission Control" && (
@@ -2727,6 +2574,151 @@ function ForgeFlowWorkspace() {
                 </div>
               </div>
             </div>
+
+            {/* Team Members & Access Control Card (RBAC & Invitations) */}
+            <div className="p-6 rounded-2xl border border-slate-200 bg-white shadow-xs space-y-5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-sm font-bold text-slate-900 uppercase font-mono">Team Collaboration &amp; Workspace Invites</h3>
+                    <span className="px-2 py-0.5 rounded text-xs font-mono font-bold bg-sky-50 text-sky-800 border border-sky-200">
+                      RBAC Enforced
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 mt-1">
+                    Manage team roles, invite application engineers or plant managers, and track email verification status.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setInviteModalOpen(true);
+                    setInviteError("");
+                  }}
+                  className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-xs font-bold text-white shadow-xs transition flex items-center gap-1.5 self-start sm:self-auto cursor-pointer"
+                >
+                  <span>+</span>
+                  <span>Invite Team Member</span>
+                </button>
+              </div>
+
+              {/* Members List */}
+              <div className="space-y-3">
+                <div className="text-xs font-mono font-bold text-slate-500 uppercase tracking-wider">
+                  Active Workspace Members ({workspaceMembers.length || 1})
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead>
+                      <tr className="border-b border-slate-200 text-slate-500 font-mono">
+                        <th className="pb-2 font-semibold">User</th>
+                        <th className="pb-2 font-semibold">Role</th>
+                        <th className="pb-2 font-semibold">Email Verification</th>
+                        <th className="pb-2 font-semibold">Joined Date</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {workspaceMembers.length > 0 ? (
+                        workspaceMembers.map((member) => (
+                          <tr key={member.id} className="py-2.5">
+                            <td className="py-2.5">
+                              <div className="font-bold text-slate-900">
+                                {member.name || member.email.split("@")[0]}
+                                {member.isCurrentUser && (
+                                  <span className="ml-2 text-2xs font-mono bg-sky-100 text-sky-800 px-1.5 py-0.2 rounded font-semibold">
+                                    You
+                                  </span>
+                                )}
+                              </div>
+                              <div className="text-2xs text-slate-500 font-mono">{member.email}</div>
+                            </td>
+                            <td className="py-2.5">
+                              <span className={`px-2 py-0.5 rounded font-mono font-bold text-2xs ${
+                                member.role === "OWNER"
+                                  ? "bg-purple-50 text-purple-800 border border-purple-200"
+                                  : member.role === "ADMIN"
+                                    ? "bg-sky-50 text-sky-800 border border-sky-200"
+                                    : member.role === "REVIEWER"
+                                      ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                                      : "bg-slate-100 text-slate-700"
+                              }`}>
+                                {member.role}
+                              </span>
+                            </td>
+                            <td className="py-2.5">
+                              {member.emailVerified ? (
+                                <span className="inline-flex items-center gap-1 text-emerald-700 font-medium">
+                                  <span>✓</span>
+                                  <span>Verified</span>
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 text-amber-700 font-medium">
+                                  <span>!</span>
+                                  <span>Pending</span>
+                                </span>
+                              )}
+                            </td>
+                            <td className="py-2.5 font-mono text-slate-500">
+                              {new Date(member.createdAt).toLocaleDateString()}
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr className="py-2.5">
+                          <td className="py-2.5 font-bold text-slate-900">
+                            {user?.name || user?.email.split("@")[0] || "Admin"}
+                            <span className="ml-2 text-2xs font-mono bg-sky-100 text-sky-800 px-1.5 py-0.2 rounded font-semibold">
+                              You
+                            </span>
+                          </td>
+                          <td className="py-2.5">
+                            <span className="px-2 py-0.5 rounded font-mono font-bold text-2xs bg-purple-50 text-purple-800 border border-purple-200">
+                              {user?.role || "OWNER"}
+                            </span>
+                          </td>
+                          <td className="py-2.5">
+                            {user?.emailVerified ? (
+                              <span className="text-emerald-700 font-medium">✓ Verified</span>
+                            ) : (
+                              <span className="text-amber-700 font-medium">! Pending verification</span>
+                            )}
+                          </td>
+                          <td className="py-2.5 font-mono text-slate-500">Active</td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Pending Invitations */}
+              {workspaceInvites.length > 0 && (
+                <div className="pt-4 border-t border-slate-100 space-y-3">
+                  <div className="text-xs font-mono font-bold text-slate-500 uppercase tracking-wider">
+                    Pending Invitations ({workspaceInvites.length})
+                  </div>
+                  <div className="divide-y divide-slate-100 border border-slate-200 rounded-xl overflow-hidden">
+                    {workspaceInvites.map((invite) => (
+                      <div key={invite.id} className="p-3 bg-slate-50/50 flex items-center justify-between text-xs">
+                        <div>
+                          <div className="font-mono font-bold text-slate-900">{invite.email}</div>
+                          <div className="text-2xs text-slate-500 font-mono mt-0.5">
+                            Role: <strong className="text-slate-700">{invite.role}</strong> · Expires: {new Date(invite.expiresAt).toLocaleDateString()}
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleRevokeInvite(invite.id)}
+                          className="px-2.5 py-1 rounded-lg border border-red-200 text-red-700 hover:bg-red-50 text-2xs font-bold transition cursor-pointer"
+                        >
+                          Revoke
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         )}
 
@@ -2823,6 +2815,86 @@ function ForgeFlowWorkspace() {
           </div>
         )}
       </div>
+
+      {/* Team Invitation Modal */}
+      {inviteModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-xl max-w-md w-full p-6 animate-in fade-in zoom-in duration-150">
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <h3 className="text-base font-bold text-slate-900">Invite Team Member</h3>
+                <p className="text-xs text-slate-500 mt-1">
+                  Send a secure invite link to add an engineer or manager to your workspace.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setInviteModalOpen(false)}
+                className="text-slate-400 hover:text-slate-600 text-lg leading-none p-1 cursor-pointer"
+                aria-label="Close"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleSendInvite} className="space-y-4">
+              {inviteError && (
+                <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-xs text-red-700">
+                  {inviteError}
+                </div>
+              )}
+              <div>
+                <label className="block text-[11px] font-mono uppercase tracking-wider font-bold text-slate-600 mb-1">
+                  Colleague Work Email
+                </label>
+                <input
+                  type="email"
+                  required
+                  placeholder="engineer@company.com"
+                  value={inviteEmail}
+                  onChange={(e) => setInviteEmail(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-mono uppercase tracking-wider font-bold text-slate-600 mb-1">
+                  Role &amp; Permissions
+                </label>
+                <select
+                  value={inviteRole}
+                  onChange={(e) => setInviteRole(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
+                >
+                  <option value="MEMBER">Member (Can generate slices and drafts)</option>
+                  <option value="REVIEWER">Reviewer (Can review, edit QA, and auto-patch)</option>
+                  <option value="ADMIN">Admin (Full workspace and taxonomy permissions)</option>
+                </select>
+                <p className="text-[11px] text-slate-500 mt-1">
+                  Invitations expire after 7 days and use SHA-256 secure hash tokens.
+                </p>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setInviteModalOpen(false)}
+                  className="px-4 py-2 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={inviteSending}
+                  className="px-4 py-2 rounded-xl bg-sky-600 text-xs font-bold text-white hover:bg-sky-500 transition disabled:opacity-50 cursor-pointer"
+                >
+                  {inviteSending ? "Sending Invite…" : "Send Invitation"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

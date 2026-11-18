@@ -5,7 +5,10 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 type AuthUser = {
   id: string;
   email: string;
-  organization: { id: string; name: string; plan: string };
+  name?: string | null;
+  role?: string;
+  emailVerified?: string | null;
+  organization: { id: string; name: string; plan: string; industry?: string | null; website?: string | null };
 };
 
 type AuthContextValue = {
@@ -183,9 +186,16 @@ function AuthScreen({ onAuthenticated }: { onAuthenticated: (user: AuthUser) => 
           </label>
 
           <div>
-            <label htmlFor="password" className="block text-xs font-semibold uppercase tracking-wider text-slate-700">
-              Password
-            </label>
+            <div className="flex justify-between items-center mb-1">
+              <label htmlFor="password" className="block text-xs font-semibold uppercase tracking-wider text-slate-700">
+                Password
+              </label>
+              {mode === "login" && (
+                <a href="/forgot-password" className="text-2xs text-sky-600 hover:text-sky-800 hover:underline font-semibold transition">
+                  Forgot password?
+                </a>
+              )}
+            </div>
             <div className="mt-1.5 flex rounded-xl border border-slate-300 bg-slate-50/50 focus-within:border-sky-600 focus-within:bg-white focus-within:ring-2 focus-within:ring-sky-100 transition">
               <input
                 id="password"

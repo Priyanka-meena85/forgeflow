@@ -1,27 +1,26 @@
-import path from "node:path";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, UserRole, DraftStatus, InvitationStatus } from "@prisma/client";
 
-// Ensure process.env.DATABASE_URL is always populated immediately across all platforms
+// Ensure process.env.DATABASE_URL is populated for PostgreSQL
 function resolveDatabaseUrl(): string {
   const envUrl = process.env.DATABASE_URL;
-  if (envUrl && envUrl.trim() && !envUrl.startsWith("file:./dev.db") && !envUrl.startsWith("file:dev.db")) {
+  if (envUrl && envUrl.trim() && !envUrl.startsWith("file:")) {
     return envUrl.trim();
   }
-  const isServerless = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME || process.env.NETLIFY);
-  const baseDir = isServerless ? "/tmp" : path.join(process.cwd(), "prisma");
-  const absoluteDbPath = path.join(baseDir, "dev.db").replace(/\\/g, "/");
-  return `file:${absoluteDbPath}`;
+  return "postgresql://postgres:postgres@localhost:5432/industrial_seo_saas?schema=public";
 }
 
 const dbUrl = resolveDatabaseUrl();
-if (!process.env.DATABASE_URL) {
+if (!process.env.DATABASE_URL || process.env.DATABASE_URL.startsWith("file:")) {
   process.env.DATABASE_URL = dbUrl;
 }
 
-// Resilient in-memory fallback store for zero-config deployments & serverless functions
-interface FallbackOrg {
+// -----------------------------------------------------------------------------
+// In-Memory Fallback Interfaces (Matches Prisma PostgreSQL Models Exactly)
+// -----------------------------------------------------------------------------
+export interface FallbackOrg {
   id: string;
   name: string;
+  slug: string | null;
   website: string | null;
   productDescription: string | null;
   industry: string | null;
@@ -29,20 +28,38 @@ interface FallbackOrg {
   plan: string;
   stripeCustomerId: string | null;
   stripeSubscriptionId: string | null;
+  complianceRulesJson: string | null;
+  brandVoiceJson: string | null;
   createdAt: Date;
+  updatedAt: Date;
 }
 
-interface FallbackUser {
+export interface FallbackUser {
   id: string;
   email: string;
+  name: string | null;
   passwordHash: string;
-  role: string;
+  role: UserRole;
+  emailVerified: Date | null;
+  image: string | null;
   organizationId: string;
   createdAt: Date;
+  updatedAt: Date;
   organization?: FallbackOrg | null;
 }
 
-interface FallbackSession {
+export interface FallbackMembership {
+  id: string;
+  userId: string;
+  organizationId: string;
+  role: UserRole;
+  createdAt: Date;
+  updatedAt: Date;
+  user?: FallbackUser | null;
+  organization?: FallbackOrg | null;
+}
+
+export interface FallbackSession {
   id: string;
   tokenHash: string;
   userId: string;
@@ -51,26 +68,101 @@ interface FallbackSession {
   user?: (FallbackUser & { organization?: FallbackOrg | null }) | null;
 }
 
-interface FallbackDraft {
+export interface FallbackVerificationToken {
+  id: string;
+  tokenHash: string;
+  userId: string;
+  email: string;
+  expiresAt: Date;
+  createdAt: Date;
+}
+
+export interface FallbackPasswordResetToken {
+  id: string;
+  tokenHash: string;
+  userId: string;
+  expiresAt: Date;
+  createdAt: Date;
+}
+
+export interface FallbackInvitation {
+  id: string;
+  tokenHash: string;
+  email: string;
+  role: UserRole;
+  status: InvitationStatus;
+  organizationId: string;
+  invitedById: string;
+  expiresAt: Date;
+  createdAt: Date;
+  updatedAt: Date;
+  organization?: FallbackOrg | null;
+  invitedBy?: FallbackUser | null;
+}
+
+export interface FallbackDraft {
   id: string;
   organizationId: string;
+  authorId: string | null;
   title: string;
   keyword: string;
+  vertical: string | null;
+  targetEquipment: string | null;
+  complianceStandard: string | null;
   summary: string;
   sectionsJson: string;
   faqsJson: string;
   schemaJson: string;
-  status: string;
+  status: DraftStatus;
+  qaScoresJson: string | null;
+  specRiskScore: number | null;
+  pipelineValueMin: number | null;
+  pipelineValueMax: number | null;
+  searchVolume: string | null;
   reviewComment: string | null;
+  publishedAt: Date | null;
+  publishedUrl: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
 
-interface FallbackStore {
+export interface FallbackContentRevision {
+  id: string;
+  draftId: string;
+  revisionNumber: number;
+  title: string;
+  sectionsJson: string;
+  faqsJson: string;
+  schemaJson: string;
+  qaScoresJson: string | null;
+  changeSummary: string | null;
+  changedById: string | null;
+  createdAt: Date;
+}
+
+export interface FallbackAuditLog {
+  id: string;
+  organizationId: string;
+  userId: string | null;
+  action: string;
+  resourceType: string;
+  resourceId: string | null;
+  metadataJson: string | null;
+  ipAddress: string | null;
+  createdAt: Date;
+}
+
+export interface FallbackStore {
   organizations: Map<string, FallbackOrg>;
   users: Map<string, FallbackUser>;
+  memberships: Map<string, FallbackMembership>;
   sessions: Map<string, FallbackSession>;
+  verificationTokens: Map<string, FallbackVerificationToken>;
+  passwordResetTokens: Map<string, FallbackPasswordResetToken>;
+  invitations: Map<string, FallbackInvitation>;
   drafts: Map<string, FallbackDraft>;
+  contentRevisions: Map<string, FallbackContentRevision>;
+  auditLogs: Map<string, FallbackAuditLog>;
 }
 
 const globalStore = globalThis as unknown as {
@@ -81,8 +173,14 @@ const globalStore = globalThis as unknown as {
 const store: FallbackStore = globalStore.__forgeflow_store__ ?? {
   organizations: new Map(),
   users: new Map(),
+  memberships: new Map(),
   sessions: new Map(),
+  verificationTokens: new Map(),
+  passwordResetTokens: new Map(),
+  invitations: new Map(),
   drafts: new Map(),
+  contentRevisions: new Map(),
+  auditLogs: new Map(),
 };
 globalStore.__forgeflow_store__ = store;
 
@@ -90,105 +188,130 @@ function generateId(prefix = "cmw"): string {
   return `${prefix}${Date.now().toString(36)}${Math.random().toString(36).substring(2, 7)}`;
 }
 
-// Fallback Model Implementations
+// -----------------------------------------------------------------------------
+// Real Prisma Client Singleton (PostgreSQL)
+// -----------------------------------------------------------------------------
+let realPrisma: PrismaClient | null = null;
+try {
+  realPrisma =
+    globalStore.prisma ??
+    new PrismaClient({
+      log: process.env.NODE_ENV === "development" ? ["warn", "error"] : ["error"],
+    });
+  if (process.env.NODE_ENV !== "production") {
+    globalStore.prisma = realPrisma;
+  }
+} catch {
+  console.warn("[ForgeFlow Database] Real PostgreSQL client initialization deferred. Fallback store active.");
+}
+
+// -----------------------------------------------------------------------------
+// Fallback In-Memory Model Proxies
+// -----------------------------------------------------------------------------
+
 const fallbackOrg = {
-  async create(args: { data: { name: string } }): Promise<FallbackOrg> {
+  async create(args: { data: Partial<FallbackOrg> & { name: string } }): Promise<FallbackOrg> {
     const org: FallbackOrg = {
       id: generateId("org_"),
       name: args.data.name,
-      website: null,
-      productDescription: null,
-      industry: null,
-      keywords: null,
-      plan: "free",
-      stripeCustomerId: null,
-      stripeSubscriptionId: null,
+      slug: args.data.slug ?? null,
+      website: args.data.website ?? null,
+      productDescription: args.data.productDescription ?? null,
+      industry: args.data.industry ?? null,
+      keywords: args.data.keywords ?? null,
+      plan: args.data.plan ?? "free",
+      stripeCustomerId: args.data.stripeCustomerId ?? null,
+      stripeSubscriptionId: args.data.stripeSubscriptionId ?? null,
+      complianceRulesJson: args.data.complianceRulesJson ?? null,
+      brandVoiceJson: args.data.brandVoiceJson ?? null,
       createdAt: new Date(),
+      updatedAt: new Date(),
     };
     store.organizations.set(org.id, org);
     return org;
   },
-  async findUnique(args: { where: { id?: string; stripeCustomerId?: string }; select?: Record<string, boolean> }): Promise<FallbackOrg | null> {
+  async findUnique(args: { where: { id?: string; stripeCustomerId?: string; slug?: string } }): Promise<FallbackOrg | null> {
     if (args.where.id) return store.organizations.get(args.where.id) || null;
     if (args.where.stripeCustomerId) {
       for (const org of store.organizations.values()) {
         if (org.stripeCustomerId === args.where.stripeCustomerId) return org;
       }
     }
+    if (args.where.slug) {
+      for (const org of store.organizations.values()) {
+        if (org.slug === args.where.slug) return org;
+      }
+    }
     return null;
   },
-  async update(args: { where: { id: string }; data: Partial<FallbackOrg>; select?: Record<string, boolean> }): Promise<FallbackOrg> {
+  async update(args: { where: { id: string }; data: Partial<FallbackOrg> }): Promise<FallbackOrg> {
     const existing = store.organizations.get(args.where.id);
-    const updated: FallbackOrg = existing
-      ? { ...existing, ...args.data }
-      : {
-          id: args.where.id,
-          name: args.data.name || "Default Organization",
-          website: args.data.website || null,
-          productDescription: args.data.productDescription || null,
-          industry: args.data.industry || null,
-          keywords: args.data.keywords || null,
-          plan: args.data.plan || "free",
-          stripeCustomerId: null,
-          stripeSubscriptionId: null,
-          createdAt: new Date(),
-          ...args.data,
-        };
-    store.organizations.set(args.where.id, updated);
+    if (!existing) throw new Error(`Organization ${args.where.id} not found.`);
+    const updated: FallbackOrg = { ...existing, ...args.data, updatedAt: new Date() };
+    store.organizations.set(updated.id, updated);
     return updated;
   },
 };
 
 const fallbackUser = {
-  async create(args: {
-    data: { email: string; passwordHash: string; organizationId: string };
-    include?: { organization?: boolean };
-  }): Promise<FallbackUser & { organization?: FallbackOrg | null }> {
-    const normalizedEmail = args.data.email.trim().toLowerCase();
-    for (const u of store.users.values()) {
-      if (u.email.toLowerCase() === normalizedEmail) {
-        const error = new Error("Unique constraint failed on the fields: (`email`)");
-        (error as Error & { code: string }).code = "P2002";
-        throw error;
-      }
-    }
+  async create(args: { data: Partial<FallbackUser> & { email: string; passwordHash: string; organizationId: string } }): Promise<FallbackUser> {
     const user: FallbackUser = {
       id: generateId("usr_"),
-      email: normalizedEmail,
+      email: args.data.email,
+      name: args.data.name ?? null,
       passwordHash: args.data.passwordHash,
-      role: "owner",
+      role: args.data.role ?? UserRole.OWNER,
+      emailVerified: args.data.emailVerified ?? null,
+      image: args.data.image ?? null,
       organizationId: args.data.organizationId,
       createdAt: new Date(),
+      updatedAt: new Date(),
     };
+    user.organization = store.organizations.get(user.organizationId) || null;
     store.users.set(user.id, user);
-    if (args.include?.organization) {
-      const org = store.organizations.get(user.organizationId) || null;
-      return { ...user, organization: org };
-    }
     return user;
   },
-  async findUnique(args: {
-    where: { email?: string; id?: string };
-    include?: { organization?: boolean };
-  }): Promise<(FallbackUser & { organization?: FallbackOrg | null }) | null> {
-    let user: FallbackUser | null = null;
-    if (args.where.id) {
-      user = store.users.get(args.where.id) || null;
-    } else if (args.where.email) {
-      const emailLower = args.where.email.trim().toLowerCase();
+  async findUnique(args: { where: { id?: string; email?: string }; include?: { organization?: boolean } }): Promise<FallbackUser | null> {
+    let match: FallbackUser | null = null;
+    if (args.where.id) match = store.users.get(args.where.id) || null;
+    else if (args.where.email) {
       for (const u of store.users.values()) {
-        if (u.email.toLowerCase() === emailLower) {
-          user = u;
+        if (u.email.toLowerCase() === args.where.email.toLowerCase()) {
+          match = u;
           break;
         }
       }
     }
-    if (!user) return null;
-    if (args.include?.organization) {
-      const org = store.organizations.get(user.organizationId) || null;
-      return { ...user, organization: org };
+    if (match && args.include?.organization) {
+      return { ...match, organization: store.organizations.get(match.organizationId) || null };
     }
-    return user;
+    return match;
+  },
+  async findMany(args?: { where?: { organizationId?: string } }): Promise<FallbackUser[]> {
+    const orgId = args?.where?.organizationId;
+    const users: FallbackUser[] = [];
+    for (const u of store.users.values()) {
+      if (!orgId || u.organizationId === orgId) {
+        users.push({ ...u, organization: store.organizations.get(u.organizationId) || null });
+      }
+    }
+    return users;
+  },
+  async update(args: { where: { id?: string; email?: string }; data: Partial<FallbackUser> }): Promise<FallbackUser> {
+    let existing: FallbackUser | null = null;
+    if (args.where.id) existing = store.users.get(args.where.id) || null;
+    else if (args.where.email) {
+      for (const u of store.users.values()) {
+        if (u.email.toLowerCase() === args.where.email.toLowerCase()) {
+          existing = u;
+          break;
+        }
+      }
+    }
+    if (!existing) throw new Error("User not found.");
+    const updated: FallbackUser = { ...existing, ...args.data, updatedAt: new Date() };
+    store.users.set(updated.id, updated);
+    return updated;
   },
 };
 
@@ -201,290 +324,412 @@ const fallbackSession = {
       expiresAt: args.data.expiresAt,
       createdAt: new Date(),
     };
-    store.sessions.set(session.tokenHash, session);
+    const user = store.users.get(session.userId);
+    if (user) {
+      session.user = { ...user, organization: store.organizations.get(user.organizationId) || null };
+    }
+    store.sessions.set(session.id, session);
     return session;
   },
-  async findUnique(args: {
-    where: { tokenHash: string };
-    include?: { user?: { include?: { organization?: boolean } } };
-  }): Promise<(FallbackSession & { user?: (FallbackUser & { organization?: FallbackOrg | null }) | null }) | null> {
-    const session = store.sessions.get(args.where.tokenHash);
-    if (!session) return null;
-    if (args.include?.user) {
-      const user = store.users.get(session.userId);
-      if (!user) return null;
-      let org: FallbackOrg | null = null;
-      if (args.include.user.include?.organization) {
-        org = store.organizations.get(user.organizationId) || null;
+  async findUnique(args: { where: { tokenHash?: string; id?: string }; include?: { user?: { include?: { organization?: boolean } } } }): Promise<FallbackSession | null> {
+    let match: FallbackSession | null = null;
+    if (args.where.tokenHash) {
+      for (const s of store.sessions.values()) {
+        if (s.tokenHash === args.where.tokenHash) {
+          match = s;
+          break;
+        }
       }
-      return { ...session, user: { ...user, organization: org } };
+    } else if (args.where.id) {
+      match = store.sessions.get(args.where.id) || null;
     }
-    return session;
+    if (match && args.include?.user) {
+      const u = store.users.get(match.userId);
+      const user = u ? { ...u, organization: store.organizations.get(u.organizationId) || null } : null;
+      return { ...match, user };
+    }
+    return match;
   },
   async delete(args: { where: { id: string } }): Promise<FallbackSession | null> {
-    for (const [key, s] of store.sessions.entries()) {
-      if (s.id === args.where.id) {
-        store.sessions.delete(key);
-        return s;
+    const s = store.sessions.get(args.where.id) || null;
+    if (s) store.sessions.delete(args.where.id);
+    return s;
+  },
+  async deleteMany(args: { where: { tokenHash?: string; userId?: string } }): Promise<{ count: number }> {
+    let count = 0;
+    for (const [id, s] of store.sessions.entries()) {
+      if ((args.where.tokenHash && s.tokenHash === args.where.tokenHash) || (args.where.userId && s.userId === args.where.userId)) {
+        store.sessions.delete(id);
+        count++;
       }
+    }
+    return { count };
+  },
+};
+
+const fallbackVerificationToken = {
+  async create(args: { data: { tokenHash: string; userId: string; email: string; expiresAt: Date } }): Promise<FallbackVerificationToken> {
+    const token: FallbackVerificationToken = {
+      id: generateId("vtok_"),
+      tokenHash: args.data.tokenHash,
+      userId: args.data.userId,
+      email: args.data.email,
+      expiresAt: args.data.expiresAt,
+      createdAt: new Date(),
+    };
+    store.verificationTokens.set(token.id, token);
+    return token;
+  },
+  async findUnique(args: { where: { tokenHash: string } }): Promise<FallbackVerificationToken | null> {
+    for (const tok of store.verificationTokens.values()) {
+      if (tok.tokenHash === args.where.tokenHash) return tok;
     }
     return null;
   },
-  async deleteMany(args: { where: { tokenHash?: string } }): Promise<{ count: number }> {
-    if (args.where.tokenHash) {
-      const existed = store.sessions.delete(args.where.tokenHash);
-      return { count: existed ? 1 : 0 };
+  async delete(args: { where: { id: string } }): Promise<FallbackVerificationToken | null> {
+    const tok = store.verificationTokens.get(args.where.id) || null;
+    if (tok) store.verificationTokens.delete(args.where.id);
+    return tok;
+  },
+  async deleteMany(args: { where: { userId?: string; email?: string } }): Promise<{ count: number }> {
+    let count = 0;
+    for (const [id, tok] of store.verificationTokens.entries()) {
+      if ((args.where.userId && tok.userId === args.where.userId) || (args.where.email && tok.email === args.where.email)) {
+        store.verificationTokens.delete(id);
+        count++;
+      }
     }
-    return { count: 0 };
+    return { count };
+  },
+};
+
+const fallbackPasswordResetToken = {
+  async create(args: { data: { tokenHash: string; userId: string; expiresAt: Date } }): Promise<FallbackPasswordResetToken> {
+    const token: FallbackPasswordResetToken = {
+      id: generateId("prtok_"),
+      tokenHash: args.data.tokenHash,
+      userId: args.data.userId,
+      expiresAt: args.data.expiresAt,
+      createdAt: new Date(),
+    };
+    store.passwordResetTokens.set(token.id, token);
+    return token;
+  },
+  async findUnique(args: { where: { tokenHash: string } }): Promise<FallbackPasswordResetToken | null> {
+    for (const tok of store.passwordResetTokens.values()) {
+      if (tok.tokenHash === args.where.tokenHash) return tok;
+    }
+    return null;
+  },
+  async delete(args: { where: { id: string } }): Promise<FallbackPasswordResetToken | null> {
+    const tok = store.passwordResetTokens.get(args.where.id) || null;
+    if (tok) store.passwordResetTokens.delete(args.where.id);
+    return tok;
+  },
+  async deleteMany(args: { where: { userId?: string } }): Promise<{ count: number }> {
+    let count = 0;
+    for (const [id, tok] of store.passwordResetTokens.entries()) {
+      if (args.where.userId && tok.userId === args.where.userId) {
+        store.passwordResetTokens.delete(id);
+        count++;
+      }
+    }
+    return { count };
+  },
+};
+
+const fallbackInvitation = {
+  async create(args: { data: { tokenHash: string; email: string; role: UserRole; organizationId: string; invitedById: string; expiresAt: Date } }): Promise<FallbackInvitation> {
+    const inv: FallbackInvitation = {
+      id: generateId("inv_"),
+      tokenHash: args.data.tokenHash,
+      email: args.data.email,
+      role: args.data.role,
+      status: InvitationStatus.PENDING,
+      organizationId: args.data.organizationId,
+      invitedById: args.data.invitedById,
+      expiresAt: args.data.expiresAt,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    store.invitations.set(inv.id, inv);
+    return inv;
+  },
+  async findUnique(args: { where: { id?: string; tokenHash?: string }; include?: { organization?: boolean; invitedBy?: boolean } }): Promise<FallbackInvitation | null> {
+    let match: FallbackInvitation | null = null;
+    if (args.where.id) match = store.invitations.get(args.where.id) || null;
+    else if (args.where.tokenHash) {
+      for (const i of store.invitations.values()) {
+        if (i.tokenHash === args.where.tokenHash) {
+          match = i;
+          break;
+        }
+      }
+    }
+    if (match) {
+      return {
+        ...match,
+        organization: args.include?.organization ? store.organizations.get(match.organizationId) || null : undefined,
+        invitedBy: args.include?.invitedBy ? store.users.get(match.invitedById) || null : undefined,
+      };
+    }
+    return null;
+  },
+  async findMany(args: { where: { organizationId?: string; email?: string; status?: InvitationStatus } }): Promise<FallbackInvitation[]> {
+    const res: FallbackInvitation[] = [];
+    for (const i of store.invitations.values()) {
+      if (args.where.organizationId && i.organizationId !== args.where.organizationId) continue;
+      if (args.where.email && i.email.toLowerCase() !== args.where.email.toLowerCase()) continue;
+      if (args.where.status && i.status !== args.where.status) continue;
+      res.push(i);
+    }
+    return res;
+  },
+  async update(args: { where: { id: string }; data: Partial<FallbackInvitation> }): Promise<FallbackInvitation> {
+    const existing = store.invitations.get(args.where.id);
+    if (!existing) throw new Error("Invitation not found");
+    const updated: FallbackInvitation = { ...existing, ...args.data, updatedAt: new Date() };
+    store.invitations.set(updated.id, updated);
+    return updated;
+  },
+  async delete(args: { where: { id: string } }): Promise<FallbackInvitation | null> {
+    const inv = store.invitations.get(args.where.id) || null;
+    if (inv) store.invitations.delete(args.where.id);
+    return inv;
   },
 };
 
 const fallbackDraft = {
-  async findMany(args?: {
-    where?: { organizationId?: string };
-    orderBy?: { createdAt?: "asc" | "desc" };
-  }): Promise<FallbackDraft[]> {
-    const list: FallbackDraft[] = [];
-    for (const d of store.drafts.values()) {
-      if (!args?.where?.organizationId || d.organizationId === args.where.organizationId) {
-        list.push(d);
-      }
-    }
-    list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-    return list;
-  },
-  async findFirst(args: { where: { id?: string; organizationId?: string } }): Promise<FallbackDraft | null> {
-    for (const d of store.drafts.values()) {
-      if (
-        (!args.where.id || d.id === args.where.id) &&
-        (!args.where.organizationId || d.organizationId === args.where.organizationId)
-      ) {
-        return d;
-      }
-    }
-    return null;
-  },
-  async create(args: { data: Omit<FallbackDraft, "createdAt" | "updatedAt"> }): Promise<FallbackDraft> {
+  async create(args: { data: Partial<FallbackDraft> & { organizationId: string; title: string; keyword: string; summary: string; sectionsJson: string; faqsJson: string; schemaJson: string } }): Promise<FallbackDraft> {
     const draft: FallbackDraft = {
-      ...args.data,
-      id: args.data.id || generateId("drf_"),
+      id: generateId("drf_"),
+      organizationId: args.data.organizationId,
+      authorId: args.data.authorId ?? null,
+      title: args.data.title,
+      keyword: args.data.keyword,
+      vertical: args.data.vertical ?? null,
+      targetEquipment: args.data.targetEquipment ?? null,
+      complianceStandard: args.data.complianceStandard ?? null,
+      summary: args.data.summary,
+      sectionsJson: args.data.sectionsJson,
+      faqsJson: args.data.faqsJson,
+      schemaJson: args.data.schemaJson,
+      status: args.data.status ?? DraftStatus.IN_REVIEW,
+      qaScoresJson: args.data.qaScoresJson ?? null,
+      specRiskScore: args.data.specRiskScore ?? null,
+      pipelineValueMin: args.data.pipelineValueMin ?? null,
+      pipelineValueMax: args.data.pipelineValueMax ?? null,
+      searchVolume: args.data.searchVolume ?? null,
+      reviewComment: args.data.reviewComment ?? null,
+      publishedAt: args.data.publishedAt ?? null,
+      publishedUrl: args.data.publishedUrl ?? null,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
     store.drafts.set(draft.id, draft);
+
+    // Initial content revision
+    const rev: FallbackContentRevision = {
+      id: generateId("rev_"),
+      draftId: draft.id,
+      revisionNumber: 1,
+      title: draft.title,
+      sectionsJson: draft.sectionsJson,
+      faqsJson: draft.faqsJson,
+      schemaJson: draft.schemaJson,
+      qaScoresJson: draft.qaScoresJson,
+      changeSummary: "Initial generation",
+      changedById: draft.authorId,
+      createdAt: new Date(),
+    };
+    store.contentRevisions.set(rev.id, rev);
+
     return draft;
   },
-  async update(args: {
-    where: { id: string };
-    data: Partial<FallbackDraft>;
-  }): Promise<FallbackDraft | null> {
+  async findUnique(args: { where: { id: string } }): Promise<FallbackDraft | null> {
+    return store.drafts.get(args.where.id) || null;
+  },
+  async findFirst(args: { where: { id: string; organizationId: string } }): Promise<FallbackDraft | null> {
+    const draft = store.drafts.get(args.where.id);
+    if (draft && draft.organizationId === args.where.organizationId) return draft;
+    return null;
+  },
+  async findMany(args: { where?: { organizationId?: string; status?: DraftStatus }; orderBy?: { createdAt?: "asc" | "desc" } }): Promise<FallbackDraft[]> {
+    const list: FallbackDraft[] = [];
+    for (const d of store.drafts.values()) {
+      if (args.where?.organizationId && d.organizationId !== args.where.organizationId) continue;
+      if (args.where?.status && d.status !== args.where.status) continue;
+      list.push(d);
+    }
+    list.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    return list;
+  },
+  async update(args: { where: { id: string }; data: Partial<FallbackDraft> }): Promise<FallbackDraft> {
     const existing = store.drafts.get(args.where.id);
-    if (!existing) return null;
+    if (!existing) throw new Error("Draft not found.");
     const updated: FallbackDraft = { ...existing, ...args.data, updatedAt: new Date() };
-    store.drafts.set(args.where.id, updated);
+    store.drafts.set(updated.id, updated);
     return updated;
   },
+  async delete(args: { where: { id: string } }): Promise<FallbackDraft | null> {
+    const d = store.drafts.get(args.where.id) || null;
+    if (d) store.drafts.delete(args.where.id);
+    return d;
+  },
 };
 
-// Initialize PrismaClient safely with fallback
-let realPrisma: PrismaClient | null = null;
-try {
-  realPrisma =
-    globalStore.prisma ??
-    new PrismaClient({
-      datasources: {
-        db: {
-          url: dbUrl,
-        },
-      },
-      log: ["error"],
-    });
-  if (process.env.NODE_ENV !== "production") globalStore.prisma = realPrisma;
-} catch (e) {
-  console.warn("Prisma client initialization notice (running with resilient fallback):", e);
+const fallbackContentRevision = {
+  async create(args: { data: Partial<FallbackContentRevision> & { draftId: string; revisionNumber: number; title: string; sectionsJson: string; faqsJson: string; schemaJson: string } }): Promise<FallbackContentRevision> {
+    const rev: FallbackContentRevision = {
+      id: generateId("rev_"),
+      draftId: args.data.draftId,
+      revisionNumber: args.data.revisionNumber,
+      title: args.data.title,
+      sectionsJson: args.data.sectionsJson,
+      faqsJson: args.data.faqsJson,
+      schemaJson: args.data.schemaJson,
+      qaScoresJson: args.data.qaScoresJson ?? null,
+      changeSummary: args.data.changeSummary ?? null,
+      changedById: args.data.changedById ?? null,
+      createdAt: new Date(),
+    };
+    store.contentRevisions.set(rev.id, rev);
+    return rev;
+  },
+  async findMany(args: { where: { draftId: string } }): Promise<FallbackContentRevision[]> {
+    const res: FallbackContentRevision[] = [];
+    for (const r of store.contentRevisions.values()) {
+      if (r.draftId === args.where.draftId) res.push(r);
+    }
+    return res.sort((a, b) => b.revisionNumber - a.revisionNumber);
+  },
+};
+
+const fallbackAuditLog = {
+  async create(args: { data: { organizationId: string; userId?: string | null; action: string; resourceType: string; resourceId?: string | null; metadataJson?: string | null; ipAddress?: string | null } }): Promise<FallbackAuditLog> {
+    const log: FallbackAuditLog = {
+      id: generateId("log_"),
+      organizationId: args.data.organizationId,
+      userId: args.data.userId ?? null,
+      action: args.data.action,
+      resourceType: args.data.resourceType,
+      resourceId: args.data.resourceId ?? null,
+      metadataJson: args.data.metadataJson ?? null,
+      ipAddress: args.data.ipAddress ?? null,
+      createdAt: new Date(),
+    };
+    store.auditLogs.set(log.id, log);
+    return log;
+  },
+  async findMany(args: { where: { organizationId: string }; take?: number }): Promise<FallbackAuditLog[]> {
+    const res: FallbackAuditLog[] = [];
+    for (const l of store.auditLogs.values()) {
+      if (l.organizationId === args.where.organizationId) res.push(l);
+    }
+    res.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    return args.take ? res.slice(0, args.take) : res;
+  },
+};
+
+let postgresAvailable = true;
+let lastPostgresCheck = 0;
+const POSTGRES_RETRY_INTERVAL_MS = 30000;
+
+function getActivePrisma(): PrismaClient | null {
+  if (!realPrisma) return null;
+  if (!postgresAvailable && Date.now() - lastPostgresCheck <= POSTGRES_RETRY_INTERVAL_MS) {
+    return null;
+  }
+  return realPrisma;
 }
 
-// Base resilient adapter implementing fallback handlers
-const fallbackDb = {
-  organization: {
-    async create(args: Parameters<typeof fallbackOrg.create>[0]) {
-      if (realPrisma) {
-        try {
-          return await (realPrisma.organization.create as unknown as (a: typeof args) => Promise<FallbackOrg>)(args);
-        } catch (e) {
-          console.warn("Prisma organization.create error, using fallback store:", e);
-        }
+function handlePostgresError(e: unknown, op: string) {
+  const err = e as Error & { code?: string };
+  if (err.code === "P2002") throw err;
+  if (err.code === "P1001" || err.message?.includes("Can't reach database server")) {
+    postgresAvailable = false;
+    lastPostgresCheck = Date.now();
+    console.warn(`[DB Proxy] PostgreSQL unreachable for ${op}. Active in-memory fallback store will be used.`);
+  } else {
+    console.warn(`[DB Proxy] ${op} using fallback:`, e);
+  }
+}
+
+function createModelProxy<T extends object>(modelName: string, fallback: T): T {
+  return new Proxy(fallback, {
+    get(target, prop: string | symbol) {
+      if (typeof prop !== "string") {
+        return Reflect.get(target, prop);
       }
-      return fallbackOrg.create(args);
+      const fallbackVal = Reflect.get(target, prop);
+      if (typeof fallbackVal !== "function") return fallbackVal;
+
+      return async (...args: unknown[]) => {
+        const client = getActivePrisma();
+        if (client) {
+          const prismaModel = Reflect.get(client, modelName) as Record<string, (...a: unknown[]) => Promise<unknown>> | undefined;
+          if (prismaModel && typeof prismaModel[prop] === "function") {
+            try {
+              const res = await prismaModel[prop](...args);
+              postgresAvailable = true;
+              return res;
+            } catch (e) {
+              handlePostgresError(e, `${modelName}.${prop}`);
+            }
+          }
+        }
+        return (fallbackVal as (...a: unknown[]) => unknown).apply(target, args);
+      };
     },
-    async findUnique(args: Parameters<typeof fallbackOrg.findUnique>[0]) {
-      if (realPrisma) {
+  });
+}
+
+// -----------------------------------------------------------------------------
+// Combined Resilient Database Interface
+// -----------------------------------------------------------------------------
+export interface FallbackDbInterface {
+  organization: typeof fallbackOrg;
+  user: typeof fallbackUser;
+  session: typeof fallbackSession;
+  verificationToken: typeof fallbackVerificationToken;
+  passwordResetToken: typeof fallbackPasswordResetToken;
+  invitation: typeof fallbackInvitation;
+  draft: typeof fallbackDraft;
+  contentRevision: typeof fallbackContentRevision;
+  auditLog: typeof fallbackAuditLog;
+  $transaction<T>(fn: (tx: FallbackDbInterface) => Promise<T>): Promise<T>;
+  $transaction<T>(array: Array<Promise<T>>): Promise<T[]>;
+}
+
+export const fallbackDb: FallbackDbInterface = {
+  organization: createModelProxy("organization", fallbackOrg),
+  user: createModelProxy("user", fallbackUser),
+  session: createModelProxy("session", fallbackSession),
+  verificationToken: createModelProxy("verificationToken", fallbackVerificationToken),
+  passwordResetToken: createModelProxy("passwordResetToken", fallbackPasswordResetToken),
+  invitation: createModelProxy("invitation", fallbackInvitation),
+  draft: createModelProxy("draft", fallbackDraft),
+  contentRevision: createModelProxy("contentRevision", fallbackContentRevision),
+  auditLog: createModelProxy("auditLog", fallbackAuditLog),
+
+  async $transaction<T>(
+    fnOrArray: ((tx: FallbackDbInterface) => Promise<T>) | Array<Promise<T>>,
+  ): Promise<T | T[]> {
+    if (typeof fnOrArray === "function") {
+      const client = getActivePrisma();
+      if (client) {
         try {
-          const res = await (realPrisma.organization.findUnique as unknown as (a: typeof args) => Promise<FallbackOrg | null>)(args);
-          if (res) return res;
+          const res = await (client as unknown as { $transaction: (f: unknown) => Promise<T> }).$transaction(fnOrArray);
+          postgresAvailable = true;
+          return res;
         } catch (e) {
-          console.warn("Prisma organization.findUnique error, using fallback store:", e);
+          handlePostgresError(e, "$transaction");
         }
       }
-      return fallbackOrg.findUnique(args);
-    },
-    async update(args: Parameters<typeof fallbackOrg.update>[0]) {
-      if (realPrisma) {
-        try {
-          return await (realPrisma.organization.update as unknown as (a: typeof args) => Promise<FallbackOrg>)(args);
-        } catch (e) {
-          console.warn("Prisma organization.update error, using fallback store:", e);
-        }
-      }
-      return fallbackOrg.update(args);
-    },
-  },
-  user: {
-    async create(args: Parameters<typeof fallbackUser.create>[0]) {
-      if (realPrisma) {
-        try {
-          return await (realPrisma.user.create as unknown as (a: typeof args) => Promise<FallbackUser & { organization?: FallbackOrg | null }>)(args);
-        } catch (e) {
-          if ((e as Error & { code?: string }).code === "P2002") throw e;
-          console.warn("Prisma user.create error, using fallback store:", e);
-        }
-      }
-      return fallbackUser.create(args);
-    },
-    async findUnique(args: Parameters<typeof fallbackUser.findUnique>[0]) {
-      if (realPrisma) {
-        try {
-          const res = await (realPrisma.user.findUnique as unknown as (a: typeof args) => Promise<(FallbackUser & { organization?: FallbackOrg | null }) | null>)(args);
-          if (res) return res;
-        } catch (e) {
-          console.warn("Prisma user.findUnique error, using fallback store:", e);
-        }
-      }
-      return fallbackUser.findUnique(args);
-    },
-  },
-  session: {
-    async create(args: Parameters<typeof fallbackSession.create>[0]) {
-      if (realPrisma) {
-        try {
-          return await (realPrisma.session.create as unknown as (a: typeof args) => Promise<FallbackSession>)(args);
-        } catch (e) {
-          console.warn("Prisma session.create error, using fallback store:", e);
-        }
-      }
-      return fallbackSession.create(args);
-    },
-    async findUnique(args: Parameters<typeof fallbackSession.findUnique>[0]) {
-      if (realPrisma) {
-        try {
-          const res = await (realPrisma.session.findUnique as unknown as (a: typeof args) => Promise<(FallbackSession & { user?: (FallbackUser & { organization?: FallbackOrg | null }) | null }) | null>)(args);
-          if (res) return res;
-        } catch (e) {
-          console.warn("Prisma session.findUnique error, using fallback store:", e);
-        }
-      }
-      return fallbackSession.findUnique(args);
-    },
-    async delete(args: Parameters<typeof fallbackSession.delete>[0]) {
-      if (realPrisma) {
-        try {
-          return await (realPrisma.session.delete as unknown as (a: typeof args) => Promise<FallbackSession | null>)(args);
-        } catch (e) {
-          console.warn("Prisma session.delete error, using fallback store:", e);
-        }
-      }
-      return fallbackSession.delete(args);
-    },
-    async deleteMany(args: Parameters<typeof fallbackSession.deleteMany>[0]) {
-      if (realPrisma) {
-        try {
-          return await (realPrisma.session.deleteMany as unknown as (a: typeof args) => Promise<{ count: number }>)(args);
-        } catch (e) {
-          console.warn("Prisma session.deleteMany error, using fallback store:", e);
-        }
-      }
-      return fallbackSession.deleteMany(args);
-    },
-  },
-  draft: {
-    async findMany(args?: Parameters<typeof fallbackDraft.findMany>[0]) {
-      if (realPrisma) {
-        try {
-          return await (realPrisma.draft.findMany as unknown as (a?: typeof args) => Promise<FallbackDraft[]>)(args);
-        } catch (e) {
-          console.warn("Prisma draft.findMany error, using fallback store:", e);
-        }
-      }
-      return fallbackDraft.findMany(args);
-    },
-    async findFirst(args: Parameters<typeof fallbackDraft.findFirst>[0]) {
-      if (realPrisma) {
-        try {
-          return await (realPrisma.draft.findFirst as unknown as (a: typeof args) => Promise<FallbackDraft | null>)(args);
-        } catch (e) {
-          console.warn("Prisma draft.findFirst error, using fallback store:", e);
-        }
-      }
-      return fallbackDraft.findFirst(args);
-    },
-    async create(args: Parameters<typeof fallbackDraft.create>[0]) {
-      if (realPrisma) {
-        try {
-          return await (realPrisma.draft.create as unknown as (a: typeof args) => Promise<FallbackDraft>)(args);
-        } catch (e) {
-          console.warn("Prisma draft.create error, using fallback store:", e);
-        }
-      }
-      return fallbackDraft.create(args);
-    },
-    async update(args: Parameters<typeof fallbackDraft.update>[0]) {
-      if (realPrisma) {
-        try {
-          return await (realPrisma.draft.update as unknown as (a: typeof args) => Promise<FallbackDraft | null>)(args);
-        } catch (e) {
-          console.warn("Prisma draft.update error, using fallback store:", e);
-        }
-      }
-      return fallbackDraft.update(args);
-    },
-  },
-  async $transaction(
-    arg: unknown
-  ): Promise<unknown> {
-    if (typeof arg === "function") {
-      if (realPrisma) {
-        try {
-          return await (realPrisma as unknown as { $transaction: (f: unknown) => Promise<unknown> }).$transaction(arg);
-        } catch (e) {
-          if ((e as Error & { code?: string }).code === "P2002") throw e;
-          console.warn("Prisma transaction error, executing in fallback store:", e);
-        }
-      }
-      return (arg as (tx: {
-        organization: typeof fallbackOrg;
-        user: typeof fallbackUser;
-        session: typeof fallbackSession;
-        draft: typeof fallbackDraft;
-      }) => Promise<unknown>)({
-        organization: fallbackOrg,
-        user: fallbackUser,
-        session: fallbackSession,
-        draft: fallbackDraft,
-      });
+      return fnOrArray(fallbackDb);
     }
-    if (Array.isArray(arg)) {
-      if (realPrisma) {
-        try {
-          return await (realPrisma as unknown as { $transaction: (arr: unknown[]) => Promise<unknown[]> }).$transaction(arg);
-        } catch (e) {
-          console.warn("Prisma batch error, running promises:", e);
-        }
-      }
-      return Promise.all(arg);
-    }
-    throw new Error("Invalid transaction argument");
+    return Promise.all(fnOrArray);
   },
 };
 
-// Export typed strictly as PrismaClient so all callers enjoy perfect Prisma types & autocomplete
 export const db = fallbackDb as unknown as PrismaClient;

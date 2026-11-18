@@ -3,34 +3,94 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
+enum UserRole {
+  OWNER
+  ADMIN
+  REVIEWER
+  MEMBER
+}
+
+enum DraftStatus {
+  DRAFT
+  IN_REVIEW
+  CHANGES_REQUESTED
+  APPROVED
+  PUBLISHED
+  ARCHIVED
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  REVOKED
+  EXPIRED
+}
+
 model Organization {
-  id                    String   @id @default(cuid())
+  id                    String        @id @default(cuid())
   name                  String
+  slug                  String?       @unique
   website               String?
   productDescription    String?
   industry              String?
   keywords              String?
-  plan                  String   @default("free")
-  stripeCustomerId      String?  @unique
-  stripeSubscriptionId  String?  @unique
-  createdAt             DateTime @default(now())
+  plan                  String        @default("free")
+  stripeCustomerId      String?       @unique
+  stripeSubscriptionId  String?       @unique
+  complianceRulesJson   String?
+  brandVoiceJson        String?
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
   users                 User[]
+  memberships           Membership[]
   drafts                Draft[]
+  invitations           Invitation[]
+  auditLogs             AuditLog[]
+
+  @@index([createdAt])
 }
 
 model User {
-  id             String        @id @default(cuid())
-  email          String        @unique
-  passwordHash   String
-  role           String        @default("owner")
+  id                    String                @id @default(cuid())
+  email                 String                @unique
+  name                  String?
+  passwordHash          String
+  role                  UserRole              @default(OWNER)
+  emailVerified         DateTime?
+  image                 String?
+  organizationId        String
+  organization          Organization          @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  sessions              Session[]
+  memberships           Membership[]
+  verificationTokens    VerificationToken[]
+  passwordResetTokens   PasswordResetToken[]
+  createdInvitations    Invitation[]          @relation("InvitedByUser")
+  draftRevisions        ContentRevision[]     @relation("RevisionAuthor")
+  auditLogs             AuditLog[]
+  createdDrafts         Draft[]               @relation("DraftAuthor")
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+
+  @@index([organizationId])
+  @@index([email])
+}
+
+model Membership {
+  id             String       @id @default(cuid())
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   organizationId String
-  organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  sessions       Session[]
-  createdAt      DateTime      @default(now())
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  role           UserRole     @default(MEMBER)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@unique([userId, organizationId])
+  @@index([organizationId])
 }
 
 model Session {
@@ -44,20 +104,110 @@ model Session {
   @@index([userId])
 }
 
-model Draft {
-  id             String       @id @default(cuid())
+model VerificationToken {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  email     String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([email])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model Invitation {
+  id             String           @id @default(cuid())
+  tokenHash      String           @unique
+  email          String
+  role           UserRole         @default(MEMBER)
+  status         InvitationStatus @default(PENDING)
   organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  invitedById    String
+  invitedBy      User             @relation("InvitedByUser", fields: [invitedById], references: [id], onDelete: Cascade)
+  expiresAt      DateTime
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  @@index([organizationId])
+  @@index([email])
+}
+
+model Draft {
+  id                 String            @id @default(cuid())
+  organizationId     String
+  organization       Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  authorId           String?
+  author             User?             @relation("DraftAuthor", fields: [authorId], references: [id], onDelete: SetNull)
+  title              String
+  keyword            String
+  vertical           String?
+  targetEquipment    String?
+  complianceStandard String?
+  summary            String
+  sectionsJson       String
+  faqsJson           String
+  schemaJson         String
+  status             DraftStatus       @default(IN_REVIEW)
+  qaScoresJson       String?
+  specRiskScore      Float?
+  pipelineValueMin   Int?
+  pipelineValueMax   Int?
+  searchVolume       String?
+  reviewComment      String?
+  publishedAt        DateTime?
+  publishedUrl       String?
+  revisions          ContentRevision[]
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+  @@index([organizationId, createdAt])
+  @@index([status])
+}
+
+model ContentRevision {
+  id             String   @id @default(cuid())
+  draftId        String
+  draft          Draft    @relation(fields: [draftId], references: [id], onDelete: Cascade)
+  revisionNumber Int
   title          String
-  keyword        String
-  summary        String
   sectionsJson   String
   faqsJson       String
   schemaJson     String
-  status         String       @default("in_review")
-  reviewComment  String?
+  qaScoresJson   String?
+  changeSummary  String?
+  changedById    String?
+  changedBy      User?    @relation("RevisionAuthor", fields: [changedById], references: [id], onDelete: SetNull)
+  createdAt      DateTime @default(now())
+
+  @@index([draftId, revisionNumber])
+}
+
+model AuditLog {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  userId         String?
+  user           User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action         String
+  resourceType   String
+  resourceId     String?
+  metadataJson   String?
+  ipAddress      String?
   createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
 
   @@index([organizationId, createdAt])
 }

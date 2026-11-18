@@ -9,7 +9,16 @@ export async function GET() {
       user: {
         id: user.id,
         email: user.email,
-        organization: { id: user.organization.id, name: user.organization.name, plan: user.organization.plan },
+        name: user.name,
+        role: user.role,
+        emailVerified: user.emailVerified ? user.emailVerified.toISOString() : null,
+        organization: {
+          id: user.organization?.id ?? user.organizationId,
+          name: user.organization?.name ?? "Enterprise Tenant",
+          plan: user.organization?.plan ?? "free",
+          industry: user.organization?.industry ?? null,
+          website: user.organization?.website ?? null,
+        },
       },
     });
   } catch (error) {

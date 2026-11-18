@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { DraftStatus } from "@prisma/client";
 import { getSessionUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { serializeDraft } from "@/lib/drafts";
@@ -76,7 +77,7 @@ export async function POST(request: Request) {
     "Return only valid JSON with this shape: {\"pages\":[{\"title\":\"string\",\"keyword\":\"string\",\"summary\":\"string\",\"sections\":[{\"heading\":\"string\",\"body\":\"string\"}],\"faqs\":[{\"q\":\"string\",\"a\":\"string\"}]}]}.",
     "Create exactly one page per provided topic, keep factual claims cautious, and do not invent customer results, certifications, or product capabilities.",
     "Each page needs 3-5 useful sections and 2-4 concise FAQs. Lead sections with a direct answer. Avoid generic filler.",
-    `Company: ${user.organization.name}`,
+    `Company: ${user.organization?.name ?? "Enterprise Tenant"}`,
     `Product: ${productDescription.trim()}`,
     `Industry: ${industry.trim()}`,
     `Keywords and examples: ${keywords.trim()}`,
@@ -148,7 +149,7 @@ export async function POST(request: Request) {
           sectionsJson: JSON.stringify(page.sections),
           faqsJson: JSON.stringify(page.faqs),
           schemaJson: JSON.stringify(schema),
-          status: "in_review",
+          status: DraftStatus.IN_REVIEW,
         },
       });
     }),

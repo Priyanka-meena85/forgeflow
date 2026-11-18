@@ -1,8 +1,34 @@
 import { NextResponse } from "next/server";
-import { Prisma } from "@prisma/client";
+import { Prisma, UserRole } from "@prisma/client";
 import { createSession, hashPassword } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { sendVerificationEmail } from "@/lib/email";
+import { generateSecureToken } from "@/lib/tokens";
 import { errorResponse } from "@/lib/http";
+
+type RegisterTx = {
+  organization: {
+    create: (args: { data: { name: string } }) => Promise<{ id: string; name: string; plan?: string }>;
+  };
+  user: {
+    create: (args: {
+      data: {
+        email: string;
+        passwordHash: string;
+        organizationId: string;
+        role: UserRole;
+      };
+      include?: { organization: boolean };
+    }) => Promise<{
+      id: string;
+      email: string;
+      role: UserRole;
+      emailVerified: Date | null;
+      organizationId: string;
+      organization?: { id: string; name: string; plan: string } | null;
+    }>;
+  };
+};
 
 export async function POST(request: Request) {
   try {
@@ -26,22 +52,57 @@ export async function POST(request: Request) {
     const normalizedEmail = email.trim().toLowerCase();
     const passwordHash = await hashPassword(password);
 
-    const user = await db.$transaction(async (transaction) => {
-      const organization = await transaction.organization.create({
+    const user = await (db as unknown as { $transaction: <T>(fn: (tx: RegisterTx) => Promise<T>) => Promise<T> }).$transaction(async (tx: RegisterTx) => {
+      const organization = await tx.organization.create({
         data: { name: companyName.trim() },
       });
-      return transaction.user.create({
-        data: { email: normalizedEmail, passwordHash, organizationId: organization.id },
+      return tx.user.create({
+        data: {
+          email: normalizedEmail,
+          passwordHash,
+          organizationId: organization.id,
+          role: UserRole.OWNER,
+        },
         include: { organization: true },
       });
     });
 
+    // Create Email Verification Token (24 hours expiry)
+    const { token, tokenHash } = generateSecureToken();
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    await db.verificationToken.create({
+      data: {
+        tokenHash,
+        userId: user.id,
+        email: user.email,
+        expiresAt,
+      },
+    });
+
+    // Send transactional verification email (logs link to terminal in dev mode)
+    const emailResult = await sendVerificationEmail({
+      to: user.email,
+      token,
+      name: companyName,
+    });
+
     await createSession(user.id);
+
     return NextResponse.json({
       user: {
         id: user.id,
         email: user.email,
-        organization: { id: user.organization.id, name: user.organization.name, plan: user.organization.plan },
+        role: user.role,
+        emailVerified: user.emailVerified,
+        organization: {
+          id: user.organization?.id ?? user.organizationId,
+          name: user.organization?.name ?? companyName.trim(),
+          plan: user.organization?.plan ?? "free",
+        },
+      },
+      verification: {
+        sent: emailResult.success,
+        previewUrl: emailResult.previewUrl,
       },
     });
   } catch (error) {
