@@ -519,6 +519,7 @@ function ForgeFlowWorkspace() {
   const [selectedSchemaType, setSelectedSchemaType] = useState<"FAQPage" | "HowTo" | "TechSpec">("FAQPage");
   const [previewTab, setPreviewTab] = useState<"HumanView" | "StructuredNodes" | "SchemaJSON">("HumanView");
   const [showAnnouncement, setShowAnnouncement] = useState(true);
+  const [workflowViewMode, setWorkflowViewMode] = useState<"flowchart" | "stepper">("flowchart");
   const [selectedEquipmentIndex, setSelectedEquipmentIndex] = useState(0);
   const [selectedFailureIndex, setSelectedFailureIndex] = useState(0);
   const [selectedStandardIndex, setSelectedStandardIndex] = useState(0);
@@ -1202,90 +1203,384 @@ function ForgeFlowWorkspace() {
           </div>
         ) : null}
 
-        {/* 5-STAGE WORKFLOW STEPPER BAR */}
+        {/* END-TO-END WORKFLOW PIPELINE (EXACT SYSTEM WORKFLOW) */}
         <div className="px-6 pt-5">
-          <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs">
-            <div className="text-xs font-mono uppercase tracking-wider text-slate-500 font-bold mb-3 flex items-center justify-between">
-              <span>Content workflow · select a step to open it</span>
-              <span className="text-emerald-700 font-semibold text-xs">● Automated Closed-Loop Active</span>
+          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-4">
+            {/* Header, Legend & Mode Switcher */}
+            <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3 border-b border-slate-100 pb-3.5">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-mono font-bold uppercase tracking-wider text-slate-700">
+                    Industrial SEO & AEO Workflow
+                  </span>
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-mono font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    Closed-Loop Active
+                  </span>
+                </div>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Follow the deterministic 8-step pipeline from client intake to ranking analytics.
+                </p>
+              </div>
+
+              {/* Legend & View Toggle */}
+              <div className="flex flex-wrap items-center gap-3">
+                {/* Exact Legend as shown in user's workflow diagram */}
+                <div className="flex items-center gap-4 text-xs">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-3.5 h-3.5 rounded border border-[#0f6e56] bg-[#e1f5ee] inline-block shadow-2xs"></span>
+                    <span className="text-[#444441] font-medium">Client action</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-3.5 h-3.5 rounded border border-[#534ab7] bg-[#eeedfe] inline-block shadow-2xs"></span>
+                    <span className="text-[#444441] font-medium">System/AI action</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-3.5 h-3.5 rounded border border-[#5f5e5a] bg-[#f1efe8] inline-block shadow-2xs"></span>
+                    <span className="text-[#444441] font-medium">Output</span>
+                  </div>
+                </div>
+
+                {/* View Switcher */}
+                <div className="flex items-center rounded-xl bg-slate-100 p-1 border border-slate-200 text-xs font-medium">
+                  <button
+                    type="button"
+                    onClick={() => setWorkflowViewMode("flowchart")}
+                    className={`px-2.5 py-1 rounded-lg transition ${
+                      workflowViewMode === "flowchart"
+                        ? "bg-white text-slate-900 font-bold shadow-xs"
+                        : "text-slate-600 hover:text-slate-900"
+                    }`}
+                  >
+                    Flowchart Diagram
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setWorkflowViewMode("stepper")}
+                    className={`px-2.5 py-1 rounded-lg transition ${
+                      workflowViewMode === "stepper"
+                        ? "bg-white text-slate-900 font-bold shadow-xs"
+                        : "text-slate-600 hover:text-slate-900"
+                    }`}
+                  >
+                    Stepper View
+                  </button>
+                </div>
+              </div>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-xs">
-              <button
-                type="button"
-                onClick={() => setActiveTab("Taxonomy Matrix")}
-                className={`p-2.5 rounded-xl border text-left card-interactive transition ${
-                  activeTab === "Taxonomy Matrix"
-                    ? "bg-sky-50/80 border-sky-300 ring-1 ring-sky-300 shadow-xs"
-                    : "bg-slate-50/80 border-slate-200 hover:bg-slate-100"
-                }`}
-              >
-                <div className="text-sky-700 font-bold flex items-center gap-1.5">
-                  <span className="w-4 h-4 rounded-full bg-sky-600 text-white flex items-center justify-center text-xs font-mono">1</span>
-                  <span>Taxonomy Matrix</span>
+
+            {/* VIEW MODE A: EXACT VERTICAL FLOWCHART DIAGRAM (MATCHES PDF SPECIFICATION EXACTLY) */}
+            {workflowViewMode === "flowchart" && (
+              <div className="relative py-4 flex flex-col items-center">
+                {/* Step 1: Client sign-up [Client action] */}
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("Workspace & Rules")}
+                  style={{ backgroundColor: "#e1f5ee", borderColor: "#0f6e56" }}
+                  className={`w-full max-w-md py-3 px-5 rounded-xl border text-center transition shadow-xs card-interactive cursor-pointer ${
+                    activeTab === "Workspace & Rules" ? "ring-2 ring-[#0f6e56] shadow-sm" : "hover:brightness-98"
+                  }`}
+                >
+                  <div className="text-sm font-bold text-[#085041]">Client sign-up</div>
+                  <div className="text-xs text-[#0f6e56] mt-0.5">Company, website, target industry</div>
+                </button>
+
+                {/* Arrow 1 -> 2 */}
+                <div className="h-8 flex flex-col items-center justify-center my-0.5">
+                  <div className="w-[1.5px] h-4 bg-[#5f5e5a]"></div>
+                  <svg className="w-3.5 h-3.5 text-[#5f5e5a] -mt-1" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 18l-6-6h12l-6 6z" />
+                  </svg>
                 </div>
-                <div className="text-xs text-slate-600 mt-1">{Object.keys(verticalTaxonomies).length} example verticals</div>
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTab("Mission Control")}
-                className={`p-2.5 rounded-xl border text-left card-interactive transition ${
-                  activeTab === "Mission Control"
-                    ? "bg-sky-50/80 border-sky-300 ring-1 ring-sky-300 shadow-xs"
-                    : "bg-slate-50/80 border-slate-200 hover:bg-slate-100"
-                }`}
-              >
-                <div className="text-slate-800 font-bold flex items-center gap-1.5">
-                  <span className="w-4 h-4 rounded-full bg-slate-700 text-white flex items-center justify-center text-xs font-mono">2</span>
-                  <span>Generate draft</span>
+
+                {/* Step 2: Topic suggestions [System/AI action] */}
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("Taxonomy Matrix")}
+                  style={{ backgroundColor: "#eeedfe", borderColor: "#534ab7" }}
+                  className={`w-full max-w-md py-3 px-5 rounded-xl border text-center transition shadow-xs card-interactive cursor-pointer ${
+                    activeTab === "Taxonomy Matrix" ? "ring-2 ring-[#534ab7] shadow-sm" : "hover:brightness-98"
+                  }`}
+                >
+                  <div className="text-sm font-bold text-[#3c3489]">Topic suggestions</div>
+                  <div className="text-xs text-[#534ab7] mt-0.5">Auto-generated from vertical taxonomy</div>
+                </button>
+
+                {/* Arrow 2 -> 3 */}
+                <div className="h-8 flex flex-col items-center justify-center my-0.5">
+                  <div className="w-[1.5px] h-4 bg-[#5f5e5a]"></div>
+                  <svg className="w-3.5 h-3.5 text-[#5f5e5a] -mt-1" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 18l-6-6h12l-6 6z" />
+                  </svg>
                 </div>
-                <div className="text-xs text-slate-600 mt-1">AI provider key required</div>
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTab("QA Review Studio")}
-                className={`p-2.5 rounded-xl border text-left card-interactive transition ${
-                  activeTab === "QA Review Studio"
-                    ? "bg-emerald-50/90 border-emerald-300 ring-1 ring-emerald-300 shadow-xs"
-                    : "bg-emerald-50/50 border-emerald-200 hover:bg-emerald-100"
-                }`}
-              >
-                <div className="text-emerald-800 font-bold flex items-center gap-1.5">
-                  <span className="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center text-xs font-mono">3</span>
-                  <span>Review drafts</span>
+
+                {/* Step 3: Client approves topics [Client action] */}
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("Taxonomy Matrix")}
+                  style={{ backgroundColor: "#e1f5ee", borderColor: "#0f6e56" }}
+                  className={`w-full max-w-md py-3 px-5 rounded-xl border text-center transition shadow-xs card-interactive cursor-pointer ${
+                    activeTab === "Taxonomy Matrix" ? "ring-2 ring-[#0f6e56] shadow-sm" : "hover:brightness-98"
+                  }`}
+                >
+                  <div className="text-sm font-bold text-[#085041]">Client approves topics</div>
+                  <div className="text-xs text-[#0f6e56] mt-0.5">Forms an approved batch</div>
+                </button>
+
+                {/* Arrow 3 -> 4 */}
+                <div className="h-8 flex flex-col items-center justify-center my-0.5">
+                  <div className="w-[1.5px] h-4 bg-[#5f5e5a]"></div>
+                  <svg className="w-3.5 h-3.5 text-[#5f5e5a] -mt-1" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 18l-6-6h12l-6 6z" />
+                  </svg>
                 </div>
-                <div className="text-xs text-emerald-700 mt-1">{reviewDrafts.length} saved drafts</div>
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTab("Risk & Compliance")}
-                className={`p-2.5 rounded-xl border text-left card-interactive transition ${
-                  activeTab === "Risk & Compliance"
-                    ? "bg-amber-50/90 border-amber-300 ring-1 ring-amber-300 shadow-xs"
-                    : "bg-slate-50/80 border-slate-200 hover:bg-slate-100"
-                }`}
-              >
-                <div className="text-slate-800 font-bold flex items-center gap-1.5">
-                  <span className="w-4 h-4 rounded-full bg-slate-700 text-white flex items-center justify-center text-xs font-mono">4</span>
-                  <span>Check risks</span>
+
+                {/* Step 4: AI generates pages [System/AI action] */}
+                <button
+                  type="button"
+                  onClick={() => generateProgrammaticBatch()}
+                  disabled={generationBusy}
+                  style={{ backgroundColor: "#eeedfe", borderColor: "#534ab7" }}
+                  className="w-full max-w-md py-3 px-5 rounded-xl border text-center transition shadow-xs card-interactive cursor-pointer hover:brightness-98 disabled:opacity-50"
+                >
+                  <div className="text-sm font-bold text-[#3c3489]">AI generates pages</div>
+                  <div className="text-xs text-[#534ab7] mt-0.5">Headline, sections, FAQs, schema</div>
+                </button>
+
+                {/* Arrow 4 -> 5 */}
+                <div className="h-8 flex flex-col items-center justify-center my-0.5">
+                  <div className="w-[1.5px] h-4 bg-[#5f5e5a]"></div>
+                  <svg className="w-3.5 h-3.5 text-[#5f5e5a] -mt-1" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 18l-6-6h12l-6 6z" />
+                  </svg>
                 </div>
-                <div className="text-xs text-slate-600 mt-1">Human verification required</div>
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTab("Publishing Pipeline")}
-                className={`p-2.5 rounded-xl border text-left card-interactive transition ${
-                  activeTab === "Publishing Pipeline"
-                    ? "bg-purple-50/90 border-purple-300 ring-1 ring-purple-300 shadow-xs"
-                    : "bg-purple-50/50 border-purple-200 hover:bg-purple-100"
-                }`}
-              >
-                <div className="text-purple-800 font-bold flex items-center gap-1.5">
-                  <span className="w-4 h-4 rounded-full bg-purple-600 text-white flex items-center justify-center text-xs font-mono">5</span>
-                  <span>Export HTML</span>
+
+                {/* Step 5: Validate & auto-patch [System/AI action] */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveTab("QA Review Studio");
+                    runAutoPatch();
+                  }}
+                  style={{ backgroundColor: "#eeedfe", borderColor: "#534ab7" }}
+                  className={`w-full max-w-md py-3 px-5 rounded-xl border text-center transition shadow-xs card-interactive cursor-pointer ${
+                    isPatching ? "ring-2 ring-[#534ab7] animate-pulse" : "hover:brightness-98"
+                  }`}
+                >
+                  <div className="text-sm font-bold text-[#3c3489]">
+                    {isPatching ? `Validate & auto-patch (Step ${patchStep}/4)…` : "Validate & auto-patch"}
+                  </div>
+                  <div className="text-xs text-[#534ab7] mt-0.5">Checks rules, fixes violations</div>
+                </button>
+
+                {/* Arrow 5 -> 6 */}
+                <div className="h-8 flex flex-col items-center justify-center my-0.5">
+                  <div className="w-[1.5px] h-4 bg-[#5f5e5a]"></div>
+                  <svg className="w-3.5 h-3.5 text-[#5f5e5a] -mt-1" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 18l-6-6h12l-6 6z" />
+                  </svg>
                 </div>
-                <div className="text-xs text-purple-700 mt-1">Manual publishing</div>
-              </button>
-            </div>
+
+                {/* Step 6: Human review [Client action] with back to AI loop */}
+                <div className="w-full max-w-md relative flex items-center justify-center">
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab("QA Review Studio")}
+                    style={{ backgroundColor: "#e1f5ee", borderColor: "#0f6e56" }}
+                    className={`w-full py-3 px-5 rounded-xl border text-center transition shadow-xs card-interactive cursor-pointer ${
+                      activeTab === "QA Review Studio" ? "ring-2 ring-[#0f6e56] shadow-sm" : "hover:brightness-98"
+                    }`}
+                  >
+                    <div className="text-sm font-bold text-[#085041]">Human review</div>
+                    <div className="text-xs text-[#0f6e56] mt-0.5">QA strip, approve or request changes</div>
+                  </button>
+
+                  {/* Exact "↻ back to AI" feedback loop badge from workflow diagram */}
+                  <div
+                    onClick={() => {
+                      setActiveTab("QA Review Studio");
+                      runAutoPatch();
+                    }}
+                    title="Human review changes loop back to AI auto-patch"
+                    className="absolute -right-2 sm:-right-32 top-1/2 -translate-y-1/2 flex items-center gap-1.5 px-3 py-1 rounded-full border border-[#5f5e5a] bg-white text-[#444441] text-xs font-mono font-semibold shadow-xs cursor-pointer hover:bg-slate-50 transition whitespace-nowrap"
+                  >
+                    <span className="text-sm leading-none font-bold">↻</span>
+                    <span>back to AI</span>
+                  </div>
+                </div>
+
+                {/* Arrow 6 -> 7 */}
+                <div className="h-8 flex flex-col items-center justify-center my-0.5">
+                  <div className="w-[1.5px] h-4 bg-[#5f5e5a]"></div>
+                  <svg className="w-3.5 h-3.5 text-[#5f5e5a] -mt-1" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 18l-6-6h12l-6 6z" />
+                  </svg>
+                </div>
+
+                {/* Step 7: Publish or export [System/AI action] */}
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("Publishing Pipeline")}
+                  style={{ backgroundColor: "#eeedfe", borderColor: "#534ab7" }}
+                  className={`w-full max-w-md py-3 px-5 rounded-xl border text-center transition shadow-xs card-interactive cursor-pointer ${
+                    activeTab === "Publishing Pipeline" ? "ring-2 ring-[#534ab7] shadow-sm" : "hover:brightness-98"
+                  }`}
+                >
+                  <div className="text-sm font-bold text-[#3c3489]">Publish or export</div>
+                  <div className="text-xs text-[#534ab7] mt-0.5">Clean HTML or direct CMS publish</div>
+                </button>
+
+                {/* Arrow 7 -> 8 */}
+                <div className="h-8 flex flex-col items-center justify-center my-0.5">
+                  <div className="w-[1.5px] h-4 bg-[#5f5e5a]"></div>
+                  <svg className="w-3.5 h-3.5 text-[#5f5e5a] -mt-1" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 18l-6-6h12l-6 6z" />
+                  </svg>
+                </div>
+
+                {/* Step 8: Track results [Output] */}
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("Industrial Analytics")}
+                  style={{ backgroundColor: "#f1efe8", borderColor: "#5f5e5a" }}
+                  className={`w-full max-w-md py-3 px-5 rounded-xl border text-center transition shadow-xs card-interactive cursor-pointer ${
+                    activeTab === "Industrial Analytics" ? "ring-2 ring-[#5f5e5a] shadow-sm" : "hover:brightness-98"
+                  }`}
+                >
+                  <div className="text-sm font-bold text-[#444441]">Track results</div>
+                  <div className="text-xs text-[#5f5e5a] mt-0.5">Traffic and ranking dashboard</div>
+                </button>
+              </div>
+            )}
+
+            {/* VIEW MODE B: HORIZONTAL STEPPER GRID */}
+            {workflowViewMode === "stepper" && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+                {/* 1 */}
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("Workspace & Rules")}
+                  style={{ backgroundColor: "#e1f5ee", borderColor: "#0f6e56" }}
+                  className="p-3 rounded-xl border text-left transition hover:brightness-98 card-interactive cursor-pointer shadow-2xs"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-xs font-bold text-[#085041]">01. CLIENT ACTION</span>
+                    <span className="w-4 h-4 rounded-full bg-[#0f6e56] text-white flex items-center justify-center text-xs font-mono">1</span>
+                  </div>
+                  <div className="text-xs font-bold text-[#085041] mt-1">Client sign-up</div>
+                  <div className="text-xs text-[#0f6e56] mt-0.5">Company, website, target industry</div>
+                </button>
+
+                {/* 2 */}
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("Taxonomy Matrix")}
+                  style={{ backgroundColor: "#eeedfe", borderColor: "#534ab7" }}
+                  className="p-3 rounded-xl border text-left transition hover:brightness-98 card-interactive cursor-pointer shadow-2xs"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-xs font-bold text-[#3c3489]">02. SYSTEM/AI</span>
+                    <span className="w-4 h-4 rounded-full bg-[#534ab7] text-white flex items-center justify-center text-xs font-mono">2</span>
+                  </div>
+                  <div className="text-xs font-bold text-[#3c3489] mt-1">Topic suggestions</div>
+                  <div className="text-xs text-[#534ab7] mt-0.5">Auto-generated from taxonomy</div>
+                </button>
+
+                {/* 3 */}
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("Taxonomy Matrix")}
+                  style={{ backgroundColor: "#e1f5ee", borderColor: "#0f6e56" }}
+                  className="p-3 rounded-xl border text-left transition hover:brightness-98 card-interactive cursor-pointer shadow-2xs"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-xs font-bold text-[#085041]">03. CLIENT ACTION</span>
+                    <span className="w-4 h-4 rounded-full bg-[#0f6e56] text-white flex items-center justify-center text-xs font-mono">3</span>
+                  </div>
+                  <div className="text-xs font-bold text-[#085041] mt-1">Client approves topics</div>
+                  <div className="text-xs text-[#0f6e56] mt-0.5">Forms an approved batch</div>
+                </button>
+
+                {/* 4 */}
+                <button
+                  type="button"
+                  onClick={() => generateProgrammaticBatch()}
+                  disabled={generationBusy}
+                  style={{ backgroundColor: "#eeedfe", borderColor: "#534ab7" }}
+                  className="p-3 rounded-xl border text-left transition hover:brightness-98 card-interactive cursor-pointer shadow-2xs disabled:opacity-50"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-xs font-bold text-[#3c3489]">04. SYSTEM/AI</span>
+                    <span className="w-4 h-4 rounded-full bg-[#534ab7] text-white flex items-center justify-center text-xs font-mono">4</span>
+                  </div>
+                  <div className="text-xs font-bold text-[#3c3489] mt-1">AI generates pages</div>
+                  <div className="text-xs text-[#534ab7] mt-0.5">Headline, sections, FAQs, schema</div>
+                </button>
+
+                {/* 5 */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveTab("QA Review Studio");
+                    runAutoPatch();
+                  }}
+                  style={{ backgroundColor: "#eeedfe", borderColor: "#534ab7" }}
+                  className="p-3 rounded-xl border text-left transition hover:brightness-98 card-interactive cursor-pointer shadow-2xs"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-xs font-bold text-[#3c3489]">05. SYSTEM/AI</span>
+                    <span className="w-4 h-4 rounded-full bg-[#534ab7] text-white flex items-center justify-center text-xs font-mono">5</span>
+                  </div>
+                  <div className="text-xs font-bold text-[#3c3489] mt-1">Validate & auto-patch</div>
+                  <div className="text-xs text-[#534ab7] mt-0.5">Checks rules, fixes violations</div>
+                </button>
+
+                {/* 6 */}
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("QA Review Studio")}
+                  style={{ backgroundColor: "#e1f5ee", borderColor: "#0f6e56" }}
+                  className="p-3 rounded-xl border text-left transition hover:brightness-98 card-interactive cursor-pointer shadow-2xs"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-xs font-bold text-[#085041]">06. CLIENT ACTION</span>
+                    <span className="text-xs font-mono font-bold text-[#444441] border border-[#5f5e5a] bg-white px-1.5 py-0.2 rounded-full">↺ loop</span>
+                  </div>
+                  <div className="text-xs font-bold text-[#085041] mt-1">Human review</div>
+                  <div className="text-xs text-[#0f6e56] mt-0.5">QA strip, approve or request changes</div>
+                </button>
+
+                {/* 7 */}
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("Publishing Pipeline")}
+                  style={{ backgroundColor: "#eeedfe", borderColor: "#534ab7" }}
+                  className="p-3 rounded-xl border text-left transition hover:brightness-98 card-interactive cursor-pointer shadow-2xs"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-xs font-bold text-[#3c3489]">07. SYSTEM/AI</span>
+                    <span className="w-4 h-4 rounded-full bg-[#534ab7] text-white flex items-center justify-center text-xs font-mono">7</span>
+                  </div>
+                  <div className="text-xs font-bold text-[#3c3489] mt-1">Publish or export</div>
+                  <div className="text-xs text-[#534ab7] mt-0.5">Clean HTML or direct CMS publish</div>
+                </button>
+
+                {/* 8 */}
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("Industrial Analytics")}
+                  style={{ backgroundColor: "#f1efe8", borderColor: "#5f5e5a" }}
+                  className="p-3 rounded-xl border text-left transition hover:brightness-98 card-interactive cursor-pointer shadow-2xs"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-xs font-bold text-[#444441]">08. OUTPUT</span>
+                    <span className="w-4 h-4 rounded-full bg-[#5f5e5a] text-white flex items-center justify-center text-xs font-mono">8</span>
+                  </div>
+                  <div className="text-xs font-bold text-[#444441] mt-1">Track results</div>
+                  <div className="text-xs text-[#5f5e5a] mt-0.5">Traffic and ranking dashboard</div>
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
