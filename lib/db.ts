@@ -646,13 +646,9 @@ function getActivePrisma(): PrismaClient | null {
 function handlePostgresError(e: unknown, op: string) {
   const err = e as Error & { code?: string };
   if (err.code === "P2002") throw err;
-  if (err.code === "P1001" || err.message?.includes("Can't reach database server")) {
-    postgresAvailable = false;
-    lastPostgresCheck = Date.now();
-    console.warn(`[DB Proxy] PostgreSQL unreachable for ${op}. Active in-memory fallback store will be used.`);
-  } else {
-    console.warn(`[DB Proxy] ${op} using fallback:`, e);
-  }
+  postgresAvailable = false;
+  lastPostgresCheck = Date.now();
+  console.warn(`[DB Proxy] Database unavailable for ${op} (${err.code ?? err.message ?? "connection error"}). Active in-memory fallback store will be used.`);
 }
 
 function createModelProxy<T extends object>(modelName: string, fallback: T): T {

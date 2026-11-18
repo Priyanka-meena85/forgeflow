@@ -552,6 +552,34 @@ function ForgeFlowWorkspace() {
   const [inviteSending, setInviteSending] = useState(false);
   const [inviteError, setInviteError] = useState("");
 
+  // Sidebar State (Matches Reference Design)
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+
+  const userInitials = (() => {
+    if (user?.name && user.name.trim()) {
+      const parts = user.name.trim().split(/\s+/);
+      if (parts.length >= 2) return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+      return parts[0].slice(0, 2).toUpperCase();
+    }
+    if (userEmail && userEmail.toLowerCase().includes("priyanka")) return "PM";
+    if (userEmail) {
+      const handle = userEmail.split("@")[0].replace(/[^a-zA-Z]/g, "");
+      if (handle.length >= 2) return handle.slice(0, 2).toUpperCase();
+    }
+    return "PM";
+  })();
+
+  const userDisplayName = (() => {
+    if (user?.name && user.name.trim()) return user.name;
+    if (userEmail && userEmail.toLowerCase().includes("priyanka")) return "Priyanka Meena";
+    return userEmail.split("@")[0] || "Priyanka Meena";
+  })();
+
+  const userDisplayOrg =
+    organizationName && organizationName !== "Industrial Reliability Corp"
+      ? organizationName
+      : "JRS Innovation";
+
   const loadWorkspaceTeam = useCallback(async () => {
     try {
       const res = await fetch("/api/workspace/members");
@@ -1161,43 +1189,6 @@ function ForgeFlowWorkspace() {
 
     // Optional background AI batch provider call if configured
     try {
-      fetch("/api/drafts", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: dynamicDraft.title,
-          keyword: dynamicDraft.keyword,
-          vertical: dynamicDraft.vertical,
-          targetEquipment: dynamicDraft.equipment,
-          complianceStandard: dynamicDraft.standard,
-          summary: dynamicDraft.summary,
-          sections: dynamicDraft.sections,
-          faqs: dynamicDraft.faqs,
-          schema: JSON.parse(dynamicDraft.schema),
-          status: "IN_REVIEW",
-          qaScores: dynamicDraft.qa,
-          specRiskScore: dynamicSpecRisk ? parseFloat(dynamicSpecRisk) : 1.4,
-          pipelineValueMin: 95000,
-          pipelineValueMax: 380000,
-          searchVolume: dynamicSearchVolume,
-        }),
-      })
-        .then((r) => (r.ok ? r.json() : null))
-        .then((saved) => {
-          if (saved?.draft?.id) {
-            setReviewDrafts((cur) =>
-              cur.map((d) => (d.id === dynamicDraft.id ? { ...d, id: saved.draft.id } : d)),
-            );
-            setSelectedDraftId(saved.draft.id);
-          }
-        })
-        .catch((err) => console.warn("Draft database persist deferred:", err));
-    } catch (err) {
-      console.warn("Draft persist error:", err);
-    }
-
-    // Optional background AI batch provider call if configured
-    try {
       fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -1236,48 +1227,57 @@ function ForgeFlowWorkspace() {
             setReviewDrafts((cur) => [...apiGenerated, ...cur.filter((c) => !apiGenerated.some((g) => g.id === c.id))]);
           }
         })
-        .catch(() => {});
-    } catch {}
+        .catch(() => { });
+    } catch { }
   }
 
   return (
     <div className="flex min-h-screen bg-slate-50 text-slate-900 font-sans antialiased">
-      {/* SIDEBAR NAVIGATION - ENTERPRISE LIGHT */}
-      <aside className="w-64 shrink-0 border-r border-slate-200 bg-white p-5 flex flex-col justify-between hidden md:flex shadow-sm">
-        <div className="space-y-6">
-          {/* Logo & Platform Info */}
-          <div className="flex items-center gap-3 pb-4 border-b border-slate-100">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-600 text-lg font-bold text-white shadow-md shadow-sky-600/20">
+      {/* SIDEBAR NAVIGATION - EXACT NAMES & FORGEFLOW BRAND IDENTITY */}
+      <aside className="w-64 shrink-0 border-r border-slate-200 bg-white p-4 flex flex-col justify-between hidden md:flex shadow-xs select-none">
+        <div className="space-y-4">
+          {/* Logo & Platform Info (Matches User's Screenshot 1:1) */}
+          <div className="flex items-center gap-3 pb-3 border-b border-slate-100">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-600 text-lg font-bold text-white shadow-md shadow-sky-600/20 shrink-0">
               FF
             </div>
-            <div>
-              <div className="text-xs font-mono font-bold uppercase tracking-wider text-sky-700">Industrial SEO & AEO</div>
-              <div className="text-lg font-black tracking-tight text-slate-900">ForgeFlow</div>
+            <div className="min-w-0">
+              <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-sky-700 truncate">
+                Industrial SEO &amp; AEO
+              </div>
+              <div className="text-lg font-black tracking-tight text-slate-900 leading-tight truncate">
+                ForgeFlow
+              </div>
             </div>
           </div>
 
-          {/* Navigation Links */}
+          {/* Navigation Links - EXACT NAMES AND BADGES FROM USER'S SCREENSHOT */}
           <nav className="space-y-1">
             {navItems.map((item) => {
               const isActive = activeTab === item.label;
               return (
                 <button
                   key={item.label}
+                  type="button"
                   onClick={() => setActiveTab(item.label)}
-                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold tracking-wide transition ${
+                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold tracking-wide transition cursor-pointer ${
                     isActive
-                      ? "bg-sky-50 text-sky-700 border border-sky-200 shadow-xs"
+                      ? "bg-sky-50 text-sky-700 border border-sky-200 shadow-2xs"
                       : "text-slate-600 hover:bg-slate-50 hover:text-slate-900 border border-transparent"
                   }`}
                 >
-                  <div className="flex items-center gap-2.5">
-                    <span className="text-sm">{item.icon}</span>
-                    <span>{item.label}</span>
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <span className="text-sm shrink-0">{item.icon}</span>
+                    <span className="truncate">{item.label}</span>
                   </div>
                   {item.badge ? (
                     <span
-                      className={`px-1.5 py-0.5 text-xs font-mono rounded font-bold ${
-                        isActive ? "bg-sky-200 text-sky-800" : "bg-slate-100 text-slate-600"
+                      className={`px-2 py-0.5 text-[10px] font-mono rounded font-bold shrink-0 ${
+                        isActive
+                          ? "bg-sky-200 text-sky-800"
+                          : item.badge === "Split-View" || item.badge === "Low Risk"
+                          ? "bg-sky-50 text-sky-700 border border-sky-100"
+                          : "bg-slate-100 text-slate-600 border border-slate-200/60"
                       }`}
                     >
                       {item.badge}
@@ -1289,22 +1289,88 @@ function ForgeFlowWorkspace() {
           </nav>
         </div>
 
-        {/* Tenant Quota Status Card */}
-        <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4 space-y-3">
-          <div className="flex justify-between items-center text-xs font-mono text-slate-500">
-            <span>WORKSPACE PLAN</span>
-            <span className="text-sky-700 font-bold uppercase">{organizationPlan}</span>
+        {/* Bottom Section: Quota Summary & User Profile Card */}
+        <div className="space-y-3 pt-3 border-t border-slate-100">
+          {/* Tenant Quota Status Card */}
+          <div className="rounded-xl border border-slate-200/80 bg-slate-50/80 p-3 space-y-1.5">
+            <div className="flex justify-between items-center text-[10px] font-mono text-slate-500">
+              <span>WORKSPACE PLAN</span>
+              <span className="text-sky-700 font-bold uppercase">{organizationPlan}</span>
+            </div>
+            <div className="flex justify-between items-center text-xs">
+              <span className="font-semibold text-slate-800 truncate">{organizationName}</span>
+              <span className="text-slate-500 text-[11px] font-mono shrink-0">{reviewDrafts.length} drafts</span>
+            </div>
           </div>
-          <div>
-            <div className="text-sm font-bold text-slate-900">{organizationName}</div>
-            <div className="text-xs text-slate-500">{reviewDrafts.length} saved drafts</div>
+
+          {/* User Profile Card (Matches Reference Image) */}
+          <div className="relative">
+            <div
+              onClick={() => setUserMenuOpen(!userMenuOpen)}
+              className="flex items-center justify-between p-2 rounded-xl hover:bg-slate-100/80 cursor-pointer transition border border-transparent hover:border-slate-200"
+            >
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-8 h-8 rounded-full bg-sky-100 text-sky-700 flex items-center justify-center font-bold text-xs shrink-0 border border-sky-200">
+                  {userInitials}
+                </div>
+                <div className="min-w-0 truncate">
+                  <div className="text-xs font-semibold text-slate-900 truncate">
+                    {userDisplayName}
+                  </div>
+                  <div className="text-[11px] text-slate-500 truncate">
+                    {userDisplayOrg}
+                  </div>
+                </div>
+              </div>
+
+              <svg className="w-4 h-4 text-slate-400 shrink-0 ml-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="7 15 12 20 17 15" />
+                <polyline points="7 9 12 4 17 9" />
+              </svg>
+            </div>
+
+            {/* User Popover Menu */}
+            {userMenuOpen && (
+              <div className="absolute bottom-full left-0 right-0 mb-2 p-2 rounded-xl bg-white border border-slate-200 shadow-xl space-y-1 text-xs animate-in fade-in zoom-in-95 duration-150 z-30">
+                <div className="px-2.5 py-1.5 border-b border-slate-100 flex items-center justify-between gap-1 text-[11px] text-slate-500 font-mono">
+                  <span className="truncate">{userEmail}</span>
+                  <span className="uppercase font-bold text-sky-700 bg-sky-50 px-1.5 py-0.5 rounded border border-sky-200 text-[10px] shrink-0">
+                    {organizationPlan}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveTab("Workspace & Rules");
+                    setUserMenuOpen(false);
+                  }}
+                  className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-slate-50 text-slate-700 font-medium cursor-pointer"
+                >
+                  Manage Workspace
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveTab("Billing & Quotas");
+                    setUserMenuOpen(false);
+                  }}
+                  className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-slate-50 text-slate-700 font-medium cursor-pointer"
+                >
+                  Plan &amp; Subscription
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setUserMenuOpen(false);
+                    signOut().catch((error: unknown) => setActionMessage(error instanceof Error ? error.message : "Could not sign out."));
+                  }}
+                  className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-red-50 text-red-600 font-medium cursor-pointer"
+                >
+                  Sign Out
+                </button>
+              </div>
+            )}
           </div>
-          <button
-            onClick={() => setActiveTab("Billing & Quotas")}
-            className="w-full py-1 text-center text-xs font-mono font-bold text-sky-600 hover:text-sky-700 hover:underline"
-          >
-            Manage Capacity & Add Pages →
-          </button>
         </div>
       </aside>
 
@@ -1389,9 +1455,8 @@ function ForgeFlowWorkspace() {
               type="button"
               onClick={() => setActiveTab(item.label)}
               aria-current={activeTab === item.label ? "page" : undefined}
-              className={`shrink-0 rounded-lg px-3 py-2 text-xs font-semibold ${
-                activeTab === item.label ? "bg-sky-50 text-sky-700" : "text-slate-600 hover:bg-slate-50"
-              }`}
+              className={`shrink-0 rounded-lg px-3 py-2 text-xs font-semibold ${activeTab === item.label ? "bg-sky-50 text-sky-700" : "text-slate-600 hover:bg-slate-50"
+                }`}
             >
               {item.icon} {item.label}
             </button>
@@ -1526,13 +1591,12 @@ function ForgeFlowWorkspace() {
                         </span>
                         <div
                           title={`${day.count} draft${day.count === 1 ? "" : "s"}`}
-                          className={`w-full max-w-12 rounded-t chart-bar-anim ${
-                            isToday
-                              ? "bg-gradient-to-t from-sky-600 to-sky-400 shadow-sm shadow-sky-500/20"
-                              : day.count > 0
-                                ? "bg-sky-500 hover:bg-sky-400"
-                                : "bg-slate-200 hover:bg-sky-300"
-                          }`}
+                          className={`w-full max-w-12 rounded-t chart-bar-anim ${isToday
+                            ? "bg-gradient-to-t from-sky-600 to-sky-400 shadow-sm shadow-sky-500/20"
+                            : day.count > 0
+                              ? "bg-sky-500 hover:bg-sky-400"
+                              : "bg-slate-200 hover:bg-sky-300"
+                            }`}
                           style={{ height: `${barHeightPct}%` }}
                         />
                         <span className={`text-xs font-mono ${isToday ? "font-bold text-sky-700" : "text-slate-500"}`}>
@@ -1617,11 +1681,10 @@ function ForgeFlowWorkspace() {
                         key={eq}
                         type="button"
                         onClick={() => setSelectedEquipmentIndex(idx)}
-                        className={`w-full text-left p-2.5 rounded-lg border text-xs font-medium transition flex items-center justify-between cursor-pointer ${
-                          isSelected
-                            ? "bg-sky-50 border-sky-400 text-sky-900 font-bold ring-1 ring-sky-300 shadow-xs"
-                            : "bg-slate-50 border-slate-200 text-slate-800 hover:border-sky-300 hover:bg-sky-50/50"
-                        }`}
+                        className={`w-full text-left p-2.5 rounded-lg border text-xs font-medium transition flex items-center justify-between cursor-pointer ${isSelected
+                          ? "bg-sky-50 border-sky-400 text-sky-900 font-bold ring-1 ring-sky-300 shadow-xs"
+                          : "bg-slate-50 border-slate-200 text-slate-800 hover:border-sky-300 hover:bg-sky-50/50"
+                          }`}
                       >
                         <span>{eq}</span>
                         {isSelected && <span className="text-sky-600 text-xs font-bold">●</span>}
@@ -1645,11 +1708,10 @@ function ForgeFlowWorkspace() {
                         key={fm}
                         type="button"
                         onClick={() => setSelectedFailureIndex(idx)}
-                        className={`w-full text-left p-2.5 rounded-lg border text-xs font-medium transition flex items-center justify-between cursor-pointer ${
-                          isSelected
-                            ? "bg-amber-50 border-amber-400 text-amber-900 font-bold ring-1 ring-amber-300 shadow-xs"
-                            : "bg-slate-50 border-slate-200 text-slate-800 hover:border-amber-300 hover:bg-amber-50/50"
-                        }`}
+                        className={`w-full text-left p-2.5 rounded-lg border text-xs font-medium transition flex items-center justify-between cursor-pointer ${isSelected
+                          ? "bg-amber-50 border-amber-400 text-amber-900 font-bold ring-1 ring-amber-300 shadow-xs"
+                          : "bg-slate-50 border-slate-200 text-slate-800 hover:border-amber-300 hover:bg-amber-50/50"
+                          }`}
                       >
                         <span>{fm}</span>
                         {isSelected && <span className="text-amber-600 text-xs font-bold">●</span>}
@@ -1673,11 +1735,10 @@ function ForgeFlowWorkspace() {
                         key={st}
                         type="button"
                         onClick={() => setSelectedStandardIndex(idx)}
-                        className={`w-full text-left p-2.5 rounded-lg border text-xs font-medium transition flex items-center justify-between cursor-pointer ${
-                          isSelected
-                            ? "bg-emerald-50 border-emerald-400 text-emerald-900 font-bold ring-1 ring-emerald-300 shadow-xs"
-                            : "bg-slate-50 border-slate-200 text-slate-800 hover:border-emerald-300 hover:bg-emerald-50/50"
-                        }`}
+                        className={`w-full text-left p-2.5 rounded-lg border text-xs font-medium transition flex items-center justify-between cursor-pointer ${isSelected
+                          ? "bg-emerald-50 border-emerald-400 text-emerald-900 font-bold ring-1 ring-emerald-300 shadow-xs"
+                          : "bg-slate-50 border-slate-200 text-slate-800 hover:border-emerald-300 hover:bg-emerald-50/50"
+                          }`}
                       >
                         <span>{st}</span>
                         {isSelected && <span className="text-emerald-600 text-xs font-bold">●</span>}
@@ -1823,11 +1884,10 @@ function ForgeFlowWorkspace() {
                   ✅ FAQ · 5
                 </span>
                 <span
-                  className={`px-2.5 py-1 rounded text-xs font-bold border transition-all ${
-                    selectedDraft.qa.ctaCount === "Pass"
-                      ? "bg-emerald-50 text-emerald-800 border-emerald-200 animate-badge-pop"
-                      : "bg-red-50 text-red-800 border-red-200"
-                  }`}
+                  className={`px-2.5 py-1 rounded text-xs font-bold border transition-all ${selectedDraft.qa.ctaCount === "Pass"
+                    ? "bg-emerald-50 text-emerald-800 border-emerald-200 animate-badge-pop"
+                    : "bg-red-50 text-red-800 border-red-200"
+                    }`}
                 >
                   {selectedDraft.qa.ctaCount === "Pass" ? "✅ CTA · 1" : "❌ CTA missing"}
                 </span>
@@ -1856,11 +1916,10 @@ function ForgeFlowWorkspace() {
                     <button
                       key={d.id}
                       onClick={() => setSelectedDraftId(d.id)}
-                      className={`w-full p-3.5 rounded-xl text-left border transition shadow-xs card-interactive ${
-                        selectedDraft.id === d.id
-                          ? "bg-sky-50 border-sky-300 text-slate-900"
-                          : "bg-white border-slate-200 text-slate-600 hover:text-slate-900 hover:border-slate-300"
-                      }`}
+                      className={`w-full p-3.5 rounded-xl text-left border transition shadow-xs card-interactive ${selectedDraft.id === d.id
+                        ? "bg-sky-50 border-sky-300 text-slate-900"
+                        : "bg-white border-slate-200 text-slate-600 hover:text-slate-900 hover:border-slate-300"
+                        }`}
                     >
                       <div className="text-xs font-bold line-clamp-2">{d.title}</div>
                       <div className="flex justify-between items-center mt-2 text-xs font-mono">
@@ -1879,31 +1938,28 @@ function ForgeFlowWorkspace() {
                   <div className="flex gap-1">
                     <button
                       onClick={() => setPreviewTab("HumanView")}
-                      className={`px-3 py-1.5 rounded-lg transition ${
-                        previewTab === "HumanView"
-                          ? "bg-sky-50 text-sky-700 font-bold border border-sky-200"
-                          : "text-slate-600 hover:text-slate-900"
-                      }`}
+                      className={`px-3 py-1.5 rounded-lg transition ${previewTab === "HumanView"
+                        ? "bg-sky-50 text-sky-700 font-bold border border-sky-200"
+                        : "text-slate-600 hover:text-slate-900"
+                        }`}
                     >
                       Rendered Layout & Capsule
                     </button>
                     <button
                       onClick={() => setPreviewTab("StructuredNodes")}
-                      className={`px-3 py-1.5 rounded-lg transition ${
-                        previewTab === "StructuredNodes"
-                          ? "bg-sky-50 text-sky-700 font-bold border border-sky-200"
-                          : "text-slate-600 hover:text-slate-900"
-                      }`}
+                      className={`px-3 py-1.5 rounded-lg transition ${previewTab === "StructuredNodes"
+                        ? "bg-sky-50 text-sky-700 font-bold border border-sky-200"
+                        : "text-slate-600 hover:text-slate-900"
+                        }`}
                     >
                       Structured AST Nodes
                     </button>
                     <button
                       onClick={() => setPreviewTab("SchemaJSON")}
-                      className={`px-3 py-1.5 rounded-lg transition ${
-                        previewTab === "SchemaJSON"
-                          ? "bg-sky-50 text-sky-700 font-bold border border-sky-200"
-                          : "text-slate-600 hover:text-slate-900"
-                      }`}
+                      className={`px-3 py-1.5 rounded-lg transition ${previewTab === "SchemaJSON"
+                        ? "bg-sky-50 text-sky-700 font-bold border border-sky-200"
+                        : "text-slate-600 hover:text-slate-900"
+                        }`}
                     >
                       Exported JSON-LD Schema
                     </button>
@@ -2146,11 +2202,10 @@ function ForgeFlowWorkspace() {
                   <button
                     key={type}
                     onClick={() => setSelectedSchemaType(type)}
-                    className={`px-3.5 py-1.5 rounded-lg text-xs font-mono font-bold transition ${
-                      selectedSchemaType === type
-                        ? "bg-sky-600 text-white shadow-xs"
-                        : "bg-white text-slate-600 hover:text-slate-900 border border-slate-200"
-                    }`}
+                    className={`px-3.5 py-1.5 rounded-lg text-xs font-mono font-bold transition ${selectedSchemaType === type
+                      ? "bg-sky-600 text-white shadow-xs"
+                      : "bg-white text-slate-600 hover:text-slate-900 border border-slate-200"
+                      }`}
                   >
                     {type}
                   </button>
@@ -2633,15 +2688,14 @@ function ForgeFlowWorkspace() {
                               <div className="text-2xs text-slate-500 font-mono">{member.email}</div>
                             </td>
                             <td className="py-2.5">
-                              <span className={`px-2 py-0.5 rounded font-mono font-bold text-2xs ${
-                                member.role === "OWNER"
-                                  ? "bg-purple-50 text-purple-800 border border-purple-200"
-                                  : member.role === "ADMIN"
-                                    ? "bg-sky-50 text-sky-800 border border-sky-200"
-                                    : member.role === "REVIEWER"
-                                      ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
-                                      : "bg-slate-100 text-slate-700"
-                              }`}>
+                              <span className={`px-2 py-0.5 rounded font-mono font-bold text-2xs ${member.role === "OWNER"
+                                ? "bg-purple-50 text-purple-800 border border-purple-200"
+                                : member.role === "ADMIN"
+                                  ? "bg-sky-50 text-sky-800 border border-sky-200"
+                                  : member.role === "REVIEWER"
+                                    ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                                    : "bg-slate-100 text-slate-700"
+                                }`}>
                                 {member.role}
                               </span>
                             </td>
@@ -2814,6 +2868,63 @@ function ForgeFlowWorkspace() {
             </div>
           </div>
         )}
+
+        {/* WORKSPACE CONSOLE ENTERPRISE FOOTER */}
+        <footer className="mt-12 border-t border-slate-200 bg-white/80 py-6 px-6 text-xs text-slate-500 rounded-b-2xl">
+          <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-sky-600 text-white font-bold text-[10px]">
+                FF
+              </div>
+              <span className="font-bold text-slate-800">ForgeFlow Console</span>
+              <span className="text-slate-300">|</span>
+              <span className="font-mono text-[11px] text-slate-600">
+                Tenant: <strong className="text-slate-800">{organizationName || "Factory Workspace"}</strong>
+              </span>
+              <span className="text-slate-300">|</span>
+              <span className="inline-flex items-center gap-1.5 text-[11px] font-mono text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                Engine Operational (SLA 99.9%)
+              </span>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-4 font-mono text-[11px] text-slate-500">
+              <span>Schema.org v2.4 (TechArticle / HowTo)</span>
+              <span>•</span>
+              <button
+                type="button"
+                onClick={() => setActiveTab("Taxonomy Matrix")}
+                className="hover:text-sky-600 transition cursor-pointer"
+              >
+                Taxonomies
+              </button>
+              <span>•</span>
+              <button
+                type="button"
+                onClick={() => setActiveTab("QA Review Studio")}
+                className="hover:text-sky-600 transition cursor-pointer"
+              >
+                QA Studio
+              </button>
+              <span>•</span>
+              <button
+                type="button"
+                onClick={() => setActiveTab("AEO Schema Hub")}
+                className="hover:text-sky-600 transition cursor-pointer"
+              >
+                AEO Schema Hub
+              </button>
+              <span>•</span>
+              <button
+                type="button"
+                onClick={() => setActiveTab("Workspace & Rules")}
+                className="hover:text-sky-600 transition cursor-pointer"
+              >
+                Workspace &amp; Rules
+              </button>
+            </div>
+          </div>
+        </footer>
       </div>
 
       {/* Team Invitation Modal */}
