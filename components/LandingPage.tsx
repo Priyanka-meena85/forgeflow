@@ -1522,7 +1522,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
       <section className="py-20 bg-slate-50 border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
           <div className="text-center max-w-5xl mx-auto space-y-5">
-            <span className="inline-block text-xs sm:text-sm font-mono uppercase tracking-wider font-extrabold text-purple-700 bg-purple-50 px-3.5 py-1.5 rounded-full border border-purple-200 shadow-2xs">
+            <span className="inline-block text-xs sm:text-sm font-mono uppercase tracking-wider font-extrabold text-sky-800 bg-sky-50 px-3.5 py-1.5 rounded-full border border-sky-200 shadow-2xs">
               Why ForgeFlow Wins
             </span>
             <h2 className="text-5xl sm:text-6xl md:text-7xl lg:text-7xl xl:text-8xl font-black text-slate-950 tracking-tight leading-[1.05]">
@@ -1893,16 +1893,17 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
       </section>
 
       {/* 11. BOTTOM CALL TO ACTION BANNER */}
-      <section className="py-20 lg:py-24 bg-[#F4F5FA] border-t border-slate-200/80 overflow-hidden relative">
+      <section className="py-20 lg:py-24 bg-gradient-to-b from-slate-50 via-sky-50/25 to-slate-100/70 border-t border-slate-200/80 overflow-hidden relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
             {/* Left Column: Heading, Subtext, and Action Buttons */}
             <div className="lg:col-span-7 space-y-6">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-200 text-[#5C56B6] text-xs font-mono font-bold">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-sky-50 border border-sky-200 text-sky-800 text-xs font-mono font-bold shadow-2xs">
+                <span className="w-2 h-2 rounded-full bg-sky-500 animate-pulse"></span>
                 <span>Pilot Program Open · Cohort Onboarding</span>
               </div>
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#2E335B] tracking-tight leading-[1.12]">
-                Ready to Build an Engineer-Verified Search Pipeline?
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 tracking-tight leading-[1.12]">
+                Ready to Build an Engineer-Verified <span className="text-sky-600">Search Pipeline?</span>
               </h2>
               <p className="text-base sm:text-lg text-slate-600 leading-relaxed font-normal max-w-xl">
                 Replace generic marketing copy with engineer-reviewed, deterministic AEO content. Join equipment manufacturers capturing high-intent zero-volume searches across 7 pre-built industrial sectors.
@@ -1911,38 +1912,43 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                 <button
                   type="button"
                   onClick={() => { setDemoSubmitted(false); setDemoModalOpen(true); }}
-                  className="px-7 py-3.5 rounded-lg bg-[#5C56B6] hover:bg-[#4E48A2] text-white text-sm font-bold shadow-md shadow-indigo-500/20 transition cursor-pointer flex items-center gap-2"
+                  className="px-7 py-3.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-sm font-bold shadow-lg shadow-sky-600/25 transition cursor-pointer flex items-center gap-2"
                 >
                   <span>Book a 20-minute pilot walkthrough</span>
+                  <span>&rarr;</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => openAuth("register")}
-                  className="px-7 py-3.5 rounded-lg border-2 border-[#5C56B6] text-[#5C56B6] bg-white hover:bg-indigo-50/50 text-sm font-semibold transition cursor-pointer shadow-xs"
+                  className="px-7 py-3.5 rounded-xl border-2 border-slate-300 hover:border-sky-500 text-slate-800 hover:text-sky-700 bg-white hover:bg-sky-50/50 text-sm font-bold transition cursor-pointer shadow-xs"
                 >
                   Start a free pilot
                 </button>
               </div>
             </div>
 
-            {/* Right Column: Two Floating Live Cards (Styled 1:1 like Inspiration Image) */}
+            {/* Right Column: Two Floating Live Cards (Styled 1:1 with ForgeFlow Theme) */}
             <div className="lg:col-span-5 flex items-start justify-center lg:justify-end gap-4 sm:gap-6 pt-4 lg:pt-0">
               {/* Card 1: Production Monitor */}
               <div className="w-[210px] sm:w-[230px] rounded-2xl bg-white shadow-xl shadow-slate-300/40 border border-slate-200/80 overflow-hidden shrink-0">
-                <div className="bg-[#5C56B6] px-4 py-3 text-white text-xs font-bold tracking-tight text-center sm:text-left">
-                  <span>AEO Content Monitor</span>
+                <div className="bg-gradient-to-r from-slate-900 to-sky-950 px-4 py-3 text-white text-xs font-bold tracking-tight text-center sm:text-left flex items-center justify-between border-b border-sky-900/40">
+                  <span className="flex items-center gap-1.5 font-mono">
+                    <span className="text-sky-400">⚡</span>
+                    <span>AEO Content Monitor</span>
+                  </span>
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                 </div>
 
                 <div className="p-4 space-y-3.5">
                   <div className="flex items-center justify-between pb-1">
                     <span className="text-xs font-medium text-slate-600">QA Status</span>
-                    <span className="px-2 py-0.5 rounded-full bg-[#00B884] text-white text-[11px] font-bold font-mono">
+                    <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-bold font-mono border border-emerald-200">
                       8/8 PASS
                     </span>
                   </div>
 
                   <div className="flex items-start gap-2.5">
-                    <span className="mt-0.5 w-4 h-4 rounded-full border border-[#00B884] text-[#00B884] flex items-center justify-center text-[9px] shrink-0 font-bold">
+                    <span className="mt-0.5 w-4 h-4 rounded-full border border-emerald-600 text-emerald-600 flex items-center justify-center text-[9px] shrink-0 font-bold bg-emerald-50">
                       ✓
                     </span>
                     <div>
@@ -1954,7 +1960,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                   <div className="border-t border-slate-100" />
 
                   <div className="flex items-start gap-2.5">
-                    <span className="mt-0.5 w-4 h-4 rounded-full border border-[#00B884] text-[#00B884] flex items-center justify-center text-[9px] shrink-0 font-bold">
+                    <span className="mt-0.5 w-4 h-4 rounded-full border border-emerald-600 text-emerald-600 flex items-center justify-center text-[9px] shrink-0 font-bold bg-emerald-50">
                       ✓
                     </span>
                     <div>
@@ -1966,7 +1972,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                   <div className="border-t border-slate-100" />
 
                   <div className="flex items-start gap-2.5">
-                    <span className="mt-0.5 w-4 h-4 rounded-full border border-[#00B884] text-[#00B884] flex items-center justify-center text-[9px] shrink-0 font-bold">
+                    <span className="mt-0.5 w-4 h-4 rounded-full border border-emerald-600 text-emerald-600 flex items-center justify-center text-[9px] shrink-0 font-bold bg-emerald-50">
                       ✓
                     </span>
                     <div>
@@ -1977,23 +1983,27 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                 </div>
               </div>
 
-              {/* Card 2: AI Predictions */}
+              {/* Card 2: AI Engine Citations */}
               <div className="w-[210px] sm:w-[230px] rounded-2xl bg-white shadow-xl shadow-slate-300/40 border border-slate-200/80 overflow-hidden shrink-0">
-                <div className="bg-[#5C56B6] px-4 py-3 text-white text-xs font-bold tracking-tight text-center sm:text-left">
-                  <span>AI Engine Citations</span>
+                <div className="bg-gradient-to-r from-sky-600 to-blue-700 px-4 py-3 text-white text-xs font-bold tracking-tight text-center sm:text-left flex items-center justify-between border-b border-sky-500/40">
+                  <span className="flex items-center gap-1.5 font-mono">
+                    <span>✨</span>
+                    <span>AI Engine Citations</span>
+                  </span>
+                  <span className="w-2 h-2 rounded-full bg-sky-200 animate-pulse"></span>
                 </div>
 
                 <div className="p-4 space-y-3.5">
                   <div className="flex items-center justify-between pb-1">
                     <span className="text-xs font-medium text-slate-600">Active Citations</span>
-                    <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-bold font-mono">
+                    <span className="px-2 py-0.5 rounded-full bg-sky-100 text-sky-800 text-[11px] font-bold font-mono border border-sky-200">
                       Top 1
                     </span>
                   </div>
 
                   <div>
                     <div className="text-xs font-semibold text-slate-800">Google AI Overview</div>
-                    <div className="text-[11px] text-emerald-600 font-medium mt-0.5">
+                    <div className="text-[11px] text-sky-700 font-semibold mt-0.5">
                       Cited as Primary Source
                     </div>
                   </div>
@@ -2002,7 +2012,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
 
                   <div>
                     <div className="text-xs font-semibold text-slate-800">Perplexity Copilot</div>
-                    <div className="text-[11px] text-[#00B884] font-medium mt-0.5">
+                    <div className="text-[11px] text-emerald-600 font-semibold mt-0.5">
                       #1 Diagnostic Source
                     </div>
                   </div>
@@ -2011,7 +2021,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
 
                   <div>
                     <div className="text-xs font-semibold text-slate-800">ChatGPT Search</div>
-                    <div className="text-[11px] text-sky-600 font-medium mt-0.5">
+                    <div className="text-[11px] text-sky-600 font-semibold mt-0.5">
                       Entity Graph Indexed
                     </div>
                   </div>
@@ -3014,11 +3024,11 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
         }}
       />
 
-      {/* 17. FLOATING SCROLL TO TOP BUTTON (MATCHES IMAGE 1 BOTTOM RIGHT) */}
+      {/* 17. FLOATING SCROLL TO TOP BUTTON (BRAND SKY BLUE THEME) */}
       <button
         type="button"
         onClick={scrollToTop}
-        className="fixed bottom-6 right-6 z-40 w-11 h-11 rounded-full border-2 border-[#5C56B6] bg-white text-[#5C56B6] hover:bg-[#5C56B6] hover:text-white shadow-lg transition flex items-center justify-center cursor-pointer"
+        className="fixed bottom-6 right-6 z-40 w-11 h-11 rounded-full border-2 border-sky-600 bg-white text-sky-600 hover:bg-sky-600 hover:text-white shadow-lg shadow-sky-600/25 transition flex items-center justify-center cursor-pointer"
         aria-label="Back to top"
       >
         <svg className="w-5 h-5 stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
