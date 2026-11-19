@@ -29,7 +29,41 @@ export async function GET(request: Request) {
       orderBy: { createdAt: "desc" },
     });
 
-    return NextResponse.json({ drafts: drafts.map(serializeDraft) });
+    const serialized = await Promise.all(
+      drafts.map(async (draft) => {
+        const review = await db.pageReview.findUnique({
+          where: { draftId: draft.id },
+          include: { reviewer: true },
+        });
+
+        const serializedReview = review
+          ? {
+              id: review.id,
+              reviewerId: review.reviewerId,
+              status: review.status as "PENDING" | "APPROVED" | "CHANGES_REQUESTED",
+              reviewDate: review.reviewDate.toISOString(),
+              reviewerNotes: review.reviewerNotes,
+              verificationItems: review.verificationItemsJson ? JSON.parse(review.verificationItemsJson) : [],
+              reviewer: review.reviewer
+                ? {
+                    id: review.reviewer.id,
+                    name: review.reviewer.name,
+                    jobTitle: review.reviewer.jobTitle,
+                    credentials: review.reviewer.credentials,
+                    yearsOfExperience: review.reviewer.yearsOfExperience,
+                    linkedInUrl: review.reviewer.linkedInUrl,
+                    photoUrl: review.reviewer.photoUrl,
+                    bio: review.reviewer.bio,
+                  }
+                : null,
+            }
+          : null;
+
+        return serializeDraft(draft, serializedReview);
+      }),
+    );
+
+    return NextResponse.json({ drafts: serialized });
   } catch (error) {
     console.error("Fetch drafts error:", error);
     return errorResponse("Failed to load drafts from database.", 500);
@@ -60,6 +94,18 @@ export async function POST(request: Request) {
         where: { id: draftId, organizationId: user.organizationId },
       });
       if (!draft) return errorResponse("Draft not found.", 404);
+
+      if (nextStatus === DraftStatus.PUBLISHED) {
+        const review = await db.pageReview.findUnique({
+          where: { draftId: draft.id },
+        });
+        if (!review || review.status !== "APPROVED") {
+          return errorResponse(
+            "Page cannot be published until it is reviewed and approved by a certified application engineer.",
+            400,
+          );
+        }
+      }
 
       const updated = await db.draft.update({
         where: { id: draft.id },

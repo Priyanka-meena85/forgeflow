@@ -1,5 +1,24 @@
 import type { Draft } from "@prisma/client";
 
+export interface SerializedDraftReview {
+  id?: string;
+  reviewerId: string;
+  status: "PENDING" | "APPROVED" | "CHANGES_REQUESTED";
+  reviewDate: string;
+  reviewerNotes: string | null;
+  verificationItems: string[];
+  reviewer: {
+    id: string;
+    name: string;
+    jobTitle: string;
+    credentials: string;
+    yearsOfExperience: number;
+    linkedInUrl: string | null;
+    photoUrl: string | null;
+    bio: string | null;
+  } | null;
+}
+
 export interface SerializedDraft {
   id: string;
   organizationId: string;
@@ -20,6 +39,7 @@ export interface SerializedDraft {
   sections: Array<{ heading: string; body: string }>;
   faqs: Array<{ q: string; a: string }>;
   schema: Record<string, unknown>;
+  pageReview?: SerializedDraftReview | null;
   qaScores: {
     wordCount: "Pass" | "Fail";
     faqCount: "Pass" | "Fail";
@@ -43,7 +63,14 @@ function safeJsonParse<T>(raw: string | null | undefined, fallback: T): T {
   }
 }
 
-export function serializeDraft(draft: Draft): SerializedDraft {
+export function serializeDraft(
+  draft: Draft,
+  review?: SerializedDraftReview | null | unknown,
+): SerializedDraft {
+  const actualReview =
+    review && typeof review === "object" && "status" in review
+      ? (review as SerializedDraftReview)
+      : null;
   const defaultQa = {
     wordCount: "Pass" as const,
     faqCount: "Pass" as const,
@@ -75,6 +102,7 @@ export function serializeDraft(draft: Draft): SerializedDraft {
     sections: safeJsonParse<Array<{ heading: string; body: string }>>(draft.sectionsJson, []),
     faqs: safeJsonParse<Array<{ q: string; a: string }>>(draft.faqsJson, []),
     schema: safeJsonParse<Record<string, unknown>>(draft.schemaJson, {}),
+    pageReview: actualReview ?? null,
     qaScores: safeJsonParse<typeof defaultQa>(draft.qaScoresJson, defaultQa),
     createdAt: draft.createdAt.toISOString(),
     updatedAt: draft.updatedAt.toISOString(),

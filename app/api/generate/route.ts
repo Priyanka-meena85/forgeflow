@@ -169,5 +169,5 @@ export async function POST(request: Request) {
     }),
   );
 
-  return NextResponse.json({ drafts: storedDrafts.map(serializeDraft) }, { status: 201 });
+  return NextResponse.json({ drafts: storedDrafts.map((d) => serializeDraft(d)) }, { status: 201 });
 }

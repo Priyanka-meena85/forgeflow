@@ -1,4 +1,4 @@
-import { PrismaClient, UserRole, DraftStatus, InvitationStatus } from "@prisma/client";
+import { PrismaClient, UserRole, DraftStatus, InvitationStatus, ReviewStatus } from "@prisma/client";
 
 // Ensure process.env.DATABASE_URL is populated for PostgreSQL
 function resolveDatabaseUrl(): string {
@@ -152,6 +152,33 @@ export interface FallbackAuditLog {
   createdAt: Date;
 }
 
+export interface FallbackExpertReviewer {
+  id: string;
+  organizationId: string;
+  name: string;
+  jobTitle: string;
+  credentials: string;
+  yearsOfExperience: number;
+  linkedInUrl: string | null;
+  photoUrl: string | null;
+  bio: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface FallbackPageReview {
+  id: string;
+  draftId: string;
+  reviewerId: string;
+  status: ReviewStatus;
+  reviewDate: Date;
+  reviewerNotes: string | null;
+  verificationItemsJson: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  reviewer?: FallbackExpertReviewer | null;
+}
+
 export interface FallbackStore {
   organizations: Map<string, FallbackOrg>;
   users: Map<string, FallbackUser>;
@@ -163,6 +190,8 @@ export interface FallbackStore {
   drafts: Map<string, FallbackDraft>;
   contentRevisions: Map<string, FallbackContentRevision>;
   auditLogs: Map<string, FallbackAuditLog>;
+  expertReviewers: Map<string, FallbackExpertReviewer>;
+  pageReviews: Map<string, FallbackPageReview>;
 }
 
 const globalStore = globalThis as unknown as {
@@ -181,8 +210,59 @@ const store: FallbackStore = globalStore.__forgeflow_store__ ?? {
   drafts: new Map(),
   contentRevisions: new Map(),
   auditLogs: new Map(),
+  expertReviewers: new Map(),
+  pageReviews: new Map(),
 };
 globalStore.__forgeflow_store__ = store;
+
+// Default Seed Reviewers for immediate out-of-the-box readiness
+const defaultSeedReviewers: FallbackExpertReviewer[] = [
+  {
+    id: "rev_marcus_vance",
+    organizationId: "global",
+    name: "Dr. Marcus Vance, PE",
+    jobTitle: "Lead Thermal & Mechanical Applications Engineer",
+    credentials: "PE, ASHRAE Fellow, MS Mechanical Engineering",
+    yearsOfExperience: 18,
+    linkedInUrl: "https://www.linkedin.com/in/marcus-vance-pe-industrial",
+    photoUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80",
+    bio: "18+ years specializing in commercial HVAC rooftop unit failure mode diagnostics, ASHRAE 90.1/189.1 compliance, and industrial refrigeration compressor reliability.",
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
+  {
+    id: "rev_elena_rostova",
+    organizationId: "global",
+    name: "Elena Rostova",
+    jobTitle: "Principal Industrial Systems & Reliability Lead",
+    credentials: "Six Sigma Black Belt, IATF 16949 Lead Auditor",
+    yearsOfExperience: 14,
+    linkedInUrl: "https://www.linkedin.com/in/elena-rostova-industrial-qa",
+    photoUrl: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=200&auto=format&fit=crop&q=80",
+    bio: "14 years conducting root-cause failure analysis for automotive stamping presses, sanitary rotary pumps, and polymer extrusion machinery under ISO 9001 and 3-A standards.",
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
+  {
+    id: "rev_david_chen",
+    organizationId: "global",
+    name: "David Chen, CMRP",
+    jobTitle: "Senior Fluid Power & Hydraulics Specialist",
+    credentials: "CMRP, CFPS (Fluid Power Specialist)",
+    yearsOfExperience: 12,
+    linkedInUrl: "https://www.linkedin.com/in/david-chen-fluid-power",
+    photoUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&auto=format&fit=crop&q=80",
+    bio: "Certified fluid power specialist focusing on high-pressure hydraulic piston pump cavitation, ISO 4406 cleanliness standards, and industrial automation safety protocols.",
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
+];
+
+for (const reviewer of defaultSeedReviewers) {
+  if (!store.expertReviewers.has(reviewer.id)) {
+    store.expertReviewers.set(reviewer.id, reviewer);
+  }
+}
 
 function generateId(prefix = "cmw"): string {
   return `${prefix}${Date.now().toString(36)}${Math.random().toString(36).substring(2, 7)}`;
@@ -631,6 +711,149 @@ const fallbackAuditLog = {
   },
 };
 
+const fallbackExpertReviewer = {
+  async create(args: { data: Partial<FallbackExpertReviewer> & { organizationId: string; name: string; jobTitle: string; credentials: string } }): Promise<FallbackExpertReviewer> {
+    const reviewer: FallbackExpertReviewer = {
+      id: generateId("rev_"),
+      organizationId: args.data.organizationId,
+      name: args.data.name,
+      jobTitle: args.data.jobTitle,
+      credentials: args.data.credentials,
+      yearsOfExperience: args.data.yearsOfExperience ?? 5,
+      linkedInUrl: args.data.linkedInUrl ?? null,
+      photoUrl: args.data.photoUrl ?? null,
+      bio: args.data.bio ?? null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    store.expertReviewers.set(reviewer.id, reviewer);
+    return reviewer;
+  },
+  async findMany(args?: { where?: { organizationId?: string } }): Promise<FallbackExpertReviewer[]> {
+    const list: FallbackExpertReviewer[] = [];
+    for (const r of store.expertReviewers.values()) {
+      if (args?.where?.organizationId) {
+        if (r.organizationId === args.where.organizationId || r.organizationId === "global") {
+          list.push(r);
+        }
+      } else {
+        list.push(r);
+      }
+    }
+    return list;
+  },
+  async findUnique(args: { where: { id: string } }): Promise<FallbackExpertReviewer | null> {
+    return store.expertReviewers.get(args.where.id) || null;
+  },
+  async update(args: { where: { id: string }; data: Partial<FallbackExpertReviewer> }): Promise<FallbackExpertReviewer> {
+    const existing = store.expertReviewers.get(args.where.id);
+    if (!existing) throw new Error(`Reviewer ${args.where.id} not found.`);
+    const updated: FallbackExpertReviewer = { ...existing, ...args.data, updatedAt: new Date() };
+    store.expertReviewers.set(updated.id, updated);
+    return updated;
+  },
+  async delete(args: { where: { id: string } }): Promise<FallbackExpertReviewer | null> {
+    const existing = store.expertReviewers.get(args.where.id) || null;
+    if (existing) store.expertReviewers.delete(args.where.id);
+    return existing;
+  },
+};
+
+const fallbackPageReview = {
+  async create(args: { data: { draftId: string; reviewerId: string; status?: ReviewStatus; reviewDate?: Date; reviewerNotes?: string | null; verificationItemsJson?: string | null } }): Promise<FallbackPageReview> {
+    const review: FallbackPageReview = {
+      id: generateId("prv_"),
+      draftId: args.data.draftId,
+      reviewerId: args.data.reviewerId,
+      status: args.data.status ?? ReviewStatus.PENDING,
+      reviewDate: args.data.reviewDate ?? new Date(),
+      reviewerNotes: args.data.reviewerNotes ?? null,
+      verificationItemsJson: args.data.verificationItemsJson ?? null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    store.pageReviews.set(review.draftId, review);
+    return review;
+  },
+  async findUnique(args: { where: { id?: string; draftId?: string }; include?: { reviewer?: boolean } }): Promise<FallbackPageReview | null> {
+    let review: FallbackPageReview | null = null;
+    if (args.where.draftId) {
+      review = store.pageReviews.get(args.where.draftId) || null;
+    } else if (args.where.id) {
+      for (const r of store.pageReviews.values()) {
+        if (r.id === args.where.id) {
+          review = r;
+          break;
+        }
+      }
+    }
+    if (review && args.include?.reviewer) {
+      const reviewer = store.expertReviewers.get(review.reviewerId) || null;
+      return { ...review, reviewer };
+    }
+    return review;
+  },
+  async findMany(args?: { where?: { reviewerId?: string; status?: ReviewStatus } }): Promise<FallbackPageReview[]> {
+    const list: FallbackPageReview[] = [];
+    for (const r of store.pageReviews.values()) {
+      if (args?.where?.reviewerId && r.reviewerId !== args.where.reviewerId) continue;
+      if (args?.where?.status && r.status !== args.where.status) continue;
+      list.push(r);
+    }
+    return list;
+  },
+  async upsert(args: {
+    where: { draftId: string };
+    create: { draftId: string; reviewerId: string; status?: ReviewStatus; reviewDate?: Date; reviewerNotes?: string | null; verificationItemsJson?: string | null };
+    update: Partial<FallbackPageReview>;
+    include?: { reviewer?: boolean };
+  }): Promise<FallbackPageReview> {
+    let review = store.pageReviews.get(args.where.draftId);
+    if (review) {
+      review = { ...review, ...args.update, updatedAt: new Date() };
+      store.pageReviews.set(args.where.draftId, review);
+    } else {
+      review = {
+        id: generateId("prv_"),
+        draftId: args.create.draftId,
+        reviewerId: args.create.reviewerId,
+        status: args.create.status ?? ReviewStatus.PENDING,
+        reviewDate: args.create.reviewDate ?? new Date(),
+        reviewerNotes: args.create.reviewerNotes ?? null,
+        verificationItemsJson: args.create.verificationItemsJson ?? null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      store.pageReviews.set(args.where.draftId, review);
+    }
+    if (args.include?.reviewer) {
+      const reviewer = store.expertReviewers.get(review.reviewerId) || null;
+      return { ...review, reviewer };
+    }
+    return review;
+  },
+  async update(args: { where: { id?: string; draftId?: string }; data: Partial<FallbackPageReview>; include?: { reviewer?: boolean } }): Promise<FallbackPageReview> {
+    const targetKey = args.where.draftId ?? Array.from(store.pageReviews.values()).find((r) => r.id === args.where.id)?.draftId;
+    if (!targetKey) throw new Error("Page review not found to update.");
+    const existing = store.pageReviews.get(targetKey);
+    if (!existing) throw new Error("Page review not found to update.");
+    const updated: FallbackPageReview = { ...existing, ...args.data, updatedAt: new Date() };
+    store.pageReviews.set(targetKey, updated);
+    if (args.include?.reviewer) {
+      const reviewer = store.expertReviewers.get(updated.reviewerId) || null;
+      return { ...updated, reviewer };
+    }
+    return updated;
+  },
+  async delete(args: { where: { id?: string; draftId?: string } }): Promise<FallbackPageReview | null> {
+    const targetKey = args.where.draftId ?? Array.from(store.pageReviews.values()).find((r) => r.id === args.where.id)?.draftId;
+    if (!targetKey) return null;
+    const existing = store.pageReviews.get(targetKey) || null;
+    if (existing) store.pageReviews.delete(targetKey);
+    return existing;
+  },
+};
+
 let postgresAvailable = true;
 let lastPostgresCheck = 0;
 const POSTGRES_RETRY_INTERVAL_MS = 30000;
@@ -693,6 +916,8 @@ export interface FallbackDbInterface {
   draft: typeof fallbackDraft;
   contentRevision: typeof fallbackContentRevision;
   auditLog: typeof fallbackAuditLog;
+  expertReviewer: typeof fallbackExpertReviewer;
+  pageReview: typeof fallbackPageReview;
   $transaction<T>(fn: (tx: FallbackDbInterface) => Promise<T>): Promise<T>;
   $transaction<T>(array: Array<Promise<T>>): Promise<T[]>;
 }
@@ -707,6 +932,8 @@ export const fallbackDb: FallbackDbInterface = {
   draft: createModelProxy("draft", fallbackDraft),
   contentRevision: createModelProxy("contentRevision", fallbackContentRevision),
   auditLog: createModelProxy("auditLog", fallbackAuditLog),
+  expertReviewer: createModelProxy("expertReviewer", fallbackExpertReviewer),
+  pageReview: createModelProxy("pageReview", fallbackPageReview),
 
   async $transaction<T>(
     fnOrArray: ((tx: FallbackDbInterface) => Promise<T>) | Array<Promise<T>>,

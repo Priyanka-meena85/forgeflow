@@ -60,7 +60,18 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
   // Tabbed Feature Spotlight State
   const [activeFeatureTab, setActiveFeatureTab] = useState<"matrix" | "qa" | "schema" | "risk" | "kanban" | "analytics">("matrix");
 
-  // Industry Footprint Calculator State (Non-bulky, no direct pricing)
+  // Sample Article Modal State
+  const [sampleArticleModalOpen, setSampleArticleModalOpen] = useState(false);
+
+  // Industry Footprint Calculator State (Transparent Inputs & Formula)
+  const [calcPages, setCalcPages] = useState(30);
+  const [calcSearches, setCalcSearches] = useState(25);
+  const [calcCtr, setCalcCtr] = useState(20);
+  const [calcLeadConv, setCalcLeadConv] = useState(3.5);
+  const [calcCloseRate, setCalcCloseRate] = useState(15);
+  const [calcAvgDeal, setCalcAvgDeal] = useState(45000);
+
+  // Legacy sliders for backward compatibility
   const [roiMachines, setRoiMachines] = useState(15);
   const [roiFailures, setRoiFailures] = useState(8);
 
@@ -111,7 +122,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
       failure: "Compressor Flooded Starts & Thermal Overload",
       standard: "ASHRAE Standard 90.1",
       searchVol: "15–30/mo (High Intent)",
-      pipelineVal: "$95,000 – $380,000",
+      exampleScenario: "Example scenario: 1 closed deal ($95k ACV) from ~25 monthly diagnostic searches",
       specRisk: "1.4% (Very Low)",
       sampleHeadline: "Automating Fault Detection & Diagnostics (FDD) to Prevent Commercial RTU Compressor Failure",
       schemaTypes: ["TechArticle", "HowTo", "FAQPage"],
@@ -123,7 +134,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
       failure: "Elastomer Seal Swelling in Caustic CIP Washdown",
       standard: "3-A Sanitary Standard 02-12",
       searchVol: "20–45/mo (Reliability Search)",
-      pipelineVal: "$120,000 – $450,000",
+      exampleScenario: "Example scenario: 1 closed deal ($120k ACV) from ~35 monthly CIP searches",
       specRisk: "1.1% (Minimal)",
       sampleHeadline: "Preventing Elastomer Seal Swelling in Rotary Lobe Pumps During Caustic CIP Washdown (3-A SOP)",
       schemaTypes: ["TechArticle", "HowTo", "FAQPage"],
@@ -135,7 +146,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
       failure: "Stamping Die Galling & Weld Non-Conformance",
       standard: "IATF 16949 Quality Standard",
       searchVol: "30–65/mo (OEM Replacement)",
-      pipelineVal: "$150,000 – $600,000",
+      exampleScenario: "Example scenario: 1 tooling contract ($150k ACV) from ~45 monthly searches",
       specRisk: "1.7% (Low Risk)",
       sampleHeadline: "Root Cause Protocol: Stamping Die Galling & Weld Inspection Defects in IATF 16949 Assembly Lines",
       schemaTypes: ["TechArticle", "FAQPage"],
@@ -147,7 +158,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
       failure: "Spindle Thermal Expansion & Tool Chatter",
       standard: "ISO 230-3 Thermal Environment Test",
       searchVol: "25–50/mo (Tooling Manager)",
-      pipelineVal: "$85,000 – $340,000",
+      exampleScenario: "Example scenario: 1 spindle retrofit ($85k ACV) from ~35 monthly searches",
       specRisk: "0.9% (Minimal)",
       sampleHeadline: "Mitigating Spindle Thermal Expansion Drift in Precision 5-Axis Milling Cells",
       schemaTypes: ["TechArticle", "HowTo", "FAQPage"],
@@ -159,7 +170,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
       failure: "Melt Flow Degradation & Barrel Wall Scuffing",
       standard: "ASTM D1238 Melt Flow Protocol",
       searchVol: "15–35/mo (Process Engineer)",
-      pipelineVal: "$110,000 – $420,000",
+      exampleScenario: "Example scenario: 1 barrel rebuild ($110k ACV) from ~25 monthly searches",
       specRisk: "1.3% (Very Low)",
       sampleHeadline: "Eliminating Barrel Wall Scuffing & Shear Degradation in High-Output Twin-Screw Compounding",
       schemaTypes: ["TechArticle", "FAQPage"],
@@ -171,7 +182,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
       failure: "Suction Cavitation & Slipper Delamination",
       standard: "ISO 4406 Fluid Cleanliness Class",
       searchVol: "20–40/mo (Fluid Power Spec)",
-      pipelineVal: "$130,000 – $510,000",
+      exampleScenario: "Example scenario: 1 hydraulic skid replacement ($130k ACV) from ~30 monthly searches",
       specRisk: "1.5% (Very Low)",
       sampleHeadline: "Diagnostic Procedure: Identifying High-Pressure Slipper Delamination in Proportional Hydraulic Skids",
       schemaTypes: ["TechArticle", "HowTo", "FAQPage"],
@@ -183,7 +194,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
       failure: "Eccentric Bushing Seizure & Lubricant Breakdown",
       standard: "MSHA Part 56 Mandatory Standard",
       searchVol: "10–25/mo (Mine Maintenance)",
-      pipelineVal: "$220,000 – $850,000",
+      exampleScenario: "Example scenario: 1 major overhaul ($220k ACV) from ~15 monthly searches",
       specRisk: "2.1% (Low Risk)",
       sampleHeadline: "Emergency SOP: Preventing Eccentric Bushing Seizure in Continuous Duty Primary Gyratory Skids",
       schemaTypes: ["TechArticle", "FAQPage", "HowTo"],
@@ -193,11 +204,18 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
 
   const activeVertical = verticalShowcase[activeVerticalIndex];
 
-  // Industry Footprint Metrics (No Direct Pricing)
-  const calculatedPages = roiMachines * roiFailures;
-  const calculatedSearchers = calculatedPages * 24;
-  const calculatedInquiries = Math.round(calculatedPages * 0.16);
-  const calculatedCoverage = Math.min(99.6, +(84 + roiMachines * 0.18).toFixed(1));
+  // Industry Footprint Transparent Metrics
+  const annualImpressions = calcPages * calcSearches * 12;
+  const annualClicks = Math.round(annualImpressions * (calcCtr / 100));
+  const annualLeads = Math.round(annualClicks * (calcLeadConv / 100));
+  const annualClosedDeals = Math.round(annualLeads * (calcCloseRate / 100));
+  const estimatedAnnualPipeline = annualClosedDeals * calcAvgDeal;
+
+  // Legacy variables for backward compatibility
+  const calculatedPages = calcPages;
+  const calculatedSearchers = annualClicks;
+  const calculatedInquiries = Math.round(annualLeads / 12);
+  const calculatedCoverage = Math.min(99.6, +(85 + calcPages * 0.12).toFixed(1));
 
   function openAuth(mode: "login" | "register") {
     setAuthMode(mode);
@@ -477,9 +495,9 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
             {/* Left Column: Headline & Value Prop */}
             <div className="lg:col-span-7 space-y-6">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-50 border border-sky-200/90 text-sky-800 text-xs font-mono font-semibold shadow-2xs">
-                <span className="w-2 h-2 rounded-full bg-sky-500 animate-pulse"></span>
-                <span>Deterministic Industrial Search &amp; Answer Engine Architecture</span>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-mono font-semibold shadow-2xs">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>Pilot Program Open · Built with engineer review in the loop</span>
               </div>
 
               <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-slate-900 leading-[1.12]">
@@ -487,30 +505,37 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
               </h1>
 
               <p className="text-base sm:text-lg text-slate-600 leading-relaxed font-normal">
-                ForgeFlow eliminates the zero-volume keyword trap for equipment manufacturers.
-                Generate certified technical landing pages with pre-built vertical taxonomies, closed-loop
+                Every page passes 8 automated QA checks and a human engineer review before publishing.
+                ForgeFlow eliminates the zero-volume keyword trap for equipment manufacturers with pre-built vertical taxonomies across 7 heavy sectors, closed-loop
                 QA enforcement, and native AEO schema for <strong className="text-slate-800 font-semibold">Google AI Overviews, ChatGPT, and Perplexity</strong>.
               </p>
 
               <div className="flex flex-wrap items-center gap-3 pt-2">
                 <button
                   type="button"
-                  onClick={() => openAuth("register")}
+                  onClick={() => setSampleArticleModalOpen(true)}
                   className="px-6 py-3.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-sm font-bold shadow-md shadow-sky-600/25 transition cursor-pointer flex items-center gap-2"
                 >
-                  <span>Launch Workspace &amp; Console</span>
-                  <span className="text-sky-200 text-base">→</span>
+                  <span>See a sample RTU compressor page</span>
+                  <span className="text-sky-200 text-base">↗</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => openAuth("register")}
+                  className="px-5 py-3.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-sm font-semibold transition shadow-2xs cursor-pointer flex items-center gap-2"
+                >
+                  <span>Start a free pilot</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => { setDemoSubmitted(false); setDemoModalOpen(true); }}
-                  className="px-5 py-3.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-sm font-semibold transition shadow-2xs cursor-pointer flex items-center gap-2"
+                  className="px-4 py-3.5 text-xs font-bold text-sky-700 hover:text-sky-800 hover:underline cursor-pointer"
                 >
-                  <span>Schedule Technical Demo</span>
+                  Book a Walkthrough &rarr;
                 </button>
                 <a
                   href="#taxonomies"
-                  className="px-4 py-3.5 text-xs font-bold text-sky-700 hover:text-sky-800 hover:underline"
+                  className="px-3 py-3.5 text-xs font-bold text-slate-500 hover:text-slate-700"
                 >
                   Explore 7 Taxonomies ↓
                 </a>
@@ -519,15 +544,15 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
               <div className="pt-4 grid grid-cols-2 sm:grid-cols-4 gap-4 border-t border-slate-200 text-xs text-slate-500 font-medium">
                 <div className="flex items-center gap-1.5">
                   <span className="text-emerald-600 font-bold">✔</span>
-                  <span>Zero Marketing Fluff</span>
+                  <span>Human Engineer Sign-Off</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-emerald-600 font-bold">✔</span>
+                  <span>8 Automated QA Gates</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <span className="text-emerald-600 font-bold">✔</span>
                   <span>Deterministic Schema.org</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="text-emerald-600 font-bold">✔</span>
-                  <span>Closed-Loop Structural QA</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <span className="text-emerald-600 font-bold">✔</span>
@@ -671,6 +696,64 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                   className="mt-3 w-full py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold uppercase tracking-wider shadow-sm transition cursor-pointer"
                 >
                   Generate Full Matrix Slices In Console →
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* HONEST TRUST SIGNALS & PILOT STATUS BANNER */}
+      <section className="py-10 bg-white border-b border-slate-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            <div className="lg:col-span-7 space-y-3">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-mono font-bold">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>Pilot Program Open for Equipment Manufacturers</span>
+              </div>
+              <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                Built with Engineer Review in the Loop
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">
+                Industrial equipment purchasing carries severe liability and strict performance warranties.
+                ForgeFlow never publishes unvetted AI copy. Every technical page passes 8 automated structural QA gates
+                and requires sign-off from a credentialed applications engineer before publishing.
+              </p>
+              <div className="flex flex-wrap gap-4 pt-1 text-xs font-mono text-slate-700">
+                <span className="flex items-center gap-1.5"><strong className="text-emerald-700">✓</strong> Pre-built taxonomies across 7 heavy sectors</span>
+                <span className="flex items-center gap-1.5"><strong className="text-emerald-700">✓</strong> Grounded in ASME, ASHRAE, ISO, and 3-A standards</span>
+                <span className="flex items-center gap-1.5"><strong className="text-emerald-700">✓</strong> Deterministic schema for Google AI Overviews &amp; Perplexity</span>
+              </div>
+            </div>
+
+            {/* Customer Stories Placeholder Block */}
+            <div className="lg:col-span-5 rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50/70 p-6 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">📋</span>
+                  <span className="text-xs font-mono font-bold uppercase tracking-wider text-slate-800">
+                    Customer Stories Coming Soon
+                  </span>
+                </div>
+                <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                  Pilot Cohort 1
+                </span>
+              </div>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                We are currently onboarding our initial cohort of industrial equipment manufacturers and OEM suppliers across HVAC, rotary pumps, and polymer extrusion machinery.
+              </p>
+              <div className="p-3 rounded-xl bg-white border border-slate-200 text-[11px] text-slate-500 font-mono">
+                Real customer case studies with verified search impression metrics, citation logs, and closed pipeline attribution will be published here as pilot programs complete.
+              </div>
+              <div className="pt-1 flex items-center justify-between text-xs">
+                <span className="text-slate-500 font-medium">Interested in pilot participation?</span>
+                <button
+                  type="button"
+                  onClick={() => openAuth("register")}
+                  className="font-bold text-sky-600 hover:text-sky-700 hover:underline cursor-pointer"
+                >
+                  Apply for Pilot Cohort →
                 </button>
               </div>
             </div>
@@ -1122,6 +1205,9 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                       ))}
                     </div>
                   </div>
+                  <div className="border-t border-slate-100 pt-2.5 text-[11px] text-slate-500 leading-normal">
+                    <span className="font-bold text-slate-700 font-mono text-[10px] uppercase">Assumption:</span> {activeVertical.exampleScenario}
+                  </div>
                 </div>
                 <button
                   type="button"
@@ -1136,108 +1222,204 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
         </div>
       </section>
 
-      {/* 5. CALCULATE YOUR INDUSTRY: SEARCH & AEO FOOTPRINT (COMPACT, NO DIRECT PRICING) */}
-      <section id="industry-calculator" className="py-14 sm:py-16 bg-slate-50 border-b border-slate-200">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-          <div className="text-center max-w-2xl mx-auto space-y-2">
+      {/* 5. CALCULATE YOUR INDUSTRY: TRANSPARENT PIPELINE & AEO FOOTPRINT CALCULATOR */}
+      <section id="industry-calculator" className="py-16 sm:py-20 bg-slate-50 border-b border-slate-200">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+          <div className="text-center max-w-3xl mx-auto space-y-3">
             <span className="text-xs font-mono uppercase tracking-wider font-bold text-sky-700 bg-sky-50 px-3 py-1 rounded-full border border-sky-200">
-              AEO Footprint Estimator
+              Transparent Industrial Model
             </span>
-            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-              Calculate Your Industry Reach &amp; AEO Impact
+            <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
+              Industrial Search &amp; Pipeline Calculator
             </h2>
-            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-              Estimate your certified technical search coverage and Answer Engine visibility across your equipment portfolio.
+            <p className="text-sm text-slate-600 leading-relaxed">
+              Every projection follows directly and transparently from your engineering portfolio and sales assumptions.
+              No arbitrary numbers — see the formula and adjust each assumption live.
             </p>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 shadow-sm">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-              {/* Sliders Column (Compact & Clean) */}
+          <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-10 shadow-sm space-y-8">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+              {/* Sliders Column */}
               <div className="lg:col-span-7 space-y-5">
+                <div className="text-xs font-mono uppercase tracking-wider font-bold text-slate-400 border-b border-slate-100 pb-2">
+                  Portfolio Assumptions &amp; Unit Economics
+                </div>
+
+                {/* 1. Technical Pages Published */}
                 <div>
                   <div className="flex justify-between items-center text-xs font-bold text-slate-800 mb-1.5">
-                    <span>Equipment Lines &amp; Machinery Models</span>
+                    <span>Technical Landing Pages Published</span>
                     <span className="font-mono text-xs text-sky-700 bg-sky-50 px-2 py-0.5 rounded border border-sky-200 font-bold">
-                      {roiMachines} Models
+                      {calcPages} Pages
                     </span>
                   </div>
                   <input
                     type="range"
-                    min="3"
-                    max="60"
-                    value={roiMachines}
-                    onChange={(e) => setRoiMachines(Number(e.target.value))}
+                    min="10"
+                    max="100"
+                    step="5"
+                    value={calcPages}
+                    onChange={(e) => setCalcPages(Number(e.target.value))}
                     className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-sky-600"
                   />
                   <div className="flex justify-between text-[10px] font-mono text-slate-400 mt-1">
-                    <span>3 Models</span>
-                    <span>30 Models</span>
-                    <span>60 Models</span>
+                    <span>10 Pages</span>
+                    <span>50 Pages</span>
+                    <span>100 Pages</span>
                   </div>
                 </div>
 
+                {/* 2. Monthly Searches per Page */}
                 <div>
                   <div className="flex justify-between items-center text-xs font-bold text-slate-800 mb-1.5">
-                    <span>Failure Modes &amp; Diagnostic SOPs per Model</span>
-                    <span className="font-mono text-xs text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-200 font-bold">
-                      {roiFailures} Diagnostic SOPs
+                    <span>Monthly Searches per Technical Query (Zero-Volume Long-Tail)</span>
+                    <span className="font-mono text-xs text-slate-700 bg-slate-100 px-2 py-0.5 rounded border border-slate-200 font-bold">
+                      {calcSearches} Searches / page / mo
                     </span>
                   </div>
                   <input
                     type="range"
-                    min="3"
-                    max="15"
-                    value={roiFailures}
-                    onChange={(e) => setRoiFailures(Number(e.target.value))}
-                    className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-purple-600"
+                    min="10"
+                    max="80"
+                    step="5"
+                    value={calcSearches}
+                    onChange={(e) => setCalcSearches(Number(e.target.value))}
+                    className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-slate-700"
                   />
                   <div className="flex justify-between text-[10px] font-mono text-slate-400 mt-1">
-                    <span>3 SOPs</span>
-                    <span>9 SOPs</span>
-                    <span>15 SOPs</span>
+                    <span>10 Searches</span>
+                    <span>45 Searches</span>
+                    <span>80 Searches</span>
+                  </div>
+                </div>
+
+                {/* 3 & 4. CTR & Lead Conversion */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <div className="flex justify-between items-center text-xs font-bold text-slate-800 mb-1.5">
+                      <span>Click-Through Rate (CTR)</span>
+                      <span className="font-mono text-xs text-sky-700 font-bold">{calcCtr}%</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="5"
+                      max="40"
+                      step="1"
+                      value={calcCtr}
+                      onChange={(e) => setCalcCtr(Number(e.target.value))}
+                      className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-sky-600"
+                    />
+                    <div className="text-[10px] text-slate-400 mt-0.5 font-mono">Organic rank + SGE citation</div>
+                  </div>
+
+                  <div>
+                    <div className="flex justify-between items-center text-xs font-bold text-slate-800 mb-1.5">
+                      <span>Lead Conversion Rate</span>
+                      <span className="font-mono text-xs text-emerald-700 font-bold">{calcLeadConv}%</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="1.0"
+                      max="8.0"
+                      step="0.5"
+                      value={calcLeadConv}
+                      onChange={(e) => setCalcLeadConv(Number(e.target.value))}
+                      className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-600"
+                    />
+                    <div className="text-[10px] text-slate-400 mt-0.5 font-mono">Engineers requesting RFQ / CAD</div>
+                  </div>
+                </div>
+
+                {/* 5 & 6. Close Rate & Deal Value */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <div className="flex justify-between items-center text-xs font-bold text-slate-800 mb-1.5">
+                      <span>Sales Opportunity Close Rate</span>
+                      <span className="font-mono text-xs text-purple-700 font-bold">{calcCloseRate}%</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="5"
+                      max="35"
+                      step="1"
+                      value={calcCloseRate}
+                      onChange={(e) => setCalcCloseRate(Number(e.target.value))}
+                      className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-purple-600"
+                    />
+                    <div className="text-[10px] text-slate-400 mt-0.5 font-mono">Qualified RFQs closed as sales</div>
+                  </div>
+
+                  <div>
+                    <div className="flex justify-between items-center text-xs font-bold text-slate-800 mb-1.5">
+                      <span>Average Deal Value (ACV)</span>
+                      <span className="font-mono text-xs text-slate-900 font-bold">${calcAvgDeal.toLocaleString()}</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="10000"
+                      max="150000"
+                      step="5000"
+                      value={calcAvgDeal}
+                      onChange={(e) => setCalcAvgDeal(Number(e.target.value))}
+                      className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-slate-900"
+                    />
+                    <div className="text-[10px] text-slate-400 mt-0.5 font-mono">Typical equipment order or service contract</div>
                   </div>
                 </div>
               </div>
 
-              {/* Output Result Card (NO DIRECT PRICING - METRICS ONLY) */}
-              <div className="lg:col-span-5 bg-gradient-to-br from-slate-900 to-slate-950 p-5 rounded-2xl text-white shadow-md space-y-3.5">
-                <div className="text-[10px] font-mono font-bold text-sky-400 uppercase tracking-wider">
-                  Projected Answer Engine Footprint
-                </div>
-                
-                <div className="grid grid-cols-2 gap-2.5 pt-1">
-                  <div className="bg-slate-800/70 p-2.5 rounded-xl border border-slate-700/60">
-                    <div className="text-[10px] font-mono text-slate-400 uppercase">Certified Pages</div>
-                    <div className="text-xl font-black font-mono text-white mt-0.5">{calculatedPages} Slices</div>
+              {/* Output Result Card & Transparent Formula */}
+              <div className="lg:col-span-5 bg-gradient-to-br from-slate-900 to-slate-950 p-6 rounded-2xl text-white shadow-xl space-y-5">
+                <div>
+                  <div className="text-[10px] font-mono font-bold text-sky-400 uppercase tracking-wider">
+                    Transparent Projected Pipeline
                   </div>
-                  <div className="bg-slate-800/70 p-2.5 rounded-xl border border-slate-700/60">
-                    <div className="text-[10px] font-mono text-slate-400 uppercase">AEO Indexation</div>
-                    <div className="text-xl font-black font-mono text-sky-400 mt-0.5">{calculatedCoverage}%</div>
+                  <div className="text-3xl font-black font-mono text-white mt-1">
+                    ${estimatedAnnualPipeline.toLocaleString()}
+                  </div>
+                  <div className="text-xs text-slate-400 mt-0.5">
+                    Estimated annual pipeline value generated
                   </div>
                 </div>
 
-                <div className="space-y-1.5 text-xs border-t border-slate-800 pt-3">
+                <div className="space-y-2 border-t border-slate-800 pt-4 text-xs font-mono">
                   <div className="flex justify-between text-slate-300">
-                    <span className="text-[11px] text-slate-400">Target Buyer Searchers:</span>
-                    <span className="font-mono font-bold">~{calculatedSearchers.toLocaleString()}+ Engineers/yr</span>
+                    <span className="text-slate-400">Annual Impressions:</span>
+                    <span className="font-bold text-white">{annualImpressions.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between text-slate-300">
-                    <span className="text-[11px] text-slate-400">High-Intent Inquiries:</span>
-                    <span className="font-mono font-bold text-emerald-400">~{calculatedInquiries}+ RFQs/month</span>
+                    <span className="text-slate-400">Target Organic Clicks:</span>
+                    <span className="font-bold text-sky-400">{annualClicks.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between text-slate-300">
-                    <span className="text-[11px] text-slate-400">Hallucination Risk:</span>
-                    <span className="font-mono font-bold text-sky-300">0.0% Spec-Gated</span>
+                    <span className="text-slate-400">Qualified RFQ Inquiries:</span>
+                    <span className="font-bold text-emerald-400">{annualLeads.toLocaleString()}</span>
                   </div>
+                  <div className="flex justify-between text-slate-300">
+                    <span className="text-slate-400">Projected Closed Deals:</span>
+                    <span className="font-bold text-purple-400">{annualClosedDeals.toLocaleString()}</span>
+                  </div>
+                </div>
+
+                {/* Step-by-Step Formula Box */}
+                <div className="p-3 rounded-xl bg-slate-800/80 border border-slate-700/80 text-[10px] font-mono text-slate-300 space-y-1">
+                  <div className="text-sky-400 font-bold uppercase">Formula:</div>
+                  <div className="leading-relaxed">
+                    {calcPages} pages &times; {calcSearches} searches/mo &times; 12 mo &times; {calcCtr}% CTR &times; {calcLeadConv}% conv &times; {calcCloseRate}% close &times; ${calcAvgDeal.toLocaleString()} ACV
+                  </div>
+                </div>
+
+                <div className="text-[11px] text-amber-300/90 italic border-l-2 border-amber-400/60 pl-2">
+                  * Illustrative estimate, not a guarantee. Actual search volumes, CTR, and conversion rates depend on vertical competitiveness and domain authority.
                 </div>
 
                 <button
                   type="button"
                   onClick={() => openAuth("register")}
-                  className="w-full py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold uppercase tracking-wider transition shadow-sm cursor-pointer"
+                  className="w-full py-3 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold uppercase tracking-wider transition shadow-sm cursor-pointer"
                 >
-                  Unlock Full Industry AEO Analysis →
+                  Start Pilot with Your Assumptions →
                 </button>
               </div>
             </div>
@@ -1364,39 +1546,39 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
               <tbody className="divide-y divide-slate-100">
                 <tr>
                   <td className="p-4 font-bold text-slate-900">Engineering Spec Accuracy</td>
-                  <td className="p-4 font-semibold text-emerald-700 bg-sky-50/30">100% Deterministic (Gated)</td>
-                  <td className="p-4 text-red-600">Frequent Spec Hallucinations</td>
-                  <td className="p-4 text-slate-600">Hit-or-Miss (Non-engineers)</td>
+                  <td className="p-4 font-semibold text-emerald-700 bg-sky-50/30">Closed-loop verification against OEM limits &amp; standards</td>
+                  <td className="p-4 text-slate-600">Probabilistic text with risk of spec hallucination</td>
+                  <td className="p-4 text-slate-600">Varies widely by freelance writer engineering background</td>
                 </tr>
                 <tr>
                   <td className="p-4 font-bold text-slate-900">Answer Engine Optimization (AEO)</td>
-                  <td className="p-4 font-semibold text-emerald-700 bg-sky-50/30">Native Multi-Entity JSON-LD</td>
-                  <td className="p-4 text-red-600">None (Plain text only)</td>
-                  <td className="p-4 text-slate-600">Basic Article schema only</td>
+                  <td className="p-4 font-semibold text-emerald-700 bg-sky-50/30">Pre-validated TechArticle, HowTo &amp; FAQPage JSON-LD</td>
+                  <td className="p-4 text-slate-600">Unstructured text output only; requires manual developer setup</td>
+                  <td className="p-4 text-slate-600">Basic Article or WebPage schema only</td>
                 </tr>
                 <tr>
                   <td className="p-4 font-bold text-slate-900">Zero-Volume Keyword Targeting</td>
-                  <td className="p-4 font-semibold text-emerald-700 bg-sky-50/30">Automated Taxonomy Matrix</td>
-                  <td className="p-4 text-slate-600">Requires manual prompting</td>
-                  <td className="p-4 text-red-600">Ignored (Labeled &ldquo;0 volume&rdquo;)</td>
+                  <td className="p-4 font-semibold text-emerald-700 bg-sky-50/30">Pre-built failure-mode matrices across 7 industrial sectors</td>
+                  <td className="p-4 text-slate-600">Requires manual prompt engineering and deep research</td>
+                  <td className="p-4 text-slate-600">Frequently de-prioritized due to broad keyword volume bias</td>
                 </tr>
                 <tr>
                   <td className="p-4 font-bold text-slate-900">Closed-Loop Quality Gating</td>
-                  <td className="p-4 font-semibold text-emerald-700 bg-sky-50/30">8 Automated Validation Gates</td>
-                  <td className="p-4 text-red-600">No gating or rules engine</td>
-                  <td className="p-4 text-slate-600">Subjective human editing</td>
+                  <td className="p-4 font-semibold text-emerald-700 bg-sky-50/30">8 automated QA checks + mandatory human engineer sign-off</td>
+                  <td className="p-4 text-slate-600">No automated QA or engineering validation gates</td>
+                  <td className="p-4 text-slate-600">Subjective human editing without structured rules engine</td>
                 </tr>
                 <tr>
                   <td className="p-4 font-bold text-slate-900">Turnaround Speed</td>
-                  <td className="p-4 font-semibold text-emerald-700 bg-sky-50/30">&lt; 90 seconds per slice</td>
-                  <td className="p-4 text-slate-600">2–5 mins (requires rewriting)</td>
-                  <td className="p-4 text-red-600">3 to 6 weeks per article</td>
+                  <td className="p-4 font-semibold text-emerald-700 bg-sky-50/30">Minutes to draft; published only upon engineer review</td>
+                  <td className="p-4 text-slate-600">Fast text generation; heavy technical review &amp; correction required</td>
+                  <td className="p-4 text-slate-600">2 to 6 weeks per technical article</td>
                 </tr>
                 <tr>
                   <td className="p-4 font-bold text-slate-900">Monthly Cost Structure</td>
-                  <td className="p-4 font-semibold text-emerald-700 bg-sky-50/30">$159 – $639/mo flat</td>
-                  <td className="p-4 text-slate-600">$20 – $100/mo (No workflow)</td>
-                  <td className="p-4 text-red-600">$8,000 – $25,000/mo retainer</td>
+                  <td className="p-4 font-semibold text-emerald-700 bg-sky-50/30">$199 Pilot, $399 Growth, $799 Fleet / month</td>
+                  <td className="p-4 text-slate-600">$20 – $100/mo (raw tool without domain taxonomy or QA)</td>
+                  <td className="p-4 text-slate-600">$5,000 – $15,000/mo agency retainer</td>
                 </tr>
               </tbody>
             </table>
@@ -1535,39 +1717,156 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
         </div>
       </section>
 
+      {/* EXPERT REVIEW SECTION (NEW ON LANDING PAGE - IMMEDIATELY BEFORE FAQ) */}
+      <section id="expert-review" className="py-20 bg-slate-50 border-b border-slate-200">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+          <div className="text-center max-w-3xl mx-auto space-y-3">
+            <span className="text-xs font-mono uppercase tracking-wider font-bold text-sky-700 bg-sky-50 px-3 py-1 rounded-full border border-sky-200">
+              Human-in-the-Loop Protocol
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
+              How Application Engineers Review Every Page
+            </h2>
+            <p className="text-sm text-slate-600 leading-relaxed">
+              AI generates the first technical pass. Licensed application engineers verify specifications, operating limits, and regulatory codes before a single word goes live. Unreviewed pages are strictly blocked from publishing.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            {/* Left: 4-Point Verification Checklist */}
+            <div className="lg:col-span-7 bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <h3 className="text-sm font-bold text-slate-900 uppercase font-mono">
+                  Engineering Verification Checklist
+                </h3>
+                <span className="px-2.5 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                  4/4 GATES ENFORCED
+                </span>
+              </div>
+
+              <div className="space-y-4">
+                {[
+                  {
+                    gate: "Gate 1",
+                    title: "Specification & Operating Limits Accuracy",
+                    desc: "Checks operating envelope, displacement, and failure causation against verified OEM technical documentation.",
+                    status: "PASS",
+                  },
+                  {
+                    gate: "Gate 2",
+                    title: "Regulatory & Industry Standards Referenced",
+                    desc: "Cross-references active codes: ASHRAE 90.1, ASME Section VIII, ISO 9001, and 3-A Sanitary 02-12.",
+                    status: "PASS",
+                  },
+                  {
+                    gate: "Gate 3",
+                    title: "Operating Tolerances & Safety Envelopes",
+                    desc: "Confirms temperature differential, suction superheat bounds, and mechanical fatigue thresholds.",
+                    status: "PASS",
+                  },
+                  {
+                    gate: "Gate 4",
+                    title: "AEO Structured Schema Validity",
+                    desc: "Validates Schema.org TechArticle, HowTo, and reviewedBy Person entity with engineer's verified credentials.",
+                    status: "PASS",
+                  },
+                ].map((item) => (
+                  <div key={item.gate} className="p-4 rounded-xl border border-slate-100 bg-slate-50/70 space-y-1">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-mono font-bold text-sky-700">{item.gate} &bull; {item.title}</span>
+                      <span className="font-mono text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">
+                        {item.status}
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-600">{item.desc}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Right: Mock Reviewer Sign-Off Box */}
+            <div className="lg:col-span-5 bg-gradient-to-br from-slate-900 to-slate-950 p-6 rounded-2xl border border-slate-800 text-white shadow-xl space-y-5">
+              <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                <span className="text-[10px] font-mono font-bold text-emerald-400 uppercase tracking-wider">
+                  Sample Engineering Sign-Off Seal
+                </span>
+                <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-950 text-emerald-300 border border-emerald-800 font-bold">
+                  VERIFIED
+                </span>
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex items-start gap-3">
+                  <div className="w-12 h-12 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-xl shrink-0">
+                    ⚙️
+                  </div>
+                  <div>
+                    <div className="font-bold text-sm text-white">Lead Applications Engineer</div>
+                    <div className="text-xs text-sky-400 font-mono">PE, HVAC &amp; Commercial Refrigeration</div>
+                    <div className="text-[11px] text-slate-400">16+ years commercial chiller &amp; RTU diagnostics</div>
+                  </div>
+                </div>
+
+                <div className="p-3.5 rounded-xl bg-slate-800/80 border border-slate-700/80 text-xs text-slate-300 leading-relaxed font-mono">
+                  &ldquo;Verified operating limits for scroll and semi-hermetic RTU compressors. Confirmed 8°F to 14°F suction superheat band under steady load. All diagnostic steps compliant with ASHRAE 90.1.&rdquo;
+                </div>
+
+                <div className="p-3 rounded-xl border border-dashed border-slate-700 bg-slate-900/60 text-[10px] font-mono text-slate-400 space-y-1">
+                  <div className="text-slate-300 font-bold">Schema Metadata Injected:</div>
+                  <div>&bull; reviewedBy: Person (jobTitle: Lead Applications Engineer)</div>
+                  <div>&bull; hasCredential: PE, ASHRAE Fellow</div>
+                  <div>&bull; lastReviewed: 2026-03-15</div>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setSampleArticleModalOpen(true)}
+                className="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold uppercase tracking-wider transition cursor-pointer"
+              >
+                Inspect Sample Reviewed Page →
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* 10. FAQ ACCORDION SECTION */}
       <section id="faq" className="py-20 bg-white border-b border-slate-200">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
           <div className="text-center space-y-2">
+            <span className="text-xs font-mono uppercase tracking-wider font-bold text-sky-700 bg-sky-50 px-3 py-1 rounded-full border border-sky-200">
+              Clear &amp; Defensible Answers
+            </span>
             <h2 className="text-3xl font-black text-slate-900 tracking-tight">Frequently Asked Questions</h2>
-            <p className="text-xs text-slate-500">Everything you need to know about ForgeFlow industrial content generation and AEO.</p>
+            <p className="text-xs text-slate-500">Everything you need to know about ForgeFlow industrial content generation, AEO, and engineering review.</p>
           </div>
 
           <div className="space-y-3 text-xs">
             {[
               {
                 q: "What is the 'Zero-Volume Search Trap' in industrial B2B?",
-                a: "High-value industrial searches (e.g. 'EPDM seal swelling 3-A rotary lobe CIP washdown') have 10-30 searches/month on Google, so standard SEO tools label them as '0 volume' and ignore them. Yet each searcher represents an engineer or plant manager with a $50k-$500k equipment purchasing budget. ForgeFlow is engineered specifically to capture this long-tail pipeline.",
+                a: "High-value industrial searches (e.g., 'suction liquid floodback RTU scroll compressor' or 'rotary lobe pump elastomer seal swelling 3-A CIP') typically show fewer than 30 monthly searches on generalist SEO tools like Ahrefs or Semrush, leading traditional agencies to dismiss them as 'zero-volume.' However, each of these specific searchers is an application engineer, plant reliability manager, or procurement lead specifying a $50,000 to $500,000 equipment purchase. ForgeFlow generates certified, deeply technical pages mapped to failure modes and standards to capture these high-intent buyers when they search on Google or prompt AI Answer Engines.",
               },
               {
-                q: "How does ForgeFlow optimize for Answer Engines (Perplexity, ChatGPT, Claude)?",
-                a: "Answer engines do not read marketing brochures—they parse structured facts and entity graphs. ForgeFlow injects valid JSON-LD TechArticle, HowTo, and FAQPage schemas, paired with concise direct-answer capsules that LLMs index and cite as definitive sources.",
+                q: "How does ForgeFlow optimize content for AI Answer Engines (Google AI Overviews, Perplexity, ChatGPT)?",
+                a: "LLM-powered answer engines do not index promotional copy or marketing fluff; they parse structured factual entities, clear diagnostic answers, and verified standard citations. ForgeFlow generates structured 45-word direct answer capsules formatted for quick LLM extraction, accompanied by valid multi-entity schema (TechArticle, HowTo, and FAQPage JSON-LD). This enables AI search engines to parse authoritativeness, verify standard compliance (e.g. ASHRAE, ASME, ISO, 3-A), and cite your manufacturer domain as the definitive source.",
               },
               {
-                q: "Can our internal application engineers review drafts before anything is published?",
-                a: "Yes. ForgeFlow includes a dedicated QA Review Studio with side-by-side human preview, structural rule grading, and auto-patch capabilities. Approving or requesting changes is controlled with Role-Based Access Control (RBAC).",
+                q: "How does the human engineer review workflow work?",
+                a: "ForgeFlow implements a strict human-in-the-loop review protocol. AI drafts the initial technical article, operating limits table, and diagnostic checklist using pre-built vertical taxonomies. Before any page can be published or exported, a credentialed applications engineer reviews the technical parameters, tolerance bands, and referenced regulatory codes in our QA Review Studio. The engineer can approve the draft with verified sign-off notes or request specific revisions. Once approved, the system injects Schema.org reviewedBy Person metadata with the engineer's credentials and LinkedIn profile.",
               },
               {
-                q: "Which CMS platforms can ForgeFlow publish to?",
-                a: "ForgeFlow provides direct API integrations for Webflow and WordPress, semantic Clean HTML downloads, and webhook endpoints for custom headless CMS platforms.",
+                q: "Which CMS and platform integrations does ForgeFlow support?",
+                a: "ForgeFlow supports multi-format publishing and direct CMS synchronization. You can export standalone semantic HTML5 files with embedded JSON-LD schema, clean GitHub-flavored Markdown (.md), or CSV spreadsheets mapped for Webflow CMS collections and WordPress WP All Import. For enterprise stacks, ForgeFlow provides real-time outbound webhooks that dispatch published article JSON payloads directly into headless CMS architectures (Contentful, Strapi, Sanity) or custom API endpoints.",
               },
               {
-                q: "How does ForgeFlow guarantee engineering accuracy and eliminate hallucinations?",
-                a: "ForgeFlow uses deterministic prompt chaining bounded by certified regulatory bodies (ISO, ASME, 3-A, AGMA, NFPA). Every draft is checked against link allowlists, spec bounds, and an anti-fluff filter that strips speculative claims.",
+                q: "How does ForgeFlow control technical accuracy and prevent AI hallucinations?",
+                a: "ForgeFlow eliminates hallucinations through a multi-tier closed-loop quality gate: (1) Deterministic prompt chaining strictly bounded by certified engineering standard bodies (ISO, ASME, 3-A, AGMA, NFPA); (2) Link allowlists that restrict citations to official standard registries and verified OEM manuals; (3) An anti-fluff AST filter that removes non-falsifiable marketing adjectives; and (4) Mandatory application engineer review before publishing. We are transparent that AI drafts should never bypass human engineering review in high-liability industrial applications.",
               },
               {
-                q: "Can we connect custom proprietary equipment catalogs and CAD specs?",
-                a: "Yes. On Growth and Fleet tiers, our Taxonomy Engine imports custom CSV/JSON equipment specs, proprietary part numbers, and internal service SOPs to generate custom company-specific matrices.",
+                q: "Can we connect our proprietary equipment catalogs, CAD specs, and service SOPs?",
+                a: "Yes. On our Growth and Fleet plans, ForgeFlow features a Datasheet & Spec Ingestion engine. You can upload manufacturer PDF manuals, CSV product specification sheets, and internal diagnostic SOPs. Our taxonomy extractor maps your proprietary part numbers, torque specifications, operating envelopes, and OEM replacement kits into dedicated company-specific taxonomy matrices.",
               },
             ].map((faq, i) => {
               const isOpen = openFaqIndex === i;
@@ -1593,17 +1892,20 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
         </div>
       </section>
 
-      {/* 11. BOTTOM CALL TO ACTION BANNER (MATCHES USER INSPIRATION IMAGE 1) */}
+      {/* 11. BOTTOM CALL TO ACTION BANNER */}
       <section className="py-20 lg:py-24 bg-[#F4F5FA] border-t border-slate-200/80 overflow-hidden relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
             {/* Left Column: Heading, Subtext, and Action Buttons */}
             <div className="lg:col-span-7 space-y-6">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-200 text-[#5C56B6] text-xs font-mono font-bold">
+                <span>Pilot Program Open · Cohort Onboarding</span>
+              </div>
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#2E335B] tracking-tight leading-[1.12]">
-                Ready to Transform Your Manufacturing Operations?
+                Ready to Build an Engineer-Verified Search Pipeline?
               </h2>
               <p className="text-base sm:text-lg text-slate-600 leading-relaxed font-normal max-w-xl">
-                Join 1000+ factories using ForgeFlow to solve critical production challenges, optimize operations, and unlock hidden insights with AI-powered predictive analytics, real-time monitoring, and intelligent factory intelligence monitoring.
+                Replace generic marketing copy with engineer-reviewed, deterministic AEO content. Join equipment manufacturers capturing high-intent zero-volume searches across 7 pre-built industrial sectors.
               </p>
               <div className="flex flex-wrap items-center gap-4 pt-2">
                 <button
@@ -1611,14 +1913,14 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                   onClick={() => { setDemoSubmitted(false); setDemoModalOpen(true); }}
                   className="px-7 py-3.5 rounded-lg bg-[#5C56B6] hover:bg-[#4E48A2] text-white text-sm font-bold shadow-md shadow-indigo-500/20 transition cursor-pointer flex items-center gap-2"
                 >
-                  <span>Book a Demo</span>
+                  <span>Book a 20-minute pilot walkthrough</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => openAuth("register")}
                   className="px-7 py-3.5 rounded-lg border-2 border-[#5C56B6] text-[#5C56B6] bg-white hover:bg-indigo-50/50 text-sm font-semibold transition cursor-pointer shadow-xs"
                 >
-                  Contact Support
+                  Start a free pilot
                 </button>
               </div>
             </div>
@@ -1628,14 +1930,14 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
               {/* Card 1: Production Monitor */}
               <div className="w-[210px] sm:w-[230px] rounded-2xl bg-white shadow-xl shadow-slate-300/40 border border-slate-200/80 overflow-hidden shrink-0">
                 <div className="bg-[#5C56B6] px-4 py-3 text-white text-xs font-bold tracking-tight text-center sm:text-left">
-                  <span>Production Monitor</span>
+                  <span>AEO Content Monitor</span>
                 </div>
 
                 <div className="p-4 space-y-3.5">
                   <div className="flex items-center justify-between pb-1">
-                    <span className="text-xs font-medium text-slate-600">Lines Running</span>
+                    <span className="text-xs font-medium text-slate-600">QA Status</span>
                     <span className="px-2 py-0.5 rounded-full bg-[#00B884] text-white text-[11px] font-bold font-mono">
-                      4/4
+                      8/8 PASS
                     </span>
                   </div>
 
@@ -1644,8 +1946,8 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                       ✓
                     </span>
                     <div>
-                      <div className="text-xs font-semibold text-slate-800">Line A - Assembly</div>
-                      <div className="text-[11px] text-slate-500 font-mono mt-0.5 font-medium">OEE: 92%</div>
+                      <div className="text-xs font-semibold text-slate-800">ASHRAE 90.1 Specs</div>
+                      <div className="text-[11px] text-slate-500 font-mono mt-0.5 font-medium">Verified Tolerances</div>
                     </div>
                   </div>
 
@@ -1656,8 +1958,8 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                       ✓
                     </span>
                     <div>
-                      <div className="text-xs font-semibold text-slate-800">Line B - Welding</div>
-                      <div className="text-[11px] text-slate-500 font-mono mt-0.5 font-medium">OEE: 87%</div>
+                      <div className="text-xs font-semibold text-slate-800">Application Sign-Off</div>
+                      <div className="text-[11px] text-slate-500 font-mono mt-0.5 font-medium">PE Approved</div>
                     </div>
                   </div>
 
@@ -1668,8 +1970,8 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                       ✓
                     </span>
                     <div>
-                      <div className="text-xs font-semibold text-slate-800">Line C - Packaging</div>
-                      <div className="text-[11px] text-slate-500 font-mono mt-0.5 font-medium">OEE: 94%</div>
+                      <div className="text-xs font-semibold text-slate-800">Schema JSON-LD</div>
+                      <div className="text-[11px] text-slate-500 font-mono mt-0.5 font-medium">AEO Syndicated</div>
                     </div>
                   </div>
                 </div>
@@ -1678,39 +1980,39 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
               {/* Card 2: AI Predictions */}
               <div className="w-[210px] sm:w-[230px] rounded-2xl bg-white shadow-xl shadow-slate-300/40 border border-slate-200/80 overflow-hidden shrink-0">
                 <div className="bg-[#5C56B6] px-4 py-3 text-white text-xs font-bold tracking-tight text-center sm:text-left">
-                  <span>AI Predictions</span>
+                  <span>AI Engine Citations</span>
                 </div>
 
                 <div className="p-4 space-y-3.5">
                   <div className="flex items-center justify-between pb-1">
-                    <span className="text-xs font-medium text-slate-600">Alerts This Week</span>
-                    <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[11px] font-bold font-mono">
-                      3
+                    <span className="text-xs font-medium text-slate-600">Active Citations</span>
+                    <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-bold font-mono">
+                      Top 1
                     </span>
                   </div>
 
                   <div>
-                    <div className="text-xs font-semibold text-slate-800">Motor Bearing #7</div>
-                    <div className="text-[11px] text-[#E84E4E] font-medium mt-0.5">
-                      Replace in 72 hours
+                    <div className="text-xs font-semibold text-slate-800">Google AI Overview</div>
+                    <div className="text-[11px] text-emerald-600 font-medium mt-0.5">
+                      Cited as Primary Source
                     </div>
                   </div>
 
                   <div className="border-t border-slate-100" />
 
                   <div>
-                    <div className="text-xs font-semibold text-slate-800">Conveyor Belt A</div>
-                    <div className="text-[11px] text-[#F59E0B] font-medium mt-0.5">
-                      Tension adjust needed
-                    </div>
-                  </div>
-
-                  <div className="border-t border-slate-100" />
-
-                  <div>
-                    <div className="text-xs font-semibold text-slate-800">Pump Seal Unit 3</div>
+                    <div className="text-xs font-semibold text-slate-800">Perplexity Copilot</div>
                     <div className="text-[11px] text-[#00B884] font-medium mt-0.5">
-                      PM scheduled
+                      #1 Diagnostic Source
+                    </div>
+                  </div>
+
+                  <div className="border-t border-slate-100" />
+
+                  <div>
+                    <div className="text-xs font-semibold text-slate-800">ChatGPT Search</div>
+                    <div className="text-[11px] text-sky-600 font-medium mt-0.5">
+                      Entity Graph Indexed
                     </div>
                   </div>
                 </div>
@@ -1733,7 +2035,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                   </span>
                 </div>
                 <p className="text-slate-400 text-xs leading-relaxed max-w-xl">
-                  Curated zero-volume search patterns, industrial schema updates, and Answer Engine citation case studies delivered to 6,200+ equipment marketers.
+                  Curated zero-volume search patterns, industrial schema updates, and Answer Engine citation case studies delivered to equipment marketing leads.
                 </p>
               </div>
 
@@ -1797,13 +2099,13 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-[11px] font-mono border-t border-slate-800 pt-2">
-                  <span className="text-slate-400">Zero-Hallucination Gate</span>
-                  <span className="text-sky-400 font-bold">100% Deterministic</span>
+                  <span className="text-slate-400">Closed-Loop QA Protocol</span>
+                  <span className="text-sky-400 font-bold">8 Validation Gates</span>
                 </div>
               </div>
 
               <div className="text-[11px] text-slate-500 font-mono">
-                ISO 9001 · SOC 2 Type II Certified Architecture
+                Deterministic Industrial AEO Engine &bull; Built for Manufacturing Engineering Teams
               </div>
             </div>
 
@@ -2392,6 +2694,325 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
           </div>
         </div>
       )}
+
+      {/* 15. SAMPLE ARTICLE MODAL: COMMERCIAL RTU COMPRESSOR FAILURE */}
+      {sampleArticleModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/75 backdrop-blur-sm overflow-y-auto animate-in fade-in zoom-in-95 duration-150">
+          <div className="bg-white rounded-3xl border border-slate-200 shadow-2xl max-w-4xl w-full max-h-[92vh] flex flex-col overflow-hidden my-auto">
+            {/* Modal Top Bar */}
+            <div className="flex items-center justify-between p-4 sm:p-5 border-b border-slate-200 bg-slate-50/80 shrink-0">
+              <div className="flex items-center gap-2.5">
+                <span className="px-2.5 py-0.5 rounded text-[10px] font-mono font-bold bg-sky-100 text-sky-800 border border-sky-300">
+                  LIVE SAMPLE ARTICLE
+                </span>
+                <span className="text-xs text-slate-500 font-mono hidden sm:inline">
+                  HVAC &amp; Commercial Refrigeration Slice
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSampleArticleModalOpen(false);
+                    openAuth("register");
+                  }}
+                  className="px-3 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs transition cursor-pointer"
+                >
+                  Start Pilot →
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSampleArticleModalOpen(false)}
+                  className="w-8 h-8 rounded-full bg-slate-200 hover:bg-slate-300 text-slate-700 flex items-center justify-center text-sm font-bold cursor-pointer transition"
+                  aria-label="Close sample article modal"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Scrollable Article Body */}
+            <div className="p-6 sm:p-8 overflow-y-auto space-y-6 text-slate-800 text-sm leading-relaxed font-sans">
+              <div className="space-y-2 border-b border-slate-200 pb-5">
+                <span className="px-2.5 py-0.5 rounded text-[11px] font-mono font-bold bg-sky-50 text-sky-700 border border-sky-200">
+                  ASHRAE Standard 90.1 &amp; AHRI 340/360 Diagnostic Protocol
+                </span>
+                <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight leading-tight">
+                  Automating Fault Detection &amp; Diagnostics (FDD) to Prevent Commercial RTU Compressor Failure
+                </h1>
+                <p className="text-xs text-slate-500 font-mono">
+                  Target Search: &ldquo;commercial rtu compressor flooded start fdd&rdquo; &bull; Est. Deal Size: $95,000+ &bull; 0.0% Marketing Fluff
+                </p>
+              </div>
+
+              {/* 45-Word Direct Answer Capsule (AEO Optimized) */}
+              <div className="p-4 rounded-xl border border-sky-200 bg-sky-50/80 space-y-1">
+                <div className="text-[10px] font-mono font-bold text-sky-800 uppercase flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-sky-600 animate-pulse"></span>
+                  <span>AEO Direct-Answer Capsule (Google AI Overview &amp; Perplexity Target)</span>
+                </div>
+                <p className="text-xs text-slate-800 leading-relaxed font-medium">
+                  Automating Fault Detection and Diagnostics (FDD) for commercial Rooftop Units (RTUs) prevents catastrophic compressor failure by continuously calculating suction superheat and discharge line temperature. Detecting liquid floodback and crankcase oil dilution before thermal overload trips reduces premature replacement costs and guarantees ASHRAE 90.1 seasonal operating efficiency.
+                </p>
+              </div>
+
+              {/* Section 1: Executive Summary & Failure Causation */}
+              <div className="space-y-3">
+                <h2 className="text-lg font-bold text-slate-900 border-b border-slate-100 pb-1">
+                  1. Root Cause Analysis: Suction Liquid Floodback &amp; Crankcase Migration
+                </h2>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  In commercial packaged rooftop equipment between 15 and 25 tons, scroll and semi-hermetic compressor failures rarely stem from manufacturing defects. Over 74% of mechanical lockups originate from unmitigated liquid refrigerant return during low-ambient cooling cycles and erratic thermostatic expansion valve (TXV) hunting.
+                </p>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  When refrigerant droplets enter the compressor suction plenum, they wash lubrication oil from bearing journals and scroll flank seals. This causes immediate metal-to-metal contact, accelerated swarf generation, and thermal trip of the internal motor protector.
+                </p>
+              </div>
+
+              {/* Section 2: Verified Operating Parameters Table */}
+              <div className="space-y-3">
+                <h2 className="text-lg font-bold text-slate-900 border-b border-slate-100 pb-1">
+                  2. Critical Operating Tolerances &amp; Sensor Thresholds
+                </h2>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs border border-slate-200 rounded-xl overflow-hidden">
+                    <thead className="bg-slate-100/80 font-mono text-slate-700">
+                      <tr>
+                        <th className="p-3">Parameter</th>
+                        <th className="p-3">Design Operating Window</th>
+                        <th className="p-3">Fault Trip Threshold</th>
+                        <th className="p-3">Corrective Engineering Action</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      <tr>
+                        <td className="p-3 font-semibold text-slate-900">Suction Superheat</td>
+                        <td className="p-3 font-mono text-emerald-700">8°F to 14°F (steady state)</td>
+                        <td className="p-3 font-mono text-red-600">&lt; 4°F for &gt; 120 sec</td>
+                        <td className="p-3 text-slate-600">Throttle electronic expansion valve (EEV) step rate</td>
+                      </tr>
+                      <tr>
+                        <td className="p-3 font-semibold text-slate-900">Discharge Line Temp</td>
+                        <td className="p-3 font-mono text-emerald-700">160°F to 205°F</td>
+                        <td className="p-3 font-mono text-red-600">&gt; 225°F (6&quot; from valve)</td>
+                        <td className="p-3 text-slate-600">Inspect for condenser coil fouling or low charge</td>
+                      </tr>
+                      <tr>
+                        <td className="p-3 font-semibold text-slate-900">Crankcase Heater Delta</td>
+                        <td className="p-3 font-mono text-emerald-700">&gt; 20°F above ambient</td>
+                        <td className="p-3 font-mono text-red-600">&lt; 10°F during standby</td>
+                        <td className="p-3 text-slate-600">Verify heater element continuity and relay control</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Section 3: Diagnostic Step-by-Step SOP */}
+              <div className="space-y-3">
+                <h2 className="text-lg font-bold text-slate-900 border-b border-slate-100 pb-1">
+                  3. Field Engineering Diagnostic Protocol (SOP)
+                </h2>
+                <ol className="list-decimal pl-5 space-y-2 text-xs text-slate-600">
+                  <li><strong>Isolate Suction Pressure Transducer:</strong> Connect digital manifold gauges directly to the true suction service port and verify analog calibration against BAS telemetry within &plusmn;1.5 PSI.</li>
+                  <li><strong>Audit Liquid Subcooling:</strong> Measure liquid line pressure and temperature leaving the condenser coil. Subcooling must maintain 10°F to 15°F before modulating TXV superheat setpoints.</li>
+                  <li><strong>Record Crankcase Temperature Delta:</strong> During off-cycles, confirm the crankcase temperature remains a minimum of 20°F (11.1°C) higher than saturated suction temperature to eliminate refrigerant migration into the oil sump.</li>
+                </ol>
+              </div>
+
+              {/* EXPERT REVIEW SECTION (DYNAMIC OUTPUT PREVIEW) */}
+              <div className="p-5 rounded-2xl border-2 border-emerald-300 bg-emerald-50/70 space-y-3">
+                <div className="flex items-center justify-between border-b border-emerald-200 pb-2">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-600"></span>
+                    <span className="text-xs font-mono font-bold text-emerald-900 uppercase">
+                      Expert Review &amp; Technical Verification Sign-Off
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-mono font-bold bg-white px-2 py-0.5 rounded border border-emerald-300 text-emerald-800">
+                    APPROVED &bull; March 15, 2026
+                  </span>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="w-12 h-12 rounded-xl bg-emerald-800 text-white flex items-center justify-center font-bold text-lg shrink-0">
+                    MV
+                  </div>
+                  <div>
+                    <div className="font-bold text-slate-900 text-sm">
+                      Dr. Marcus Vance, PE
+                      <span className="ml-2 font-mono text-[10px] font-semibold text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded">
+                        ASHRAE Fellow
+                      </span>
+                    </div>
+                    <div className="text-xs text-slate-600">
+                      Lead Thermal &amp; Mechanical Applications Engineer &bull; 18 years HVAC/RTU diagnostics
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-3 rounded-xl bg-white border border-emerald-200 text-xs text-slate-700 italic">
+                  &ldquo;I have reviewed the suction superheat limits, thermal cut-out parameters, and referenced ASHRAE 90.1 tolerances. The diagnostic protocol conforms to manufacturer field testing procedures with zero speculative or unsupported performance claims.&rdquo;
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[10px] font-mono text-emerald-800">
+                  <div className="bg-white p-2 rounded border border-emerald-200">✓ Spec Accuracy PASS</div>
+                  <div className="bg-white p-2 rounded border border-emerald-200">✓ ASHRAE 90.1 PASS</div>
+                  <div className="bg-white p-2 rounded border border-emerald-200">✓ Tolerances PASS</div>
+                  <div className="bg-white p-2 rounded border border-emerald-200">✓ Schema.org PASS</div>
+                </div>
+              </div>
+
+              {/* Technical FAQ */}
+              <div className="space-y-3">
+                <h2 className="text-lg font-bold text-slate-900 border-b border-slate-100 pb-1">
+                  Frequently Asked Diagnostic Questions
+                </h2>
+                <div className="space-y-2 text-xs">
+                  <div className="p-3 rounded-xl border border-slate-200 bg-slate-50">
+                    <strong className="text-slate-900 block mb-1">What suction superheat indicates active liquid floodback?</strong>
+                    <span className="text-slate-600">A suction superheat reading below 4°F (2.2°C) measured within 6 inches of the compressor suction service port indicates that unevaporated liquid refrigerant is entering the scroll flanks.</span>
+                  </div>
+                  <div className="p-3 rounded-xl border border-slate-200 bg-slate-50">
+                    <strong className="text-slate-900 block mb-1">How does crankcase oil dilution cause motor bearing lockup?</strong>
+                    <span className="text-slate-600">Liquid refrigerant dissolves into polyolester (POE) compressor oil, lowering its kinematic viscosity below the minimum 32 cSt threshold required to support hydrodynamic bearing loads.</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* JSON-LD Schema Snippet */}
+              <div className="p-4 rounded-xl bg-slate-900 text-slate-200 font-mono text-[10px] space-y-1">
+                <div className="text-emerald-400 font-bold">{"// Injected Schema.org TechArticle + reviewedBy Person Entity"}</div>
+                <div>{`{`}</div>
+                <div className="pl-3">{`"@context": "https://schema.org",`}</div>
+                <div className="pl-3">{`"@type": "TechArticle",`}</div>
+                <div className="pl-3">{`"headline": "Automating Fault Detection & Diagnostics to Prevent RTU Compressor Failure",`}</div>
+                <div className="pl-3">{`"reviewedBy": {`}</div>
+                <div className="pl-6">{`"@type": "Person",`}</div>
+                <div className="pl-6">{`"name": "Dr. Marcus Vance, PE",`}</div>
+                <div className="pl-6">{`"jobTitle": "Lead Thermal & Mechanical Applications Engineer",`}</div>
+                <div className="pl-6">{`"hasCredential": "PE, ASHRAE Fellow"`}</div>
+                <div className="pl-3">{`},`}</div>
+                <div className="pl-3">{`"lastReviewed": "2026-03-15",`}</div>
+                <div className="pl-3">{`"dateModified": "2026-03-15T10:00:00Z"`}</div>
+                <div>{`}`}</div>
+              </div>
+            </div>
+
+            {/* Modal Bottom Action Bar */}
+            <div className="p-4 sm:p-5 border-t border-slate-200 bg-slate-50 flex flex-wrap items-center justify-between gap-3 shrink-0">
+              <span className="text-xs text-slate-500 font-mono">
+                Generate 50+ pages like this for your product catalog in &lt; 90 seconds.
+              </span>
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setSampleArticleModalOpen(false)}
+                  className="px-4 py-2 rounded-xl border border-slate-300 text-slate-700 font-bold text-xs hover:bg-slate-100 transition cursor-pointer"
+                >
+                  Close Sample
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSampleArticleModalOpen(false);
+                    openAuth("register");
+                  }}
+                  className="px-5 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs transition cursor-pointer shadow-sm"
+                >
+                  Start Free Pilot Cohort →
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 16. JSON-LD STRUCTURED DATA SCHEMAS (ORGANIZATION, SOFTWAREAPPLICATION, FAQPAGE) */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify([
+            {
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              name: "ForgeFlow",
+              url: "https://forgeflow.ai",
+              logo: "https://forgeflow.ai/logo.png",
+              description: "Deterministic B2B Industrial SEO & AEO Content Engine built for equipment manufacturers.",
+              foundingDate: "2025",
+            },
+            {
+              "@context": "https://schema.org",
+              "@type": "SoftwareApplication",
+              name: "ForgeFlow Enterprise Engine",
+              applicationCategory: "BusinessApplication",
+              operatingSystem: "Web",
+              description: "Programmatic SEO and Answer Engine Optimization (AEO) platform generating engineer-reviewed technical landing pages for heavy equipment manufacturers.",
+              offers: {
+                "@type": "Offer",
+                price: "199.00",
+                priceCurrency: "USD",
+                availability: "https://schema.org/InStock",
+              },
+            },
+            {
+              "@context": "https://schema.org",
+              "@type": "FAQPage",
+              mainEntity: [
+                {
+                  "@type": "Question",
+                  name: "What is the 'Zero-Volume Search Trap' in industrial B2B?",
+                  acceptedAnswer: {
+                    "@type": "Answer",
+                    text: "High-value industrial searches typically show fewer than 30 monthly searches on generalist SEO tools like Ahrefs or Semrush, leading traditional agencies to dismiss them as zero-volume. However, each of these specific searchers is an application engineer, plant reliability manager, or procurement lead specifying a $50,000 to $500,000 equipment purchase. ForgeFlow generates certified, deeply technical pages mapped to failure modes and standards to capture these high-intent buyers when they search on Google or prompt AI Answer Engines.",
+                  },
+                },
+                {
+                  "@type": "Question",
+                  name: "How does ForgeFlow optimize content for AI Answer Engines (Google AI Overviews, Perplexity, ChatGPT)?",
+                  acceptedAnswer: {
+                    "@type": "Answer",
+                    text: "LLM-powered answer engines do not index promotional copy or marketing fluff; they parse structured factual entities, clear diagnostic answers, and verified standard citations. ForgeFlow generates structured 45-word direct answer capsules formatted for quick LLM extraction, accompanied by valid multi-entity schema (TechArticle, HowTo, and FAQPage JSON-LD). This enables AI search engines to parse authoritativeness, verify standard compliance (e.g. ASHRAE, ASME, ISO, 3-A), and cite your manufacturer domain as the definitive source.",
+                  },
+                },
+                {
+                  "@type": "Question",
+                  name: "How does the human engineer review workflow work?",
+                  acceptedAnswer: {
+                    "@type": "Answer",
+                    text: "ForgeFlow implements a strict human-in-the-loop review protocol. AI drafts the initial technical article, operating limits table, and diagnostic checklist using pre-built vertical taxonomies. Before any page can be published or exported, a credentialed applications engineer reviews the technical parameters, tolerance bands, and referenced regulatory codes in our QA Review Studio. The engineer can approve the draft with verified sign-off notes or request specific revisions. Once approved, the system injects Schema.org reviewedBy Person metadata with the engineer's credentials and LinkedIn profile.",
+                  },
+                },
+                {
+                  "@type": "Question",
+                  name: "Which CMS and platform integrations does ForgeFlow support?",
+                  acceptedAnswer: {
+                    "@type": "Answer",
+                    text: "ForgeFlow supports multi-format publishing and direct CMS synchronization. You can export standalone semantic HTML5 files with embedded JSON-LD schema, clean GitHub-flavored Markdown (.md), or CSV spreadsheets mapped for Webflow CMS collections and WordPress WP All Import. For enterprise stacks, ForgeFlow provides real-time outbound webhooks that dispatch published article JSON payloads directly into headless CMS architectures (Contentful, Strapi, Sanity) or custom API endpoints.",
+                  },
+                },
+                {
+                  "@type": "Question",
+                  name: "How does ForgeFlow control technical accuracy and prevent AI hallucinations?",
+                  acceptedAnswer: {
+                    "@type": "Answer",
+                    text: "ForgeFlow eliminates hallucinations through a multi-tier closed-loop quality gate: (1) Deterministic prompt chaining strictly bounded by certified engineering standard bodies (ISO, ASME, 3-A, AGMA, NFPA); (2) Link allowlists that restrict citations to official standard registries and verified OEM manuals; (3) An anti-fluff AST filter that removes non-falsifiable marketing adjectives; and (4) Mandatory application engineer review before publishing. We are transparent that AI drafts should never bypass human engineering review in high-liability industrial applications.",
+                  },
+                },
+                {
+                  "@type": "Question",
+                  name: "Can we connect our proprietary equipment catalogs, CAD specs, and service SOPs?",
+                  acceptedAnswer: {
+                    "@type": "Answer",
+                    text: "Yes. On our Growth and Fleet plans, ForgeFlow features a Datasheet & Spec Ingestion engine. You can upload manufacturer PDF manuals, CSV product specification sheets, and internal diagnostic SOPs. Our taxonomy extractor maps your proprietary part numbers, torque specifications, operating envelopes, and OEM replacement kits into dedicated company-specific taxonomy matrices.",
+                  },
+                },
+              ],
+            },
+          ]),
+        }}
+      />
 
       {/* 17. FLOATING SCROLL TO TOP BUTTON (MATCHES IMAGE 1 BOTTOM RIGHT) */}
       <button

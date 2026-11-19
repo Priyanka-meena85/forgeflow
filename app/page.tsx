@@ -17,6 +17,28 @@ type TabKey =
 
 type QAStatus = "Pass" | "Review" | "Fail";
 
+export type ExpertReviewer = {
+  id: string;
+  name: string;
+  jobTitle: string;
+  credentials: string;
+  yearsOfExperience: number;
+  linkedInUrl?: string | null;
+  photoUrl?: string | null;
+  bio?: string | null;
+};
+
+export type PageReview = {
+  id?: string;
+  draftId?: string;
+  reviewerId: string;
+  status: "PENDING" | "APPROVED" | "CHANGES_REQUESTED";
+  reviewDate: string;
+  reviewerNotes?: string | null;
+  verificationItems: string[];
+  reviewer?: ExpertReviewer | null;
+};
+
 type Draft = {
   id: string | number;
   title: string;
@@ -36,6 +58,7 @@ type Draft = {
   sections: Array<{ heading: string; body: string }>;
   faqs: Array<{ q: string; a: string }>;
   schema: string;
+  pageReview?: PageReview | null;
   createdAt?: string;
   updatedAt?: string;
   vertical?: string;
@@ -324,6 +347,28 @@ const demoReviewDrafts: Draft[] = [
       null,
       2,
     ),
+    pageReview: {
+      reviewerId: "rev_marcus_vance",
+      status: "APPROVED",
+      reviewDate: new Date(Date.now() - 1 * 86400000).toISOString(),
+      reviewerNotes: "Verified tungsten carbide nozzle erosion tolerances and 180-240 bar header pressure differentials per AISE Report No. 9.",
+      verificationItems: [
+        "Spec Accuracy: Verified 180-240 bar descaler pressure envelope against OEM manual.",
+        "Standards Referenced: Cross-referenced with AISE Technical Report No. 9 and ASTM A6.",
+        "Operating Tolerances: Confirmed 15 bar delta-P manifold trip threshold.",
+        "AEO Schema Validity: Validated HowTo & TechArticle structured JSON-LD graphs.",
+      ],
+      reviewer: {
+        id: "rev_marcus_vance",
+        name: "Dr. Marcus Vance, PE",
+        jobTitle: "Lead Thermal & Mechanical Applications Engineer",
+        credentials: "PE, ASHRAE Fellow, MS Mechanical Engineering",
+        yearsOfExperience: 18,
+        linkedInUrl: "https://www.linkedin.com/in/marcus-vance-pe-industrial",
+        photoUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80",
+        bio: "Specializing in high-temperature fluid machinery diagnostics and industrial standards compliance.",
+      },
+    },
   },
   {
     id: "fr-draft-003",
@@ -604,6 +649,58 @@ function ForgeFlowWorkspace() {
   } | null>(null);
   const [geminiPanelOpen, setGeminiPanelOpen] = useState(false);
   const [geminiActiveTarget, setGeminiActiveTarget] = useState<"qa" | "taxonomy">("qa");
+
+  // Expert Review & Technical Sign-Off State
+  const [reviewers, setReviewers] = useState<ExpertReviewer[]>([
+    {
+      id: "rev_marcus_vance",
+      name: "Dr. Marcus Vance, PE",
+      jobTitle: "Lead Thermal & Mechanical Applications Engineer",
+      credentials: "PE, ASHRAE Fellow, MS Mechanical Engineering",
+      yearsOfExperience: 18,
+      linkedInUrl: "https://www.linkedin.com/in/marcus-vance-pe-industrial",
+      photoUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80",
+      bio: "18+ years specializing in commercial HVAC rooftop unit failure mode diagnostics, ASHRAE 90.1/189.1 compliance, and industrial refrigeration compressor reliability.",
+    },
+    {
+      id: "rev_elena_rostova",
+      name: "Elena Rostova",
+      jobTitle: "Principal Industrial Systems & Reliability Lead",
+      credentials: "Six Sigma Black Belt, IATF 16949 Lead Auditor",
+      yearsOfExperience: 14,
+      linkedInUrl: "https://www.linkedin.com/in/elena-rostova-industrial-qa",
+      photoUrl: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=200&auto=format&fit=crop&q=80",
+      bio: "14 years conducting root-cause failure analysis for automotive stamping presses, sanitary rotary pumps, and polymer extrusion machinery under ISO 9001 and 3-A standards.",
+    },
+    {
+      id: "rev_david_chen",
+      name: "David Chen, CMRP",
+      jobTitle: "Senior Fluid Power & Hydraulics Specialist",
+      credentials: "CMRP, CFPS (Fluid Power Specialist)",
+      yearsOfExperience: 12,
+      linkedInUrl: "https://www.linkedin.com/in/david-chen-fluid-power",
+      photoUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&auto=format&fit=crop&q=80",
+      bio: "Certified fluid power specialist focusing on high-pressure hydraulic piston pump cavitation, ISO 4406 cleanliness standards, and industrial automation safety protocols.",
+    },
+  ]);
+  const [showReviewerModal, setShowReviewerModal] = useState(false);
+  const [showSignOffModal, setShowSignOffModal] = useState(false);
+  const [signOffDecision, setSignOffDecision] = useState<"approve" | "changes_requested">("approve");
+  const [signOffReviewerId, setSignOffReviewerId] = useState("");
+  const [signOffNotes, setSignOffNotes] = useState("");
+  const [signOffChecklist, setSignOffChecklist] = useState({
+    specAccuracy: true,
+    standardsRef: true,
+    tolerances: true,
+    schemaValid: true,
+  });
+  const [newReviewerName, setNewReviewerName] = useState("");
+  const [newReviewerJobTitle, setNewReviewerJobTitle] = useState("");
+  const [newReviewerCredentials, setNewReviewerCredentials] = useState("");
+  const [newReviewerExp, setNewReviewerExp] = useState(10);
+  const [newReviewerLinkedIn, setNewReviewerLinkedIn] = useState("");
+  const [newReviewerBio, setNewReviewerBio] = useState("");
+  const [isReviewBusy, setIsReviewBusy] = useState(false);
 
   // Email Verification & Team Collaboration State
   const [resendingVerification, setResendingVerification] = useState(false);
@@ -1306,6 +1403,16 @@ function ForgeFlowWorkspace() {
   async function updateDraftStage(action: "approve" | "request_changes" | "reject" | "publish") {
     if (reviewDrafts.length === 0 || draftActionBusy) return;
     setActionMessage("");
+
+    // Strict Expert Review Publishing Gate
+    if (action === "publish") {
+      const isApproved = selectedDraft.pageReview?.status === "APPROVED" || selectedDraft.stage === "Approved";
+      if (!isApproved) {
+        setActionMessage("⚠️ Publishing Gate: Draft cannot be published until an application engineer reviews and approves the technical content.");
+        return;
+      }
+    }
+
     setDraftActionBusy(true);
     try {
       const response = await fetch("/api/drafts", {
@@ -1343,6 +1450,123 @@ function ForgeFlowWorkspace() {
       setActionMessage(error instanceof Error ? error.message : "Update failed.");
     } finally {
       setDraftActionBusy(false);
+    }
+  }
+
+  async function handleAssignReviewer(draftId: string | number, reviewerId: string) {
+    if (!draftId || !reviewerId) return;
+    setIsReviewBusy(true);
+    setActionMessage("");
+    try {
+      const res = await fetch(`/api/drafts/${encodeURIComponent(String(draftId))}/assign-reviewer`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reviewerId }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to assign reviewer.");
+      setActionMessage(data.message || "Reviewer assigned successfully.");
+      setReviewDrafts((prev) =>
+        prev.map((d) => (d.id === draftId ? { ...d, pageReview: data.review } : d))
+      );
+    } catch (err) {
+      setActionMessage(err instanceof Error ? err.message : "Assign failed.");
+    } finally {
+      setIsReviewBusy(false);
+    }
+  }
+
+  async function handleSubmitExpertReview(draftId: string | number) {
+    if (!draftId) return;
+    setIsReviewBusy(true);
+    setActionMessage("");
+    try {
+      const activeChecklistItems = [
+        signOffChecklist.specAccuracy ? "Spec Accuracy: Verified operating limits & tolerances against OEM manual." : null,
+        signOffChecklist.standardsRef ? "Standards Referenced: Cross-referenced with active regulatory codes (ISO/ASME/ASHRAE/3-A)." : null,
+        signOffChecklist.tolerances ? "Operating Tolerances: Confirmed pressure, thermal differential, and fatigue thresholds." : null,
+        signOffChecklist.schemaValid ? "AEO Schema Validity: Validated multi-entity JSON-LD graphs with reviewedBy Person entity." : null,
+      ].filter(Boolean) as string[];
+
+      const res = await fetch(`/api/drafts/${encodeURIComponent(String(draftId))}/expert-review`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          decision: signOffDecision,
+          reviewerId: signOffReviewerId || selectedDraft.pageReview?.reviewerId || reviewers[0]?.id,
+          reviewerNotes: signOffNotes,
+          verificationItems: activeChecklistItems,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to submit review.");
+      setActionMessage(data.message || "Review saved.");
+      setReviewDrafts((prev) =>
+        prev.map((d) =>
+          d.id === draftId
+            ? {
+                ...d,
+                stage: signOffDecision === "approve" ? "Approved" : "Changes requested",
+                pageReview: data.review,
+              }
+            : d,
+        ),
+      );
+      setShowSignOffModal(false);
+      setSignOffNotes("");
+    } catch (err) {
+      setActionMessage(err instanceof Error ? err.message : "Review submission failed.");
+    } finally {
+      setIsReviewBusy(false);
+    }
+  }
+
+  async function handleCreateReviewer(e: React.FormEvent) {
+    e.preventDefault();
+    if (!newReviewerName.trim() || !newReviewerJobTitle.trim()) return;
+    setIsReviewBusy(true);
+    try {
+      const res = await fetch("/api/reviewers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: newReviewerName,
+          jobTitle: newReviewerJobTitle,
+          credentials: newReviewerCredentials || "PE, Mechanical Systems",
+          yearsOfExperience: newReviewerExp,
+          linkedInUrl: newReviewerLinkedIn || null,
+          bio: newReviewerBio || null,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to create reviewer.");
+      setReviewers((prev) => [...prev, data.reviewer]);
+      setNewReviewerName("");
+      setNewReviewerJobTitle("");
+      setNewReviewerCredentials("");
+      setNewReviewerLinkedIn("");
+      setNewReviewerBio("");
+      setActionMessage(`Added ${data.reviewer.name} to engineering reviewer directory.`);
+    } catch (err) {
+      setActionMessage(err instanceof Error ? err.message : "Failed to create reviewer.");
+    } finally {
+      setIsReviewBusy(false);
+    }
+  }
+
+  async function handleDeleteReviewer(id: string) {
+    if (!id) return;
+    setIsReviewBusy(true);
+    try {
+      const res = await fetch(`/api/reviewers/${encodeURIComponent(id)}`, { method: "DELETE" });
+      if (res.ok) {
+        setReviewers((prev) => prev.filter((r) => r.id !== id));
+        setActionMessage("Reviewer removed.");
+      }
+    } catch {
+      setActionMessage("Delete failed.");
+    } finally {
+      setIsReviewBusy(false);
     }
   }
 
@@ -2632,10 +2856,149 @@ function ForgeFlowWorkspace() {
                 </button>
 
                 <button
-                  onClick={() => updateDraftStage("publish")}
-                  className="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold shadow-sm"
+                  type="button"
+                  onClick={() => setShowSignOffModal(true)}
+                  className="px-4 py-2 rounded-xl bg-sky-700 hover:bg-sky-600 text-white text-xs font-bold shadow-sm flex items-center gap-1.5 cursor-pointer"
                 >
-                  Chief Engineer Sign-Off
+                  <span>✍️</span>
+                  <span>Engineering Sign-Off</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => updateDraftStage("publish")}
+                  className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow-sm flex items-center gap-1.5 cursor-pointer"
+                >
+                  <span>🚀</span>
+                  <span>Publish to CMS</span>
+                </button>
+              </div>
+            </div>
+
+            {/* EXPERT REVIEW WARNING BANNER (Enforces Requirement 6) */}
+            {(!selectedDraft.pageReview || selectedDraft.pageReview.status !== "APPROVED") && (
+              <div className="p-4 rounded-xl border border-amber-300 bg-amber-50/90 flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs shadow-xs animate-fade-in">
+                <div className="flex items-start gap-3">
+                  <span className="text-xl shrink-0 mt-0.5">⚠️</span>
+                  <div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-bold text-amber-900 uppercase font-mono tracking-wider">
+                        {selectedDraft.pageReview
+                          ? selectedDraft.pageReview.status === "CHANGES_REQUESTED"
+                            ? "Changes Requested by Reviewer"
+                            : "Review Pending Application Engineer"
+                          : "Not expert reviewed"}
+                      </span>
+                      <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-200/90 text-amber-950 border border-amber-300">
+                        PUBLISHING GATED
+                      </span>
+                    </div>
+                    <p className="text-amber-800 mt-1">
+                      {selectedDraft.pageReview?.status === "CHANGES_REQUESTED"
+                        ? `Application engineer requested redlines: "${selectedDraft.pageReview.reviewerNotes || "Tolerances require verification"}". Address annotations before approving.`
+                        : selectedDraft.pageReview?.status === "PENDING"
+                        ? `Assigned to ${selectedDraft.pageReview.reviewer?.name || "Application Engineer"}. Awaiting sign-off on operating envelopes and regulatory codes.`
+                        : "This technical page has not received engineering approval. Publishing to production CMS is blocked until a qualified application engineer reviews and signs off."}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 shrink-0 self-end md:self-auto">
+                  <button
+                    type="button"
+                    onClick={() => setShowSignOffModal(true)}
+                    className="px-3.5 py-2 rounded-xl bg-amber-700 hover:bg-amber-800 text-white font-bold text-xs shadow-xs flex items-center gap-1.5 cursor-pointer transition"
+                  >
+                    <span>🔍</span>
+                    <span>Review &amp; Sign Off Now</span>
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* EXPERT REVIEW & GOVERNANCE BAR */}
+            <div className="p-4 rounded-2xl border border-slate-200 bg-white shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+              <div className="flex items-center gap-3 flex-wrap">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-mono font-bold text-slate-500 uppercase">Review Status:</span>
+                  {selectedDraft.pageReview?.status === "APPROVED" ? (
+                    <span className="px-3 py-1 rounded-full text-xs font-mono font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1.5 shadow-2xs">
+                      <span>✓</span>
+                      <span>Approved: {selectedDraft.pageReview.reviewer?.name || "Certified Application Engineer"}</span>
+                    </span>
+                  ) : selectedDraft.pageReview?.status === "CHANGES_REQUESTED" ? (
+                    <span className="px-3 py-1 rounded-full text-xs font-mono font-bold bg-amber-100 text-amber-800 border border-amber-200 flex items-center gap-1.5 shadow-2xs">
+                      <span>⚠️</span>
+                      <span>Changes Requested</span>
+                    </span>
+                  ) : selectedDraft.pageReview?.status === "PENDING" ? (
+                    <span className="px-3 py-1 rounded-full text-xs font-mono font-bold bg-sky-100 text-sky-800 border border-sky-200 flex items-center gap-1.5 shadow-2xs">
+                      <span>⏳</span>
+                      <span>Pending: {selectedDraft.pageReview.reviewer?.name || "Engineer Assigned"}</span>
+                    </span>
+                  ) : (
+                    <span className="px-3 py-1 rounded-full text-xs font-mono font-bold bg-red-100 text-red-800 border border-red-200 flex items-center gap-1.5 shadow-2xs">
+                      <span>⛔</span>
+                      <span>Not expert reviewed</span>
+                    </span>
+                  )}
+                </div>
+
+                {selectedDraft.pageReview?.reviewer && (
+                  <div className="text-xs text-slate-600 flex items-center gap-2 border-l border-slate-200 pl-3">
+                    <span className="font-semibold text-slate-800">{selectedDraft.pageReview.reviewer.jobTitle}</span>
+                    <span className="text-slate-400">•</span>
+                    <span className="font-mono text-[11px] text-slate-500">{selectedDraft.pageReview.reviewer.credentials}</span>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2.5 flex-wrap">
+                {/* Assign Reviewer Dropdown */}
+                <div className="flex items-center gap-1.5">
+                  <label htmlFor="qa-assign-reviewer" className="text-xs text-slate-500 font-semibold font-mono uppercase">
+                    Assign:
+                  </label>
+                  <select
+                    id="qa-assign-reviewer"
+                    disabled={isReviewBusy}
+                    value={selectedDraft.pageReview?.reviewerId || ""}
+                    onChange={(e) => {
+                      if (e.target.value) {
+                        void handleAssignReviewer(selectedDraft.id, e.target.value);
+                      }
+                    }}
+                    className="px-3 py-1.5 rounded-xl border border-slate-300 bg-slate-50 text-xs text-slate-800 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 cursor-pointer"
+                  >
+                    <option value="">Choose Reviewer…</option>
+                    {reviewers.map((r) => (
+                      <option key={r.id} value={r.id}>
+                        {r.name} ({r.credentials})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Review & Sign-Off Button */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSignOffReviewerId(selectedDraft.pageReview?.reviewerId || reviewers[0]?.id || "");
+                    setShowSignOffModal(true);
+                  }}
+                  className="px-3.5 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold shadow-xs flex items-center gap-1.5 cursor-pointer transition"
+                >
+                  <span>✍️</span>
+                  <span>Sign-Off &amp; Redline</span>
+                </button>
+
+                {/* Reviewer Directory Button */}
+                <button
+                  type="button"
+                  onClick={() => setShowReviewerModal(true)}
+                  className="px-3.5 py-1.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-semibold shadow-2xs flex items-center gap-1.5 cursor-pointer transition"
+                >
+                  <span>👥</span>
+                  <span>Reviewers Directory</span>
                 </button>
               </div>
             </div>
@@ -3903,9 +4266,29 @@ function ForgeFlowWorkspace() {
                         </div>
                       </div>
                     </div>
-                    <span className="px-3 py-1 rounded text-xs font-mono font-bold bg-slate-200 text-slate-700">
-                      {d.stage === "Published" ? "LIVE ON DOMAIN" : "QUEUED FOR DRIP"}
-                    </span>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {d.pageReview?.status === "APPROVED" ? (
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                          ✓ Reviewed: {d.pageReview.reviewer?.name?.split(",")[0] || "Engineer"}
+                        </span>
+                      ) : d.pageReview?.status === "CHANGES_REQUESTED" ? (
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-100 text-amber-800 border border-amber-200">
+                          ⚠️ Changes Requested
+                        </span>
+                      ) : d.pageReview?.status === "PENDING" ? (
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-sky-100 text-sky-800 border border-sky-200">
+                          ⏳ Review Pending
+                        </span>
+                      ) : (
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-red-100 text-red-800 border border-red-200">
+                          ⛔ Not expert reviewed
+                        </span>
+                      )}
+
+                      <span className="px-3 py-1 rounded text-xs font-mono font-bold bg-slate-200 text-slate-700">
+                        {d.stage === "Published" ? "LIVE ON DOMAIN" : "QUEUED FOR DRIP"}
+                      </span>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -4901,6 +5284,401 @@ function ForgeFlowWorkspace() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Reviewer Directory & Management Modal */}
+      {showReviewerModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col animate-in fade-in zoom-in-95 duration-150 overflow-hidden">
+            <div className="p-5 border-b border-slate-200 flex items-start justify-between bg-slate-50">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-sky-600 text-white font-bold text-xs">
+                    👥
+                  </span>
+                  <h3 className="text-base font-bold text-slate-900">Application Engineering Reviewers</h3>
+                </div>
+                <p className="text-xs text-slate-500 mt-1">
+                  Directory of certified engineers and subject matter experts authorized to sign off on technical SEO/AEO pages.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowReviewerModal(false)}
+                className="text-slate-400 hover:text-slate-600 text-lg leading-none p-1 cursor-pointer"
+                aria-label="Close"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="p-6 overflow-y-auto space-y-6 flex-1">
+              {/* Existing Reviewers List */}
+              <div className="space-y-3">
+                <h4 className="text-xs font-mono font-bold uppercase text-slate-500 tracking-wider">
+                  Active Engineering Reviewers ({reviewers.length})
+                </h4>
+                <div className="space-y-3">
+                  {reviewers.map((rev) => (
+                    <div
+                      key={rev.id}
+                      className="p-4 rounded-xl border border-slate-200 bg-slate-50/70 flex flex-col sm:flex-row sm:items-start justify-between gap-4"
+                    >
+                      <div className="flex items-start gap-3">
+                        <img
+                          src={rev.photoUrl || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80"}
+                          alt={rev.name}
+                          className="w-12 h-12 rounded-full object-cover border border-slate-300 shrink-0"
+                        />
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="font-bold text-slate-900 text-sm">{rev.name}</span>
+                            <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-sky-100 text-sky-800 border border-sky-200">
+                              {rev.credentials}
+                            </span>
+                            <span className="text-xs text-slate-500 font-mono">({rev.yearsOfExperience} yrs exp)</span>
+                          </div>
+                          <p className="text-xs font-medium text-sky-700">{rev.jobTitle}</p>
+                          {rev.bio && <p className="text-xs text-slate-600 leading-relaxed mt-1">{rev.bio}</p>}
+                          {rev.linkedInUrl && (
+                            <a
+                              href={rev.linkedInUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-block text-xs text-sky-600 hover:text-sky-700 font-semibold mt-1"
+                            >
+                              LinkedIn Profile ↗
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        disabled={isReviewBusy || reviewers.length <= 1}
+                        onClick={() => void handleDeleteReviewer(rev.id)}
+                        className="px-2.5 py-1 rounded-lg text-xs font-semibold text-red-600 hover:bg-red-50 border border-transparent hover:border-red-200 transition shrink-0 self-end sm:self-start disabled:opacity-30 cursor-pointer"
+                        title={reviewers.length <= 1 ? "At least one reviewer required" : "Remove Reviewer"}
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Add New Reviewer Form */}
+              <div className="pt-4 border-t border-slate-200">
+                <h4 className="text-xs font-mono font-bold uppercase text-slate-700 tracking-wider mb-3">
+                  + Add Application Engineer / Reviewer
+                </h4>
+                <form onSubmit={handleCreateReviewer} className="space-y-3.5 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[11px] font-mono uppercase font-bold text-slate-600 mb-1">
+                        Full Name &amp; Title
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="Dr. Samantha Reyes, PE"
+                        value={newReviewerName}
+                        onChange={(e) => setNewReviewerName(e.target.value)}
+                        className="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white text-xs text-slate-900 focus:outline-hidden focus:ring-1 focus:ring-sky-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-mono uppercase font-bold text-slate-600 mb-1">
+                        Job Title
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="Lead Thermal Systems Engineer"
+                        value={newReviewerJobTitle}
+                        onChange={(e) => setNewReviewerJobTitle(e.target.value)}
+                        className="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white text-xs text-slate-900 focus:outline-hidden focus:ring-1 focus:ring-sky-500"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="sm:col-span-2">
+                      <label className="block text-[11px] font-mono uppercase font-bold text-slate-600 mb-1">
+                        Credentials &amp; Certifications
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="PE, ASME B31.3, MS Mechanical Engineering"
+                        value={newReviewerCredentials}
+                        onChange={(e) => setNewReviewerCredentials(e.target.value)}
+                        className="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white text-xs text-slate-900 focus:outline-hidden focus:ring-1 focus:ring-sky-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-mono uppercase font-bold text-slate-600 mb-1">
+                        Years Experience
+                      </label>
+                      <input
+                        type="number"
+                        min={1}
+                        max={60}
+                        value={newReviewerExp}
+                        onChange={(e) => setNewReviewerExp(Number(e.target.value))}
+                        className="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white text-xs text-slate-900 focus:outline-hidden focus:ring-1 focus:ring-sky-500"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-mono uppercase font-bold text-slate-600 mb-1">
+                      LinkedIn Profile URL (Optional - for schema sameAs)
+                    </label>
+                    <input
+                      type="url"
+                      placeholder="https://www.linkedin.com/in/samantha-reyes-pe"
+                      value={newReviewerLinkedIn}
+                      onChange={(e) => setNewReviewerLinkedIn(e.target.value)}
+                      className="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white text-xs text-slate-900 focus:outline-hidden focus:ring-1 focus:ring-sky-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-mono uppercase font-bold text-slate-600 mb-1">
+                      Engineering Bio / Focus Area
+                    </label>
+                    <textarea
+                      rows={2}
+                      placeholder="15+ years in high-temperature fluid machinery, heat exchanger failure diagnostics, and ASME piping compliance."
+                      value={newReviewerBio}
+                      onChange={(e) => setNewReviewerBio(e.target.value)}
+                      className="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white text-xs text-slate-900 focus:outline-hidden focus:ring-1 focus:ring-sky-500"
+                    />
+                  </div>
+
+                  <div className="flex justify-end pt-1">
+                    <button
+                      type="submit"
+                      disabled={isReviewBusy || !newReviewerName.trim() || !newReviewerJobTitle.trim()}
+                      className="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs shadow-xs disabled:opacity-50 cursor-pointer"
+                    >
+                      {isReviewBusy ? "Adding Reviewer…" : "+ Save Engineer to Directory"}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+
+            <div className="p-4 border-t border-slate-200 bg-slate-50 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setShowReviewerModal(false)}
+                className="px-4 py-2 rounded-xl border border-slate-300 bg-white text-xs font-semibold text-slate-700 hover:bg-slate-100 cursor-pointer"
+              >
+                Close Directory
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Technical Verification & Sign-Off Modal */}
+      {showSignOffModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-xl w-full max-h-[90vh] flex flex-col animate-in fade-in zoom-in-95 duration-150 overflow-hidden">
+            <div className="p-5 border-b border-slate-200 flex items-start justify-between bg-slate-50">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-sky-700 text-white font-bold text-xs">
+                    ✍️
+                  </span>
+                  <h3 className="text-base font-bold text-slate-900">Application Engineering Sign-Off</h3>
+                </div>
+                <p className="text-xs text-slate-500 mt-1">
+                  Human-in-the-loop technical verification. Approved pages are signed with Person schema and unblocked for publishing.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowSignOffModal(false)}
+                className="text-slate-400 hover:text-slate-600 text-lg leading-none p-1 cursor-pointer"
+                aria-label="Close"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="p-6 overflow-y-auto space-y-5 flex-1">
+              {/* Target Draft Information */}
+              <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-1">
+                <span className="font-mono text-[10px] uppercase font-bold text-slate-500 block">Page Under Review:</span>
+                <div className="font-bold text-slate-900 text-sm">{selectedDraft.title}</div>
+                <div className="text-slate-600 flex items-center gap-2 mt-1 font-mono text-[11px]">
+                  <span>Equipment: {selectedDraft.equipment || "Industrial Asset"}</span>
+                  <span>•</span>
+                  <span>Standard: {selectedDraft.standard || "Regulatory Code"}</span>
+                </div>
+              </div>
+
+              {/* Reviewer Selection */}
+              <div>
+                <label className="block text-[11px] font-mono uppercase font-bold text-slate-700 mb-1">
+                  Signing Application Engineer
+                </label>
+                <select
+                  value={signOffReviewerId || selectedDraft.pageReview?.reviewerId || reviewers[0]?.id || ""}
+                  onChange={(e) => setSignOffReviewerId(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white text-xs text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
+                >
+                  {reviewers.map((r) => (
+                    <option key={r.id} value={r.id}>
+                      {r.name} — {r.jobTitle} ({r.credentials})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Decision Radio */}
+              <div>
+                <label className="block text-[11px] font-mono uppercase font-bold text-slate-700 mb-2">
+                  Review Decision
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setSignOffDecision("approve")}
+                    className={`p-3 rounded-xl border text-left flex items-start gap-2.5 transition cursor-pointer ${
+                      signOffDecision === "approve"
+                        ? "border-emerald-500 bg-emerald-50/70 ring-2 ring-emerald-500/20"
+                        : "border-slate-200 bg-white hover:bg-slate-50"
+                    }`}
+                  >
+                    <span className="text-emerald-600 font-bold text-sm">✓</span>
+                    <div>
+                      <div className="font-bold text-xs text-slate-900">Approve &amp; Sign Off</div>
+                      <div className="text-[11px] text-slate-500 mt-0.5">Unblocks production publishing and attaches verified schema.</div>
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setSignOffDecision("changes_requested")}
+                    className={`p-3 rounded-xl border text-left flex items-start gap-2.5 transition cursor-pointer ${
+                      signOffDecision === "changes_requested"
+                        ? "border-amber-500 bg-amber-50/70 ring-2 ring-amber-500/20"
+                        : "border-slate-200 bg-white hover:bg-slate-50"
+                    }`}
+                  >
+                    <span className="text-amber-600 font-bold text-sm">⚠️</span>
+                    <div>
+                      <div className="font-bold text-xs text-slate-900">Request Revisions</div>
+                      <div className="text-[11px] text-slate-500 mt-0.5">Keeps publishing blocked and routes redlines to author.</div>
+                    </div>
+                  </button>
+                </div>
+              </div>
+
+              {/* 4-Gate Engineering Verification Checklist */}
+              <div className="space-y-2.5">
+                <label className="block text-[11px] font-mono uppercase font-bold text-slate-700">
+                  Engineering Verification Checklist (4-Gate Protocol)
+                </label>
+                <div className="space-y-2 text-xs bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                  <label className="flex items-start gap-2.5 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={signOffChecklist.specAccuracy}
+                      onChange={(e) => setSignOffChecklist((prev) => ({ ...prev, specAccuracy: e.target.checked }))}
+                      className="mt-0.5 rounded border-slate-300 text-sky-600 focus:ring-sky-500 cursor-pointer"
+                    />
+                    <span className="text-slate-800">
+                      <strong>Spec Accuracy:</strong> Verified operating limits, failure modes, and physical tolerances against engineering manual.
+                    </span>
+                  </label>
+
+                  <label className="flex items-start gap-2.5 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={signOffChecklist.standardsRef}
+                      onChange={(e) => setSignOffChecklist((prev) => ({ ...prev, standardsRef: e.target.checked }))}
+                      className="mt-0.5 rounded border-slate-300 text-sky-600 focus:ring-sky-500 cursor-pointer"
+                    />
+                    <span className="text-slate-800">
+                      <strong>Standards Referenced:</strong> Cross-referenced with active regulatory specifications (ISO, ASME, ASHRAE, 3-A).
+                    </span>
+                  </label>
+
+                  <label className="flex items-start gap-2.5 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={signOffChecklist.tolerances}
+                      onChange={(e) => setSignOffChecklist((prev) => ({ ...prev, tolerances: e.target.checked }))}
+                      className="mt-0.5 rounded border-slate-300 text-sky-600 focus:ring-sky-500 cursor-pointer"
+                    />
+                    <span className="text-slate-800">
+                      <strong>Operating Tolerances:</strong> Confirmed pressure, thermal differential, and mechanical fatigue thresholds.
+                    </span>
+                  </label>
+
+                  <label className="flex items-start gap-2.5 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={signOffChecklist.schemaValid}
+                      onChange={(e) => setSignOffChecklist((prev) => ({ ...prev, schemaValid: e.target.checked }))}
+                      className="mt-0.5 rounded border-slate-300 text-sky-600 focus:ring-sky-500 cursor-pointer"
+                    />
+                    <span className="text-slate-800">
+                      <strong>AEO Schema Validity:</strong> Validated structured multi-entity JSON-LD graphs with reviewedBy Person entity.
+                    </span>
+                  </label>
+                </div>
+              </div>
+
+              {/* Reviewer Notes / Verification statement */}
+              <div>
+                <label className="block text-[11px] font-mono uppercase font-bold text-slate-700 mb-1">
+                  {signOffDecision === "approve" ? "Reviewer Verification Statement" : "Requested Redlines & Revision Notes"}
+                </label>
+                <textarea
+                  rows={3}
+                  placeholder={
+                    signOffDecision === "approve"
+                      ? "e.g. Verified operating envelope, failure causation, and allowable thermal differentials per certified ASHRAE/ISO guidelines."
+                      : "e.g. Please update operating pressure from 150 bar to 180-240 bar per AISE Technical Report No. 9."
+                  }
+                  value={signOffNotes}
+                  onChange={(e) => setSignOffNotes(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-xs text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
+                />
+              </div>
+            </div>
+
+            <div className="p-4 border-t border-slate-200 bg-slate-50 flex justify-end gap-2.5">
+              <button
+                type="button"
+                onClick={() => setShowSignOffModal(false)}
+                className="px-4 py-2 rounded-xl border border-slate-300 bg-white text-xs font-semibold text-slate-700 hover:bg-slate-100 cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={isReviewBusy}
+                onClick={() => void handleSubmitExpertReview(selectedDraft.id)}
+                className={`px-5 py-2 rounded-xl text-white font-bold text-xs shadow-xs transition disabled:opacity-50 cursor-pointer ${
+                  signOffDecision === "approve"
+                    ? "bg-emerald-600 hover:bg-emerald-500"
+                    : "bg-amber-600 hover:bg-amber-500"
+                }`}
+              >
+                {isReviewBusy
+                  ? "Submitting Review…"
+                  : signOffDecision === "approve"
+                  ? "✓ Approve & Sign Off Page"
+                  : "⚠️ Submit Revision Request"}
+              </button>
+            </div>
           </div>
         </div>
       )}

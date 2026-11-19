@@ -19,6 +19,19 @@ export async function POST(
     });
     if (!draft) return errorResponse("Draft not found.", 404);
 
+    // Strict Expert Review Publishing Gate
+    const pageReview = await db.pageReview.findUnique({
+      where: { draftId: draft.id },
+      include: { reviewer: true },
+    });
+
+    if (!pageReview || pageReview.status !== "APPROVED") {
+      return errorResponse(
+        "Publishing Gate Enforced: Draft cannot be published until an application engineer reviews and approves the technical content.",
+        400,
+      );
+    }
+
     const body: unknown = await request.json().catch(() => null);
     const { targetCms, targetUrl, webhookUrl } = (body && typeof body === "object" ? body : {}) as Record<string, unknown>;
 

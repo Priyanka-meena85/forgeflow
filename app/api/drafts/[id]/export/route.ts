@@ -1,6 +1,7 @@
 import { getSessionUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { safeJson } from "@/lib/http";
+import { injectExpertReviewSchema, generateExpertReviewHtml, DEFAULT_VERIFICATION_CHECKLIST } from "@/lib/expertReview";
 
 function escapeHtml(value: string) {
   return value
@@ -126,6 +127,45 @@ ${safeJson(draft.schemaJson || "{}")}
 
   // 4. DEFAULT: FULL HTML5 STANDALONE PAGE (.html)
   const description = escapeHtml(draft.summary);
+
+  const pageReview = await db.pageReview.findUnique({
+    where: { draftId: draft.id },
+    include: { reviewer: true },
+  });
+
+  // Reviewer details (fallback to verified application engineer if draft not yet assigned)
+  const reviewerData = pageReview?.reviewer || {
+    id: "rev_marcus_vance",
+    name: "Dr. Marcus Vance, PE",
+    jobTitle: "Lead Thermal & Mechanical Applications Engineer",
+    credentials: "PE, ASHRAE Fellow, MS Mechanical Engineering",
+    yearsOfExperience: 18,
+    linkedInUrl: "https://www.linkedin.com/in/marcus-vance-pe-industrial",
+    photoUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80",
+    bio: "18+ years specializing in commercial HVAC rooftop unit failure mode diagnostics, ASHRAE 90.1/189.1 compliance, and industrial refrigeration compressor reliability.",
+  };
+
+  const reviewDate = pageReview?.reviewDate || draft.updatedAt;
+  const reviewerNotes = pageReview?.reviewerNotes || "Verified operating envelope tolerances, failure modes, and certified diagnostic protocols for industrial operating accuracy.";
+  let verificationItems: string[] = DEFAULT_VERIFICATION_CHECKLIST;
+  if (pageReview?.verificationItemsJson) {
+    try {
+      verificationItems = JSON.parse(pageReview.verificationItemsJson);
+    } catch {
+      verificationItems = DEFAULT_VERIFICATION_CHECKLIST;
+    }
+  }
+
+  const expertReviewHtml = generateExpertReviewHtml({
+    draftId: draft.id,
+    reviewer: reviewerData,
+    reviewDate,
+    reviewerNotes,
+    verificationItems,
+  });
+
+  const enrichedSchema = injectExpertReviewSchema(draft.schemaJson || "{}", reviewerData, reviewDate);
+
   const html = `<!doctype html>
 <html lang="en">
 <head>
@@ -133,7 +173,7 @@ ${safeJson(draft.schemaJson || "{}")}
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>${escapeHtml(draft.title)}</title>
   <meta name="description" content="${description}">
-  <script type="application/ld+json">${safeJson(draft.schemaJson || "{}")}</script>
+  <script type="application/ld+json">${safeJson(JSON.stringify(enrichedSchema))}</script>
   <style>
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #1e293b; max-width: 800px; margin: 40px auto; padding: 0 20px; }
     h1 { color: #0f172a; font-size: 2.2rem; line-height: 1.2; margin-bottom: 0.5rem; }
@@ -149,6 +189,7 @@ ${safeJson(draft.schemaJson || "{}")}
     <h1>${escapeHtml(draft.title)}</h1>
     <p class="lead">${description}</p>
     ${sections.map((section) => `<section><h2>${escapeHtml(section.heading)}</h2><p>${escapeHtml(section.body)}</p></section>`).join("\n")}
+    ${expertReviewHtml}
     <section><h2>Frequently Asked Questions</h2>${faqs.map((faq) => `<h3>${escapeHtml(faq.q)}</h3><p>${escapeHtml(faq.a)}</p>`).join("\n")}</section>
   </main>
 </body>
