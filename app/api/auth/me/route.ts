@@ -18,6 +18,9 @@ export async function GET() {
           plan: user.organization?.plan ?? "free",
           industry: user.organization?.industry ?? null,
           website: user.organization?.website ?? null,
+          monthlyPagesLimit: user.organization?.monthlyPagesLimit ?? 5,
+          monthlyPagesUsed: user.organization?.monthlyPagesUsed ?? 0,
+          subscriptionStatus: user.organization?.subscriptionStatus ?? "trialing",
         },
       },
     });

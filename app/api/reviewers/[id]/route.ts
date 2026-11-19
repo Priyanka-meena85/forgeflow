@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
-import { getSessionUser } from "@/lib/auth";
+import { getSessionUser, isOrgAdmin } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { errorResponse } from "@/lib/http";
+import { logAuditEvent } from "@/lib/audit";
 
 export async function PUT(
   request: Request,
@@ -10,6 +11,9 @@ export async function PUT(
   try {
     const user = await getSessionUser();
     if (!user) return errorResponse("Sign in to manage reviewers.", 401);
+    if (!isOrgAdmin(user.role)) {
+      return errorResponse("Access denied. Only organization administrators can modify reviewers.", 403);
+    }
 
     const { id } = await params;
     const body: unknown = await request.json().catch(() => null);
@@ -57,6 +61,9 @@ export async function DELETE(
   try {
     const user = await getSessionUser();
     if (!user) return errorResponse("Sign in to manage reviewers.", 401);
+    if (!isOrgAdmin(user.role)) {
+      return errorResponse("Access denied. Only organization administrators can delete reviewers.", 403);
+    }
 
     const { id } = await params;
     const existing = await db.expertReviewer.findUnique({ where: { id } });

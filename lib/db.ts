@@ -26,6 +26,10 @@ export interface FallbackOrg {
   industry: string | null;
   keywords: string | null;
   plan: string;
+  subscriptionStatus?: string | null;
+  monthlyPagesLimit?: number;
+  monthlyPagesUsed?: number;
+  billingCycleStart?: Date;
   stripeCustomerId: string | null;
   stripeSubscriptionId: string | null;
   complianceRulesJson: string | null;
@@ -144,12 +148,31 @@ export interface FallbackAuditLog {
   id: string;
   organizationId: string;
   userId: string | null;
+  userRole?: string | null;
   action: string;
   resourceType: string;
   resourceId: string | null;
   metadataJson: string | null;
+  diffJson?: string | null;
+  detailsJson?: string | null;
   ipAddress: string | null;
   createdAt: Date;
+}
+
+export interface FallbackGenerationJob {
+  id: string;
+  organizationId: string;
+  userId: string | null;
+  status: string;
+  progress: number;
+  currentStep: string;
+  totalItems: number;
+  completedItems: number;
+  inputDataJson: string;
+  resultDraftIdsJson: string | null;
+  error: string | null;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface FallbackExpertReviewer {
@@ -192,6 +215,7 @@ export interface FallbackStore {
   auditLogs: Map<string, FallbackAuditLog>;
   expertReviewers: Map<string, FallbackExpertReviewer>;
   pageReviews: Map<string, FallbackPageReview>;
+  generationJobs: Map<string, FallbackGenerationJob>;
 }
 
 const globalStore = globalThis as unknown as {
@@ -212,6 +236,7 @@ const store: FallbackStore = globalStore.__forgeflow_store__ ?? {
   auditLogs: new Map(),
   expertReviewers: new Map(),
   pageReviews: new Map(),
+  generationJobs: new Map(),
 };
 globalStore.__forgeflow_store__ = store;
 
@@ -292,7 +317,7 @@ try {
 const fallbackOrg = {
   async create(args: { data: Partial<FallbackOrg> & { name: string } }): Promise<FallbackOrg> {
     const org: FallbackOrg = {
-      id: generateId("org_"),
+      id: args.data.id || generateId("org_"),
       name: args.data.name,
       slug: args.data.slug ?? null,
       website: args.data.website ?? null,
@@ -300,6 +325,10 @@ const fallbackOrg = {
       industry: args.data.industry ?? null,
       keywords: args.data.keywords ?? null,
       plan: args.data.plan ?? "free",
+      subscriptionStatus: args.data.subscriptionStatus ?? "trialing",
+      monthlyPagesLimit: args.data.monthlyPagesLimit ?? 5,
+      monthlyPagesUsed: args.data.monthlyPagesUsed ?? 0,
+      billingCycleStart: args.data.billingCycleStart ?? new Date(),
       stripeCustomerId: args.data.stripeCustomerId ?? null,
       stripeSubscriptionId: args.data.stripeSubscriptionId ?? null,
       complianceRulesJson: args.data.complianceRulesJson ?? null,
@@ -686,28 +715,89 @@ const fallbackContentRevision = {
 };
 
 const fallbackAuditLog = {
-  async create(args: { data: { organizationId: string; userId?: string | null; action: string; resourceType: string; resourceId?: string | null; metadataJson?: string | null; ipAddress?: string | null } }): Promise<FallbackAuditLog> {
+  async create(args: { data: { organizationId: string; userId?: string | null; userRole?: string | null; action: string; resourceType: string; resourceId?: string | null; metadataJson?: string | null; diffJson?: string | null; detailsJson?: string | null; ipAddress?: string | null } }): Promise<FallbackAuditLog> {
     const log: FallbackAuditLog = {
       id: generateId("log_"),
       organizationId: args.data.organizationId,
       userId: args.data.userId ?? null,
+      userRole: args.data.userRole ?? null,
       action: args.data.action,
       resourceType: args.data.resourceType,
       resourceId: args.data.resourceId ?? null,
       metadataJson: args.data.metadataJson ?? null,
+      diffJson: args.data.diffJson ?? null,
+      detailsJson: args.data.detailsJson ?? null,
       ipAddress: args.data.ipAddress ?? null,
       createdAt: new Date(),
     };
     store.auditLogs.set(log.id, log);
     return log;
   },
-  async findMany(args: { where: { organizationId: string }; take?: number }): Promise<FallbackAuditLog[]> {
+  async findMany(args?: { where?: { organizationId?: string; resourceType?: string; resourceId?: string }; take?: number }): Promise<FallbackAuditLog[]> {
     const res: FallbackAuditLog[] = [];
     for (const l of store.auditLogs.values()) {
-      if (l.organizationId === args.where.organizationId) res.push(l);
+      if (args?.where?.organizationId && l.organizationId !== args.where.organizationId) continue;
+      if (args?.where?.resourceType && l.resourceType !== args.where.resourceType) continue;
+      if (args?.where?.resourceId && l.resourceId !== args.where.resourceId) continue;
+      res.push(l);
     }
     res.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-    return args.take ? res.slice(0, args.take) : res;
+    return args?.take ? res.slice(0, args.take) : res;
+  },
+};
+
+const fallbackGenerationJob = {
+  async create(args: { data: { organizationId: string; userId?: string | null; inputDataJson: string; totalItems?: number; status?: string; currentStep?: string } }): Promise<FallbackGenerationJob> {
+    const job: FallbackGenerationJob = {
+      id: generateId("job_"),
+      organizationId: args.data.organizationId,
+      userId: args.data.userId ?? null,
+      status: args.data.status ?? "PENDING",
+      progress: 0,
+      currentStep: args.data.currentStep ?? "Queued in industrial generation pipeline",
+      totalItems: args.data.totalItems ?? 1,
+      completedItems: 0,
+      inputDataJson: args.data.inputDataJson,
+      resultDraftIdsJson: null,
+      error: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    store.generationJobs.set(job.id, job);
+    return job;
+  },
+  async findUnique(args: { where: { id: string } }): Promise<FallbackGenerationJob | null> {
+    return store.generationJobs.get(args.where.id) || null;
+  },
+  async findFirst(args: { where: { id?: string; organizationId?: string } }): Promise<FallbackGenerationJob | null> {
+    for (const j of store.generationJobs.values()) {
+      if (args.where.id && j.id !== args.where.id) continue;
+      if (args.where.organizationId && j.organizationId !== args.where.organizationId) continue;
+      return j;
+    }
+    return null;
+  },
+  async findMany(args?: { where?: { organizationId?: string; status?: string }; take?: number }): Promise<FallbackGenerationJob[]> {
+    const res: FallbackGenerationJob[] = [];
+    for (const j of store.generationJobs.values()) {
+      if (args?.where?.organizationId && j.organizationId !== args.where.organizationId) continue;
+      if (args?.where?.status && j.status !== args.where.status) continue;
+      res.push(j);
+    }
+    res.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    return args?.take ? res.slice(0, args.take) : res;
+  },
+  async update(args: { where: { id: string }; data: Partial<FallbackGenerationJob> }): Promise<FallbackGenerationJob> {
+    const existing = store.generationJobs.get(args.where.id);
+    if (!existing) throw new Error(`GenerationJob ${args.where.id} not found.`);
+    const updated: FallbackGenerationJob = { ...existing, ...args.data, updatedAt: new Date() };
+    store.generationJobs.set(updated.id, updated);
+    return updated;
+  },
+  async delete(args: { where: { id: string } }): Promise<FallbackGenerationJob | null> {
+    const existing = store.generationJobs.get(args.where.id) || null;
+    if (existing) store.generationJobs.delete(args.where.id);
+    return existing;
   },
 };
 
@@ -869,6 +959,13 @@ function getActivePrisma(): PrismaClient | null {
 function handlePostgresError(e: unknown, op: string) {
   const err = e as Error & { code?: string };
   if (err.code === "P2002") throw err;
+
+  // Strict Production Enforcement: Never silently use ephemeral in-memory store in production when ENFORCE_MANAGED_DATABASE is enabled
+  if (process.env.NODE_ENV === "production" && process.env.ENFORCE_MANAGED_DATABASE === "true") {
+    console.error(`[DB Proxy CRITICAL] Production database cluster unreachable for ${op}: ${err.message}`);
+    throw new Error(`Production database failure: Unable to execute ${op}. Managed PostgreSQL connection required.`);
+  }
+
   postgresAvailable = false;
   lastPostgresCheck = Date.now();
   console.warn(`[DB Proxy] Database unavailable for ${op} (${err.code ?? err.message ?? "connection error"}). Active in-memory fallback store will be used.`);
@@ -918,6 +1015,7 @@ export interface FallbackDbInterface {
   auditLog: typeof fallbackAuditLog;
   expertReviewer: typeof fallbackExpertReviewer;
   pageReview: typeof fallbackPageReview;
+  generationJob: typeof fallbackGenerationJob;
   $transaction<T>(fn: (tx: FallbackDbInterface) => Promise<T>): Promise<T>;
   $transaction<T>(array: Array<Promise<T>>): Promise<T[]>;
 }
@@ -934,6 +1032,7 @@ export const fallbackDb: FallbackDbInterface = {
   auditLog: createModelProxy("auditLog", fallbackAuditLog),
   expertReviewer: createModelProxy("expertReviewer", fallbackExpertReviewer),
   pageReview: createModelProxy("pageReview", fallbackPageReview),
+  generationJob: createModelProxy("generationJob", fallbackGenerationJob),
 
   async $transaction<T>(
     fnOrArray: ((tx: FallbackDbInterface) => Promise<T>) | Array<Promise<T>>,

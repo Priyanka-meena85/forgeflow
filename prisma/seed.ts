@@ -29,7 +29,11 @@ async function main() {
   // 1. Create or Find Initial Organization
   const org = await prisma.organization.upsert({
     where: { id: "seed-org-industrial" },
-    update: {},
+    update: {
+      plan: "fleet",
+      monthlyPagesLimit: 100,
+      subscriptionStatus: "active",
+    },
     create: {
       id: "seed-org-industrial",
       name: "AccuDrive Reliability Systems",
@@ -38,11 +42,14 @@ async function main() {
       website: "https://accudrive.example.com",
       productDescription: "Industrial fault detection, vibration monitoring, and predictive reliability engineering suite for automotive tier-1 manufacturing lines.",
       keywords: "servo stamping press galling, weld inspection defects, IATF 16949 compliance, predictive maintenance",
-      plan: "growth",
+      plan: "fleet",
+      monthlyPagesLimit: 100,
+      monthlyPagesUsed: 1,
+      subscriptionStatus: "active",
     },
   });
 
-  // 2. Create Initial Owner User
+  // 2. Create Initial Owner, Reviewer, and Author Users
   const passwordHash = await hashPassword("ForgeFlow2026!");
   const user = await prisma.user.upsert({
     where: { email: "admin@accudrive.io" },
@@ -56,6 +63,36 @@ async function main() {
       name: "Alex Vance (Plant Reliability Lead)",
       passwordHash,
       role: UserRole.OWNER,
+      organizationId: org.id,
+      emailVerified: new Date(),
+    },
+  });
+
+  // Certified Application Engineer User (Reviewer Role)
+  await prisma.user.upsert({
+    where: { email: "marcus.vance@accudrive.io" },
+    update: { role: UserRole.REVIEWER },
+    create: {
+      id: "seed-usr-reviewer",
+      email: "marcus.vance@accudrive.io",
+      name: "Dr. Marcus Vance, PE",
+      passwordHash,
+      role: UserRole.REVIEWER,
+      organizationId: org.id,
+      emailVerified: new Date(),
+    },
+  });
+
+  // Content Strategist User (Author Role)
+  await prisma.user.upsert({
+    where: { email: "content.lead@accudrive.io" },
+    update: { role: UserRole.AUTHOR },
+    create: {
+      id: "seed-usr-author",
+      email: "content.lead@accudrive.io",
+      name: "Sarah Jenkins (Technical Writer)",
+      passwordHash,
+      role: UserRole.AUTHOR,
       organizationId: org.id,
       emailVerified: new Date(),
     },

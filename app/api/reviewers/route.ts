@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
-import { getSessionUser } from "@/lib/auth";
+import { getSessionUser, isOrgAdmin } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { errorResponse } from "@/lib/http";
+import { logAuditEvent } from "@/lib/audit";
 
 export async function GET() {
   try {
@@ -28,6 +29,9 @@ export async function POST(request: Request) {
   try {
     const user = await getSessionUser();
     if (!user) return errorResponse("Sign in to manage reviewers.", 401);
+    if (!isOrgAdmin(user.role)) {
+      return errorResponse("Access denied. Only organization administrators can add certified reviewers.", 403);
+    }
 
     const body: unknown = await request.json().catch(() => null);
     if (!body || typeof body !== "object") return errorResponse("Invalid reviewer payload.", 400);
@@ -65,15 +69,15 @@ export async function POST(request: Request) {
       },
     });
 
-    await db.auditLog.create({
-      data: {
-        organizationId: user.organizationId,
-        userId: user.id,
-        action: "EXPERT_REVIEWER_CREATED",
-        resourceType: "ExpertReviewer",
-        resourceId: reviewer.id,
-        metadataJson: JSON.stringify({ name: reviewer.name, jobTitle: reviewer.jobTitle }),
-      },
+    await logAuditEvent({
+      organizationId: user.organizationId,
+      userId: user.id,
+      userRole: user.role,
+      action: "REVIEWER_CREATED",
+      resourceType: "REVIEWER",
+      resourceId: reviewer.id,
+      metadata: { name: reviewer.name, jobTitle: reviewer.jobTitle, credentials: reviewer.credentials },
+      details: `Added new certified application reviewer: ${reviewer.name} (${reviewer.credentials}).`,
     });
 
     return NextResponse.json({ reviewer, success: true }, { status: 201 });

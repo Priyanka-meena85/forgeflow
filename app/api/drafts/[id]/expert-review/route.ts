@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import { DraftStatus, ReviewStatus } from "@prisma/client";
-import { getSessionUser } from "@/lib/auth";
+import { getSessionUser, canApproveSpec } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { errorResponse } from "@/lib/http";
 import { injectExpertReviewSchema, DEFAULT_VERIFICATION_CHECKLIST } from "@/lib/expertReview";
 import { serializeDraft } from "@/lib/drafts";
+import { logAuditEvent } from "@/lib/audit";
 
 export async function POST(
   request: Request,
@@ -13,6 +14,13 @@ export async function POST(
   try {
     const user = await getSessionUser();
     if (!user) return errorResponse("Sign in to submit expert reviews.", 401);
+
+    if (!canApproveSpec(user)) {
+      return errorResponse(
+        "Access denied. Only certified application engineers (REVIEWER) or organization administrators can submit review decisions.",
+        403,
+      );
+    }
 
     const { id } = await params;
     const draft = await db.draft.findFirst({
@@ -169,6 +177,27 @@ export async function POST(
         bio: activeReviewer.bio,
       },
     };
+
+    // Immutably record audit log for compliance
+    await logAuditEvent({
+      organizationId: user.organizationId,
+      userId: user.id,
+      userRole: user.role,
+      action: decision === "approve" ? "SPEC_APPROVED" : "SPEC_CHANGES_REQUESTED",
+      resourceType: "DRAFT",
+      resourceId: draft.id,
+      metadata: {
+        reviewerId: activeReviewer.id,
+        reviewerName: activeReviewer.name,
+        reviewerCredentials: activeReviewer.credentials,
+        decision,
+        notes: reviewerNotes ?? "",
+        verifiedChecklistCount: itemsToSave.length,
+      },
+      details: decision === "approve" 
+        ? `Application Engineer ${activeReviewer.name} approved tolerances and standards.`
+        : `Changes requested by ${activeReviewer.name}: ${reviewerNotes || "Spec revisions needed"}.`,
+    });
 
     return NextResponse.json({
       success: true,

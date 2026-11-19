@@ -10,7 +10,16 @@ export type AuthUser = {
   name?: string | null;
   role?: string;
   emailVerified?: string | null;
-  organization: { id: string; name: string; plan: string; industry?: string | null; website?: string | null };
+  organization: {
+    id: string;
+    name: string;
+    plan: string;
+    industry?: string | null;
+    website?: string | null;
+    monthlyPagesLimit?: number;
+    monthlyPagesUsed?: number;
+    subscriptionStatus?: string | null;
+  };
 };
 
 interface LandingPageProps {

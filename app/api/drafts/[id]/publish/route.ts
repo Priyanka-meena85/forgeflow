@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import { DraftStatus } from "@prisma/client";
-import { getSessionUser } from "@/lib/auth";
+import { getSessionUser, canPublishDraft } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { serializeDraft } from "@/lib/drafts";
 import { errorResponse } from "@/lib/http";
+import { logAuditEvent } from "@/lib/audit";
 
 export async function POST(
   request: Request,
@@ -12,6 +13,13 @@ export async function POST(
   try {
     const user = await getSessionUser();
     if (!user) return errorResponse("Sign in to publish drafts.", 401);
+
+    if (!canPublishDraft(user)) {
+      return errorResponse(
+        "Access denied. Only organization administrators (OWNER/ADMIN) can authorize publishing to CMS.",
+        403,
+      );
+    }
 
     const { id } = await params;
     const draft = await db.draft.findFirst({
@@ -81,15 +89,15 @@ export async function POST(
       },
     });
 
-    await db.auditLog.create({
-      data: {
-        organizationId: user.organizationId,
-        userId: user.id,
-        action: "DRAFT_PUBLISHED",
-        resourceType: "Draft",
-        resourceId: draft.id,
-        metadataJson: JSON.stringify({ publishedUrl, targetCms, webhookStatus }),
-      },
+    await logAuditEvent({
+      organizationId: user.organizationId,
+      userId: user.id,
+      userRole: user.role,
+      action: "DRAFT_PUBLISHED",
+      resourceType: "DRAFT",
+      resourceId: draft.id,
+      metadata: { publishedUrl, targetCms, webhookStatus, reviewerName: pageReview.reviewer.name },
+      details: `Draft published to ${publishedUrl} with verified PE sign-off.`,
     });
 
     return NextResponse.json({

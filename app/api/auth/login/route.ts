@@ -2,9 +2,16 @@ import { NextResponse } from "next/server";
 import { createSession, verifyPassword } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { errorResponse } from "@/lib/http";
+import { checkRateLimit, getClientIp, RATE_LIMITS } from "@/lib/rateLimit";
 
 export async function POST(request: Request) {
   try {
+    const ip = getClientIp(request);
+    const rateCheck = await checkRateLimit(`login:${ip}`, RATE_LIMITS.AUTH.limit, RATE_LIMITS.AUTH.windowSeconds);
+    if (!rateCheck.success) {
+      return errorResponse("Too many login attempts. Please wait a minute before trying again.", 429);
+    }
+
     const body: unknown = await request.json().catch(() => null);
     if (!body || typeof body !== "object") return errorResponse("Invalid request body.", 400);
     const { email, password } = body as Record<string, unknown>;

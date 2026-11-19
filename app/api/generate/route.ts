@@ -5,6 +5,9 @@ import { db } from "@/lib/db";
 import { serializeDraft } from "@/lib/drafts";
 import { errorResponse } from "@/lib/http";
 import { generateIndustrialDraftPages, type GeneratedPage } from "@/lib/gemini";
+import { checkRateLimit, RATE_LIMITS } from "@/lib/rateLimit";
+import { checkQuota, recordPageUsage } from "@/lib/billing";
+import { logAuditEvent } from "@/lib/audit";
 
 function isGeneratedPage(value: unknown): value is GeneratedPage {
   if (!value || typeof value !== "object") return false;
@@ -40,6 +43,19 @@ export async function POST(request: Request) {
   const user = await getSessionUser();
   if (!user) return errorResponse("Sign in to generate content.", 401);
 
+  // Rate limit generation per workspace
+  const rateCheck = await checkRateLimit(
+    `gen_org:${user.organizationId}`,
+    RATE_LIMITS.AI_GENERATION.limit,
+    RATE_LIMITS.AI_GENERATION.windowSeconds,
+  );
+  if (!rateCheck.success) {
+    return errorResponse(
+      "Generation rate limit exceeded for your workspace. Please wait before generating again.",
+      429,
+    );
+  }
+
   const hasGemini = Boolean(process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY);
   const hasOpenAI = Boolean(process.env.OPENAI_API_KEY);
 
@@ -64,6 +80,12 @@ export async function POST(request: Request) {
     keywords.length > 1000
   ) {
     return errorResponse("Provide 1–5 topics and valid product, industry, and keyword details.", 400);
+  }
+
+  // Enforce monthly quota limit
+  const quota = await checkQuota(user.organizationId, topics.length);
+  if (!quota.allowed) {
+    return errorResponse(quota.error || "Monthly page generation quota exceeded.", 402);
   }
 
   let pages: GeneratedPage[] = [];
@@ -168,6 +190,23 @@ export async function POST(request: Request) {
       });
     }),
   );
+
+  // Increment usage count in organization
+  await recordPageUsage(user.organizationId, storedDrafts.length);
+
+  // Record audit logs
+  for (const d of storedDrafts) {
+    await logAuditEvent({
+      organizationId: user.organizationId,
+      userId: user.id,
+      userRole: user.role,
+      action: "DRAFT_CREATED",
+      resourceType: "DRAFT",
+      resourceId: d.id,
+      metadata: { title: d.title, keyword: d.keyword },
+      details: `Generated industrial draft "${d.title}".`,
+    });
+  }
 
   return NextResponse.json({ drafts: storedDrafts.map((d) => serializeDraft(d)) }, { status: 201 });
 }

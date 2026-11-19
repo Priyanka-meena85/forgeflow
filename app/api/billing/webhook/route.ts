@@ -1,6 +1,8 @@
 import Stripe from "stripe";
 import { db } from "@/lib/db";
 import { errorResponse } from "@/lib/http";
+import { getPlanConfig } from "@/lib/billing";
+import { logAuditEvent } from "@/lib/audit";
 
 export async function POST(request: Request) {
   const secretKey = process.env.STRIPE_SECRET_KEY;
@@ -24,15 +26,29 @@ export async function POST(request: Request) {
   if (event.type === "checkout.session.completed") {
     const session = event.data.object;
     const organizationId = session.metadata?.organizationId ?? session.client_reference_id;
-    const plan = session.metadata?.plan;
-    if (organizationId && (plan === "starter" || plan === "growth")) {
+    const plan = session.metadata?.plan || "pilot";
+    const config = getPlanConfig(plan);
+
+    if (organizationId) {
       await db.organization.update({
         where: { id: organizationId },
         data: {
           plan,
+          subscriptionStatus: "active",
+          monthlyPagesLimit: config.monthlyLimit,
+          monthlyPagesUsed: 0,
+          billingCycleStart: new Date(),
           stripeCustomerId: typeof session.customer === "string" ? session.customer : null,
           stripeSubscriptionId: typeof session.subscription === "string" ? session.subscription : null,
         },
+      });
+
+      await logAuditEvent({
+        organizationId,
+        action: "SUBSCRIPTION_UPDATED",
+        resourceType: "ORGANIZATION",
+        resourceId: organizationId,
+        details: `Upgraded to ${config.name} (${config.monthlyLimit} pages/mo).`,
       });
     }
   } else if (
@@ -42,14 +58,40 @@ export async function POST(request: Request) {
     const subscription = event.data.object;
     const organizationId = subscription.metadata.organizationId;
     if (organizationId) {
-      const isActive = event.type !== "customer.subscription.deleted" && subscription.status === "active";
+      const isDeleted = event.type === "customer.subscription.deleted";
+      const isActive = !isDeleted && subscription.status === "active";
+      const targetPlan = isActive ? (subscription.metadata.plan ?? "pilot") : "free";
+      const config = getPlanConfig(targetPlan);
+
       await db.organization.update({
         where: { id: organizationId },
         data: {
-          plan: isActive ? subscription.metadata.plan ?? "starter" : "free",
+          plan: targetPlan,
+          subscriptionStatus: isDeleted ? "canceled" : subscription.status,
+          monthlyPagesLimit: config.monthlyLimit,
           stripeSubscriptionId: isActive ? subscription.id : null,
         },
       });
+
+      await logAuditEvent({
+        organizationId,
+        action: "SUBSCRIPTION_UPDATED",
+        resourceType: "ORGANIZATION",
+        resourceId: organizationId,
+        details: `Subscription status updated: ${subscription.status} (Plan: ${config.name}).`,
+      });
+    }
+  } else if (event.type === "invoice.payment_failed") {
+    const invoice = event.data.object;
+    const customerId = typeof invoice.customer === "string" ? invoice.customer : null;
+    if (customerId) {
+      const org = await db.organization.findUnique({ where: { stripeCustomerId: customerId } });
+      if (org) {
+        await db.organization.update({
+          where: { id: org.id },
+          data: { subscriptionStatus: "past_due" },
+        });
+      }
     }
   }
 

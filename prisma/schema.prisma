@@ -11,6 +11,7 @@ enum UserRole {
   OWNER
   ADMIN
   REVIEWER
+  AUTHOR
   MEMBER
 }
 
@@ -45,6 +46,10 @@ model Organization {
   industry              String?
   keywords              String?
   plan                  String        @default("free")
+  subscriptionStatus    String?       @default("trialing")
+  monthlyPagesLimit     Int           @default(5)
+  monthlyPagesUsed      Int           @default(0)
+  billingCycleStart     DateTime      @default(now())
   stripeCustomerId      String?       @unique
   stripeSubscriptionId  String?       @unique
   complianceRulesJson   String?
@@ -57,6 +62,7 @@ model Organization {
   invitations           Invitation[]
   auditLogs             AuditLog[]
   reviewers             ExpertReviewer[]
+  generationJobs        GenerationJob[]
 
   @@index([createdAt])
 }
@@ -79,6 +85,7 @@ model User {
   draftRevisions        ContentRevision[]     @relation("RevisionAuthor")
   auditLogs             AuditLog[]
   createdDrafts         Draft[]               @relation("DraftAuthor")
+  generationJobs        GenerationJob[]
   createdAt             DateTime              @default(now())
   updatedAt             DateTime              @updatedAt
 
@@ -210,14 +217,18 @@ model AuditLog {
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   userId         String?
   user           User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userRole       String?
   action         String
   resourceType   String
   resourceId     String?
   metadataJson   String?
+  diffJson       String?
+  detailsJson    String?
   ipAddress      String?
   createdAt      DateTime     @default(now())
 
   @@index([organizationId, createdAt])
+  @@index([resourceType, resourceId])
 }
 
 model ExpertReviewer {
@@ -253,5 +264,26 @@ model PageReview {
 
   @@index([draftId])
   @@index([reviewerId])
+  @@index([status])
+}
+
+model GenerationJob {
+  id                 String        @id @default(cuid())
+  organizationId     String
+  organization       Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  userId             String?
+  user               User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  status             String        @default("PENDING") // PENDING, PROCESSING, COMPLETED, FAILED
+  progress           Int           @default(0) // 0 to 100
+  currentStep        String        @default("Queued in industrial generation pipeline")
+  totalItems         Int           @default(1)
+  completedItems     Int           @default(0)
+  inputDataJson      String        // serialized topics & parameters
+  resultDraftIdsJson String?       // serialized array of generated draft IDs
+  error              String?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  @@index([organizationId, createdAt])
   @@index([status])
 }

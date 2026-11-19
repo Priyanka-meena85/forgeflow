@@ -70,3 +70,38 @@ export async function deleteCurrentSession() {
   }
   cookieStore.delete(sessionCookie);
 }
+
+// -----------------------------------------------------------------------------
+// Industrial Role-Based Access Control (RBAC) System
+// -----------------------------------------------------------------------------
+
+export function isOrgAdmin(role?: string | null): boolean {
+  if (!role) return false;
+  return role === "OWNER" || role === "ADMIN";
+}
+
+export function isEngineerReviewer(role?: string | null): boolean {
+  if (!role) return false;
+  return role === "REVIEWER" || role === "OWNER" || role === "ADMIN";
+}
+
+export function isAuthor(role?: string | null): boolean {
+  if (!role) return false;
+  return role === "AUTHOR" || role === "MEMBER" || role === "REVIEWER" || role === "OWNER" || role === "ADMIN";
+}
+
+export function canApproveSpec(user?: { role: string } | null): boolean {
+  return isEngineerReviewer(user?.role);
+}
+
+export function canPublishDraft(user?: { role: string } | null): boolean {
+  return isOrgAdmin(user?.role);
+}
+
+export function canManageBilling(user?: { role: string } | null): boolean {
+  return isOrgAdmin(user?.role);
+}
+
+export function canManageTeam(user?: { role: string } | null): boolean {
+  return isOrgAdmin(user?.role);
+}

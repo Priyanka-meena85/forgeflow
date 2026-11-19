@@ -772,9 +772,65 @@ function ForgeFlowWorkspace() {
     }
   }, []);
 
+  const [auditLogs, setAuditLogs] = useState<Array<{
+    id: string;
+    action: string;
+    resourceType: string;
+    resourceId?: string | null;
+    userRole?: string | null;
+    details?: { summary?: string } | null;
+    createdAt: string;
+  }>>([]);
+
+  const [billingUsage, setBillingUsage] = useState<{
+    plan: string;
+    planName: string;
+    monthlyLimit: number;
+    monthlyUsed: number;
+    remaining: number;
+    percentUsed: number;
+    subscriptionStatus: string;
+    hasStripeCustomer: boolean;
+  } | null>(null);
+
+  const refreshAuditLogs = useCallback(async () => {
+    try {
+      const res = await fetch("/api/audit-logs?limit=30");
+      if (res.ok) {
+        const data = await res.json();
+        if (data.auditLogs) setAuditLogs(data.auditLogs);
+      }
+    } catch {}
+  }, []);
+
+  const refreshBillingUsage = useCallback(async () => {
+    try {
+      const res = await fetch("/api/billing/usage");
+      if (res.ok) {
+        const data = await res.json();
+        if (data.billing) setBillingUsage(data.billing);
+      }
+    } catch {}
+  }, []);
+
+  const openStripePortal = async () => {
+    try {
+      const res = await fetch("/api/billing/portal", { method: "POST" });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        setActionMessage(data.error || "No active Stripe customer found for this workspace. Please subscribe to a tier first.");
+      }
+    } catch {
+      setActionMessage("Could not open Stripe customer portal.");
+    }
+  };
+
   useEffect(() => {
     let ignore = false;
     if (activeTab === "Workspace & Rules") {
+      void refreshAuditLogs();
       fetch("/api/workspace/members")
         .then((res) => (res.ok ? res.json() : null))
         .then((data) => {
@@ -783,11 +839,13 @@ function ForgeFlowWorkspace() {
           if (data.invitations) setWorkspaceInvites(data.invitations);
         })
         .catch((e) => console.warn("Failed to load workspace team members:", e));
+    } else if (activeTab === "Billing & Quotas") {
+      void refreshBillingUsage();
     }
     return () => {
       ignore = true;
     };
-  }, [activeTab]);
+  }, [activeTab, refreshAuditLogs, refreshBillingUsage]);
 
   const handleFileRead = (file: File) => {
     setUploadedFileName(`${file.name} (${Math.round(file.size / 1024)} KB)`);
@@ -4364,6 +4422,39 @@ function ForgeFlowWorkspace() {
               </span>
             </div>
 
+            {/* Live Monthly Quota & Usage Banner */}
+            {billingUsage && (
+              <div className="p-5 rounded-2xl border border-sky-200 bg-sky-50/60 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="space-y-1.5">
+                  <div className="flex items-center gap-2">
+                    <span className="px-2.5 py-0.5 rounded-full font-mono text-2xs font-extrabold uppercase bg-sky-600 text-white">
+                      {billingUsage.planName}
+                    </span>
+                    <span className="text-xs font-bold text-slate-800">
+                      {billingUsage.monthlyUsed} of {billingUsage.monthlyLimit} pages generated this cycle
+                    </span>
+                  </div>
+                  <div className="w-64 h-2 rounded-full bg-slate-200 overflow-hidden">
+                    <div
+                      className="h-full bg-sky-600 transition-all duration-500 rounded-full"
+                      style={{ width: `${billingUsage.percentUsed}%` }}
+                    />
+                  </div>
+                  <p className="text-[11px] text-slate-500">
+                    {billingUsage.remaining} pages remaining. Resets automatically on your next billing cycle.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={openStripePortal}
+                  className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition shadow-xs cursor-pointer flex items-center gap-2 shrink-0"
+                >
+                  <span>💳</span>
+                  <span>Manage Billing & Invoices (Stripe Portal)</span>
+                </button>
+              </div>
+            )}
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="p-5 rounded-2xl border border-slate-200 bg-white shadow-xs card-interactive">
                 <div className="text-xs font-mono text-slate-500 uppercase">Long-Tail Impressions</div>
@@ -4785,6 +4876,62 @@ function ForgeFlowWorkspace() {
               )}
             </div>
 
+            {/* Engineering Compliance & Immutable Audit Trail */}
+            <div className="p-6 rounded-2xl border border-slate-200 bg-white shadow-xs space-y-4 mt-6">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900 uppercase font-mono flex items-center gap-2">
+                    <span>📜</span>
+                    <span>Engineering Audit Trail & Compliance Log</span>
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    Immutable records of all engineer sign-offs, operating tolerance approvals, and CMS publishes.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={refreshAuditLogs}
+                  className="px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 text-xs font-bold text-slate-700 transition cursor-pointer flex items-center gap-1.5"
+                >
+                  <span>🔄</span>
+                  <span>Refresh</span>
+                </button>
+              </div>
+
+              {auditLogs.length === 0 ? (
+                <div className="py-6 text-center text-xs text-slate-400 font-mono">
+                  No audit events recorded yet. Engineering approvals and publishes will appear here.
+                </div>
+              ) : (
+                <div className="divide-y divide-slate-100 max-h-72 overflow-y-auto font-mono text-2xs">
+                  {auditLogs.map((log) => (
+                    <div key={log.id} className="py-2.5 flex items-center justify-between gap-4">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <span className={`px-2 py-0.5 rounded font-bold uppercase text-[10px] shrink-0 ${
+                          log.action.includes("APPROVED")
+                            ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                            : log.action.includes("PUBLISHED")
+                            ? "bg-sky-50 text-sky-800 border border-sky-200"
+                            : log.action.includes("CHANGES")
+                            ? "bg-amber-50 text-amber-800 border border-amber-200"
+                            : "bg-slate-100 text-slate-700"
+                        }`}>
+                          {log.action}
+                        </span>
+                        <span className="text-slate-800 truncate font-semibold">
+                          {log.details?.summary || `${log.resourceType}: ${log.resourceId || "System"}`}
+                        </span>
+                      </div>
+                      <div className="text-slate-400 shrink-0 text-right">
+                        <span>{new Date(log.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+                        {log.userRole && <span className="ml-2 font-bold text-slate-600">[{log.userRole}]</span>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
             {/* Custom Industrial Compliance & Fluff Sanitizer Rule Builder */}
             <div className="p-6 rounded-2xl border border-slate-200 bg-white shadow-xs space-y-4 mt-6">
               <div className="flex items-center justify-between pb-3 border-b border-slate-100">
@@ -5014,6 +5161,39 @@ function ForgeFlowWorkspace() {
                 Transparent industrial pricing undercutting horizontal tools while providing pre-built taxonomies and schema.
               </p>
             </div>
+
+            {/* Live Monthly Quota & Usage Banner */}
+            {billingUsage && (
+              <div className="p-5 rounded-2xl border border-sky-200 bg-sky-50/60 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="space-y-1.5">
+                  <div className="flex items-center gap-2">
+                    <span className="px-2.5 py-0.5 rounded-full font-mono text-2xs font-extrabold uppercase bg-sky-600 text-white">
+                      {billingUsage.planName}
+                    </span>
+                    <span className="text-xs font-bold text-slate-800">
+                      {billingUsage.monthlyUsed} of {billingUsage.monthlyLimit} pages generated this cycle
+                    </span>
+                  </div>
+                  <div className="w-64 h-2 rounded-full bg-slate-200 overflow-hidden">
+                    <div
+                      className="h-full bg-sky-600 transition-all duration-500 rounded-full"
+                      style={{ width: `${billingUsage.percentUsed}%` }}
+                    />
+                  </div>
+                  <p className="text-[11px] text-slate-500">
+                    {billingUsage.remaining} pages remaining. Resets automatically on your next billing cycle.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={openStripePortal}
+                  className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition shadow-xs cursor-pointer flex items-center gap-2 shrink-0"
+                >
+                  <span>💳</span>
+                  <span>Manage Billing & Invoices (Stripe Portal)</span>
+                </button>
+              </div>
+            )}
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Starter */}

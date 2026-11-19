@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { sendVerificationEmail } from "@/lib/email";
 import { generateSecureToken } from "@/lib/tokens";
 import { errorResponse } from "@/lib/http";
+import { checkRateLimit, getClientIp, RATE_LIMITS } from "@/lib/rateLimit";
 
 type RegisterTx = {
   organization: {
@@ -32,6 +33,12 @@ type RegisterTx = {
 
 export async function POST(request: Request) {
   try {
+    const ip = getClientIp(request);
+    const rateCheck = await checkRateLimit(`register:${ip}`, 5, 60);
+    if (!rateCheck.success) {
+      return errorResponse("Too many registration requests. Please wait a minute before trying again.", 429);
+    }
+
     const body: unknown = await request.json().catch(() => null);
     if (!body || typeof body !== "object") return errorResponse("Invalid request body.", 400);
 
