@@ -8,6 +8,10 @@ import { InteractiveDiagnosticStudio } from "@/components/InteractiveDiagnosticS
 import { AeoCitationMonitor, type AeoQuery } from "@/components/AeoCitationMonitor";
 import { CmsPublishingManager, type CmsIntegration } from "@/components/CmsPublishingManager";
 import { EnterpriseInvoicingManager, type InvoiceItem } from "@/components/EnterpriseInvoicingManager";
+import { TeamManager } from "@/components/TeamManager";
+import { ExecutiveRoiModal } from "@/components/ExecutiveRoiModal";
+import { RfqLeadManager } from "@/components/RfqLeadManager";
+import { SlackReviewBotConfig } from "@/components/SlackReviewBotConfig";
 
 type TabKey =
   | "Mission Control"
@@ -849,6 +853,7 @@ function ForgeFlowWorkspace() {
   } | null>(null);
   const [aeoQueries, setAeoQueries] = useState<AeoQuery[]>([]);
   const [invoiceRequests, setInvoiceRequests] = useState<InvoiceItem[]>([]);
+  const [showExecutiveRoiModal, setShowExecutiveRoiModal] = useState(false);
 
   const refreshOemDocuments = useCallback(async () => {
     try {
@@ -4154,7 +4159,14 @@ function ForgeFlowWorkspace() {
                   Inspect and customize rich schema entities (FAQPage, HowTo, TechnicalSpecification) baked into every page.
                 </p>
               </div>
-              <div className="flex gap-2">
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowExecutiveRoiModal(true)}
+                  className="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-xs flex items-center gap-1.5 transition cursor-pointer"
+                >
+                  <span>📊 Executive ROI Digest</span>
+                </button>
                 {(["FAQPage", "HowTo", "TechSpec"] as const).map((type) => (
                   <button
                     key={type}
@@ -4529,10 +4541,19 @@ function ForgeFlowWorkspace() {
                   Track real impression spikes on high-intent engineering queries and monitor Perplexity/AI citations.
                 </p>
               </div>
-              <span className="text-xs font-mono px-3 py-1 rounded bg-sky-50 text-sky-800 border border-sky-200 font-bold flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-sky-600 radar-ping"></span>
-                <span>GSC + Perplexity Live Sync</span>
-              </span>
+              <div className="flex items-center gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => setShowExecutiveRoiModal(true)}
+                  className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-xs flex items-center gap-1.5 transition cursor-pointer"
+                >
+                  <span>📊 Export Executive ROI Digest (PDF)</span>
+                </button>
+                <span className="text-xs font-mono px-3 py-1 rounded bg-sky-50 text-sky-800 border border-sky-200 font-bold flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-sky-600 radar-ping"></span>
+                  <span>GSC + Perplexity Live Sync</span>
+                </span>
+              </div>
             </div>
 
             {/* Live Monthly Quota & Usage Banner */}
@@ -4737,6 +4758,9 @@ function ForgeFlowWorkspace() {
                 </div>
               </div>
             </div>
+
+            {/* Inbound RFQ & Lead Capture Attribution Engine */}
+            <RfqLeadManager onActionMessage={setActionMessage} />
           </div>
         )}
 
@@ -4845,149 +4869,11 @@ function ForgeFlowWorkspace() {
               </div>
             </div>
 
-            {/* Team Members & Access Control Card (RBAC & Invitations) */}
-            <div className="p-6 rounded-2xl border border-slate-200 bg-white shadow-xs space-y-5">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-sm font-bold text-slate-900 uppercase font-mono">Team Collaboration &amp; Workspace Invites</h3>
-                    <span className="px-2 py-0.5 rounded text-xs font-mono font-bold bg-sky-50 text-sky-800 border border-sky-200">
-                      RBAC Enforced
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-500 mt-1">
-                    Manage team roles, invite application engineers or plant managers, and track email verification status.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setInviteModalOpen(true);
-                    setInviteError("");
-                  }}
-                  className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-xs font-bold text-white shadow-xs transition flex items-center gap-1.5 self-start sm:self-auto cursor-pointer"
-                >
-                  <span>+</span>
-                  <span>Invite Team Member</span>
-                </button>
-              </div>
+            {/* Team Members & Application Engineers (RBAC & Invitations) */}
+            <TeamManager currentUserRole={user?.role as any} onActionMessage={setActionMessage} />
 
-              {/* Members List */}
-              <div className="space-y-3">
-                <div className="text-xs font-mono font-bold text-slate-500 uppercase tracking-wider">
-                  Active Workspace Members ({workspaceMembers.length || 1})
-                </div>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs">
-                    <thead>
-                      <tr className="border-b border-slate-200 text-slate-500 font-mono">
-                        <th className="pb-2 font-semibold">User</th>
-                        <th className="pb-2 font-semibold">Role</th>
-                        <th className="pb-2 font-semibold">Email Verification</th>
-                        <th className="pb-2 font-semibold">Joined Date</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                      {workspaceMembers.length > 0 ? (
-                        workspaceMembers.map((member) => (
-                          <tr key={member.id} className="py-2.5">
-                            <td className="py-2.5">
-                              <div className="font-bold text-slate-900">
-                                {member.name || member.email.split("@")[0]}
-                                {member.isCurrentUser && (
-                                  <span className="ml-2 text-2xs font-mono bg-sky-100 text-sky-800 px-1.5 py-0.2 rounded font-semibold">
-                                    You
-                                  </span>
-                                )}
-                              </div>
-                              <div className="text-2xs text-slate-500 font-mono">{member.email}</div>
-                            </td>
-                            <td className="py-2.5">
-                              <span className={`px-2 py-0.5 rounded font-mono font-bold text-2xs ${member.role === "OWNER"
-                                ? "bg-purple-50 text-purple-800 border border-purple-200"
-                                : member.role === "ADMIN"
-                                  ? "bg-sky-50 text-sky-800 border border-sky-200"
-                                  : member.role === "REVIEWER"
-                                    ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
-                                    : "bg-slate-100 text-slate-700"
-                                }`}>
-                                {member.role}
-                              </span>
-                            </td>
-                            <td className="py-2.5">
-                              {member.emailVerified ? (
-                                <span className="inline-flex items-center gap-1 text-emerald-700 font-medium">
-                                  <span>✓</span>
-                                  <span>Verified</span>
-                                </span>
-                              ) : (
-                                <span className="inline-flex items-center gap-1 text-amber-700 font-medium">
-                                  <span>!</span>
-                                  <span>Pending</span>
-                                </span>
-                              )}
-                            </td>
-                            <td className="py-2.5 font-mono text-slate-500">
-                              {new Date(member.createdAt).toLocaleDateString()}
-                            </td>
-                          </tr>
-                        ))
-                      ) : (
-                        <tr className="py-2.5">
-                          <td className="py-2.5 font-bold text-slate-900">
-                            {user?.name || user?.email.split("@")[0] || "Admin"}
-                            <span className="ml-2 text-2xs font-mono bg-sky-100 text-sky-800 px-1.5 py-0.2 rounded font-semibold">
-                              You
-                            </span>
-                          </td>
-                          <td className="py-2.5">
-                            <span className="px-2 py-0.5 rounded font-mono font-bold text-2xs bg-purple-50 text-purple-800 border border-purple-200">
-                              {user?.role || "OWNER"}
-                            </span>
-                          </td>
-                          <td className="py-2.5">
-                            {user?.emailVerified ? (
-                              <span className="text-emerald-700 font-medium">✓ Verified</span>
-                            ) : (
-                              <span className="text-amber-700 font-medium">! Pending verification</span>
-                            )}
-                          </td>
-                          <td className="py-2.5 font-mono text-slate-500">Active</td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              {/* Pending Invitations */}
-              {workspaceInvites.length > 0 && (
-                <div className="pt-4 border-t border-slate-100 space-y-3">
-                  <div className="text-xs font-mono font-bold text-slate-500 uppercase tracking-wider">
-                    Pending Invitations ({workspaceInvites.length})
-                  </div>
-                  <div className="divide-y divide-slate-100 border border-slate-200 rounded-xl overflow-hidden">
-                    {workspaceInvites.map((invite) => (
-                      <div key={invite.id} className="p-3 bg-slate-50/50 flex items-center justify-between text-xs">
-                        <div>
-                          <div className="font-mono font-bold text-slate-900">{invite.email}</div>
-                          <div className="text-2xs text-slate-500 font-mono mt-0.5">
-                            Role: <strong className="text-slate-700">{invite.role}</strong> · Expires: {new Date(invite.expiresAt).toLocaleDateString()}
-                          </div>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => handleRevokeInvite(invite.id)}
-                          className="px-2.5 py-1 rounded-lg border border-red-200 text-red-700 hover:bg-red-50 text-2xs font-bold transition cursor-pointer"
-                        >
-                          Revoke
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
+            {/* Slack & Microsoft Teams Review Bot Card */}
+            <SlackReviewBotConfig onActionMessage={setActionMessage} />
 
             {/* Engineering Compliance & Immutable Audit Trail */}
             <div className="p-6 rounded-2xl border border-slate-200 bg-white shadow-xs space-y-4 mt-6">
@@ -5982,6 +5868,12 @@ function ForgeFlowWorkspace() {
           </div>
         </div>
       )}
+
+      {/* Executive Monthly ROI Digest Modal */}
+      <ExecutiveRoiModal
+        isOpen={showExecutiveRoiModal}
+        onClose={() => setShowExecutiveRoiModal(false)}
+      />
     </div>
   );
 }

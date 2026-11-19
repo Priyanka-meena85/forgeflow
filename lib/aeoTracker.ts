@@ -124,3 +124,10 @@ export async function runOrganizationAeoScan(organizationId: string): Promise<Ae
     topQueries: results,
   };
 }
+
+/**
+ * Alias for fetching the AEO summary for executive reporting
+ */
+export async function getOrganizationAeoSummary(organizationId: string): Promise<AeoTrackerSummary> {
+  return runOrganizationAeoScan(organizationId);
+}

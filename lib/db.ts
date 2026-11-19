@@ -816,6 +816,16 @@ const fallbackUser = {
     }
     return match;
   },
+  async findFirst(args: { where: { id?: string; email?: string; organizationId?: string }; include?: { organization?: boolean } }): Promise<FallbackUser | null> {
+    if (args.where.email) {
+      for (const u of store.users.values()) {
+        if (u.email.toLowerCase() === args.where.email.toLowerCase() && (!args.where.organizationId || u.organizationId === args.where.organizationId)) {
+          return args.include?.organization ? { ...u, organization: store.organizations.get(u.organizationId) || null } : u;
+        }
+      }
+    }
+    return this.findUnique({ where: { id: args.where.id, email: args.where.email }, include: args.include });
+  },
   async findMany(args?: { where?: { organizationId?: string } }): Promise<FallbackUser[]> {
     const orgId = args?.where?.organizationId;
     const users: FallbackUser[] = [];

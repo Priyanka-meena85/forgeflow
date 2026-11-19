@@ -162,7 +162,45 @@ export function OemRagManager({ documents, onRefresh, onActionMessage }: OemRagM
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">OEM Tolerances &amp; Technical Text</label>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-xs font-bold text-slate-700">OEM Tolerances &amp; Technical Text</label>
+                  <span className="text-[10px] text-purple-700 font-mono font-semibold">Or load pre-verified specimen:</span>
+                </div>
+                <div className="flex flex-wrap gap-1.5 mb-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setTitle("Trane IntelliPak Commercial Rooftop Unit IOM");
+                      setUploadedFileName("trane_intellipak_iom.pdf");
+                      setRawText("Trane IntelliPak Packaged Rooftop Unit IOM Manual. Operating suction pressure envelope: 118 to 132 psig for R-410A scroll circuits. Saturated suction temperature: 40°F to 45°F. Design operating superheat envelope: 10°F to 14°F. Thermal discharge cutoff: 220°F. Deflection tolerance: 0.05 mm/m. Complies with ASHRAE 90.1 energy efficiency and AHRI 340/360 rating standards.");
+                    }}
+                    className="px-2 py-0.5 rounded-lg bg-purple-50 text-purple-700 border border-purple-200 text-[10px] font-mono hover:bg-purple-100 cursor-pointer"
+                  >
+                    + Trane HVAC (ASHRAE)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setTitle("Bosch Rexroth A10VSO High-Pressure Pump Specs");
+                      setUploadedFileName("rexroth_a10vso_specs.pdf");
+                      setRawText("Bosch Rexroth A10VSO Variable Displacement Axial Piston Pump. Nominal working pressure: 280 to 350 bar. Peak intermittent limit: 400 bar. Inlet suction envelope: 0.8 to 2.5 bar absolute. Hydraulic fluid cleanliness code: ISO 4406 18/16/13. Fluid viscosity range: 16 to 36 mm²/s at operating temperatures between 50°C and 80°C. Slipper clearance tolerance: 0.015 mm.");
+                    }}
+                    className="px-2 py-0.5 rounded-lg bg-purple-50 text-purple-700 border border-purple-200 text-[10px] font-mono hover:bg-purple-100 cursor-pointer"
+                  >
+                    + Rexroth Pump (ISO 4406)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setTitle("Schuler 1200T Servo Stamping Press Calibration Manual");
+                      setUploadedFileName("schuler_1200t_manual.pdf");
+                      setRawText("Schuler 1200-Ton Servo Stamping Press Operating Protocol. Die parallel alignment deflection tolerance: 0.03 mm across 3000 mm bed. Counterbalance operating air pressure: 4.5 to 6.2 bar. Slide gib clearance: 0.04 to 0.06 mm. ISO 10816 vibration severity threshold: < 2.8 mm/s RMS. IATF 16949 automotive tooling quality standard.");
+                    }}
+                    className="px-2 py-0.5 rounded-lg bg-purple-50 text-purple-700 border border-purple-200 text-[10px] font-mono hover:bg-purple-100 cursor-pointer"
+                  >
+                    + Schuler Press (IATF)
+                  </button>
+                </div>
                 <textarea
                   rows={4}
                   value={rawText}
