@@ -289,6 +289,118 @@ for (const reviewer of defaultSeedReviewers) {
   }
 }
 
+// Default Seed Organization & Users for immediate out-of-the-box readiness
+const defaultSeedOrg: FallbackOrg = {
+  id: "seed-org-industrial",
+  name: "AccuDrive Reliability Systems",
+  slug: "accudrive",
+  industry: "Automotive & Industrial Automation",
+  website: "https://accudrive.example.com",
+  productDescription: "Industrial fault detection, vibration monitoring, and predictive reliability engineering suite for automotive tier-1 manufacturing lines.",
+  keywords: "servo stamping press galling, weld inspection defects, IATF 16949 compliance, predictive maintenance",
+  plan: "fleet",
+  subscriptionStatus: "active",
+  monthlyPagesLimit: 100,
+  monthlyPagesUsed: 1,
+  billingCycleStart: new Date(),
+  stripeCustomerId: "cus_sample_industrial_001",
+  stripeSubscriptionId: "sub_sample_fleet_001",
+  complianceRulesJson: null,
+  brandVoiceJson: null,
+  createdAt: new Date(),
+  updatedAt: new Date(),
+};
+
+if (!store.organizations.has(defaultSeedOrg.id)) {
+  store.organizations.set(defaultSeedOrg.id, defaultSeedOrg);
+}
+
+const defaultSeedUsers: FallbackUser[] = [
+  {
+    id: "seed-usr-admin",
+    email: "admin@accudrive.io",
+    name: "Alex Vance (Plant Reliability Lead)",
+    passwordHash: "987ccf6c861ae89642d82ee853b102c5:d18e4a2208da6fe77c40d4030df18a542c787dac9807a6e55f1a69bb1b2211ecf67d7ccef8f02ef536d47c3e1b679d58340913f148dc7ef941302f0694084b45",
+    role: UserRole.OWNER,
+    emailVerified: new Date(),
+    image: null,
+    organizationId: defaultSeedOrg.id,
+    organization: defaultSeedOrg,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
+  {
+    id: "seed-usr-reviewer",
+    email: "marcus.vance@accudrive.io",
+    name: "Dr. Marcus Vance, PE",
+    passwordHash: "987ccf6c861ae89642d82ee853b102c5:d18e4a2208da6fe77c40d4030df18a542c787dac9807a6e55f1a69bb1b2211ecf67d7ccef8f02ef536d47c3e1b679d58340913f148dc7ef941302f0694084b45",
+    role: UserRole.REVIEWER,
+    emailVerified: new Date(),
+    image: null,
+    organizationId: defaultSeedOrg.id,
+    organization: defaultSeedOrg,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
+  {
+    id: "seed-usr-author",
+    email: "content.lead@accudrive.io",
+    name: "Sarah Jenkins (Technical Writer)",
+    passwordHash: "987ccf6c861ae89642d82ee853b102c5:d18e4a2208da6fe77c40d4030df18a542c787dac9807a6e55f1a69bb1b2211ecf67d7ccef8f02ef536d47c3e1b679d58340913f148dc7ef941302f0694084b45",
+    role: UserRole.AUTHOR,
+    emailVerified: new Date(),
+    image: null,
+    organizationId: defaultSeedOrg.id,
+    organization: defaultSeedOrg,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
+];
+
+for (const u of defaultSeedUsers) {
+  if (!store.users.has(u.id)) {
+    store.users.set(u.id, u);
+  }
+}
+
+// Initial Audit Trail Seeds
+const defaultSeedAuditLogs: FallbackAuditLog[] = [
+  {
+    id: "log_initial_1",
+    organizationId: defaultSeedOrg.id,
+    userId: "seed-usr-reviewer",
+    userRole: "REVIEWER",
+    action: "SPEC_APPROVED",
+    resourceType: "DRAFT",
+    resourceId: "seed-draft-automotive",
+    metadataJson: JSON.stringify({ reviewerName: "Dr. Marcus Vance, PE", checklistPassed: 4, standard: "IATF 16949" }),
+    diffJson: null,
+    detailsJson: JSON.stringify({ summary: "Verified stamping die tolerances & IATF 16949 inspection criteria." }),
+    ipAddress: "127.0.0.1",
+    createdAt: new Date(Date.now() - 3600000 * 2),
+  },
+  {
+    id: "log_initial_2",
+    organizationId: defaultSeedOrg.id,
+    userId: "seed-usr-admin",
+    userRole: "OWNER",
+    action: "DRAFT_PUBLISHED",
+    resourceType: "DRAFT",
+    resourceId: "seed-draft-automotive",
+    metadataJson: JSON.stringify({ publishedUrl: "https://accudrive.example.com/articles/stamping-die-galling", targetCms: "Webflow" }),
+    diffJson: null,
+    detailsJson: JSON.stringify({ summary: "Published approved automotive stamping diagnostic protocol to Webflow CMS." }),
+    ipAddress: "127.0.0.1",
+    createdAt: new Date(Date.now() - 3600000 * 1),
+  },
+];
+
+for (const l of defaultSeedAuditLogs) {
+  if (!store.auditLogs.has(l.id)) {
+    store.auditLogs.set(l.id, l);
+  }
+}
+
 function generateId(prefix = "cmw"): string {
   return `${prefix}${Date.now().toString(36)}${Math.random().toString(36).substring(2, 7)}`;
 }
