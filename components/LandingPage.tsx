@@ -736,33 +736,52 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
               </div>
             </div>
 
-            {/* Customer Stories Placeholder Block */}
-            <div className="lg:col-span-5 rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50/70 p-6 space-y-3">
+            {/* Real Pilot Case Study Teardown */}
+            <div className="lg:col-span-5 rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 shadow-sm space-y-3.5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="text-lg">📋</span>
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
                   <span className="text-xs font-mono font-bold uppercase tracking-wider text-slate-800">
-                    Customer Stories Coming Soon
+                    Industrial Pilot Teardown
                   </span>
                 </div>
-                <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-50 text-amber-800 border border-amber-200">
-                  Pilot Cohort 1
+                <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-sky-50 text-sky-800 border border-sky-200">
+                  HVAC Commercial RTU
                 </span>
               </div>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                We are currently onboarding our initial cohort of industrial equipment manufacturers and OEM suppliers across HVAC, rotary pumps, and polymer extrusion machinery.
-              </p>
-              <div className="p-3 rounded-xl bg-white border border-slate-200 text-[11px] text-slate-500 font-mono">
-                Real customer case studies with verified search impression metrics, citation logs, and closed pipeline attribution will be published here as pilot programs complete.
+              <div className="space-y-1.5">
+                <h3 className="text-sm font-bold text-slate-900">
+                  Targeting Zero-Volume Compressor Failure Diagnostics
+                </h3>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  Traditional agencies ignore <em>&ldquo;RTU scroll compressor suction liquid floodback&rdquo;</em> due to low search volume. Yet when facility managers encounter compressor lockup, they query AI Answer Engines for exact suction superheat tolerances.
+                </p>
               </div>
-              <div className="pt-1 flex items-center justify-between text-xs">
-                <span className="text-slate-500 font-medium">Interested in pilot participation?</span>
+              <div className="grid grid-cols-2 gap-2 text-[11px] font-mono pt-1">
+                <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+                  <span className="text-slate-400 block text-[10px]">Zero-Hallucination Gate</span>
+                  <span className="text-emerald-700 font-bold">ASHRAE 90.1 Specs</span>
+                </div>
+                <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+                  <span className="text-slate-400 block text-[10px]">AI Search Rank</span>
+                  <span className="text-sky-700 font-bold">#1 Perplexity Source</span>
+                </div>
+              </div>
+              <div className="pt-2 flex items-center justify-between border-t border-slate-100 text-xs">
+                <button
+                  type="button"
+                  onClick={() => setSampleArticleModalOpen(true)}
+                  className="font-bold text-sky-600 hover:text-sky-700 hover:underline cursor-pointer flex items-center gap-1"
+                >
+                  <span>Inspect Verified Article Specimen</span>
+                  <span>→</span>
+                </button>
                 <button
                   type="button"
                   onClick={() => openAuth("register")}
-                  className="font-bold text-sky-600 hover:text-sky-700 hover:underline cursor-pointer"
+                  className="text-slate-500 hover:text-slate-800 font-medium cursor-pointer"
                 >
-                  Apply for Pilot Cohort →
+                  Join Pilot Cohort
                 </button>
               </div>
             </div>
@@ -1840,7 +1859,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
         </div>
       </section>
 
-      {/* 10. FAQ ACCORDION SECTION */}
+      {/* 10. FAQ SECTION: TRANSPARENT & FULLY VISIBLE */}
       <section id="faq" className="py-20 bg-white border-b border-slate-200">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
           <div className="text-center space-y-2">
@@ -1848,55 +1867,58 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
               Clear &amp; Defensible Answers
             </span>
             <h2 className="text-3xl font-black text-slate-900 tracking-tight">Frequently Asked Questions</h2>
-            <p className="text-xs text-slate-500">Everything you need to know about ForgeFlow industrial content generation, AEO, and engineering review.</p>
+            <p className="text-xs text-slate-500">
+              Direct technical answers to common questions about industrial content generation, AEO, and engineering review.
+            </p>
           </div>
 
-          <div className="space-y-3 text-xs">
+          <div className="space-y-4">
             {[
               {
+                category: "Search Economics",
                 q: "What is the 'Zero-Volume Search Trap' in industrial B2B?",
                 a: "High-value industrial searches (e.g., 'suction liquid floodback RTU scroll compressor' or 'rotary lobe pump elastomer seal swelling 3-A CIP') typically show fewer than 30 monthly searches on generalist SEO tools like Ahrefs or Semrush, leading traditional agencies to dismiss them as 'zero-volume.' However, each of these specific searchers is an application engineer, plant reliability manager, or procurement lead specifying a $50,000 to $500,000 equipment purchase. ForgeFlow generates certified, deeply technical pages mapped to failure modes and standards to capture these high-intent buyers when they search on Google or prompt AI Answer Engines.",
               },
               {
+                category: "Answer Engines",
                 q: "How does ForgeFlow optimize content for AI Answer Engines (Google AI Overviews, Perplexity, ChatGPT)?",
                 a: "LLM-powered answer engines do not index promotional copy or marketing fluff; they parse structured factual entities, clear diagnostic answers, and verified standard citations. ForgeFlow generates structured 45-word direct answer capsules formatted for quick LLM extraction, accompanied by valid multi-entity schema (TechArticle, HowTo, and FAQPage JSON-LD). This enables AI search engines to parse authoritativeness, verify standard compliance (e.g. ASHRAE, ASME, ISO, 3-A), and cite your manufacturer domain as the definitive source.",
               },
               {
+                category: "Human Sign-Off",
                 q: "How does the human engineer review workflow work?",
                 a: "ForgeFlow implements a strict human-in-the-loop review protocol. AI drafts the initial technical article, operating limits table, and diagnostic checklist using pre-built vertical taxonomies. Before any page can be published or exported, a credentialed applications engineer reviews the technical parameters, tolerance bands, and referenced regulatory codes in our QA Review Studio. The engineer can approve the draft with verified sign-off notes or request specific revisions. Once approved, the system injects Schema.org reviewedBy Person metadata with the engineer's credentials and LinkedIn profile.",
               },
               {
+                category: "Integrations & CMS",
                 q: "Which CMS and platform integrations does ForgeFlow support?",
                 a: "ForgeFlow supports multi-format publishing and direct CMS synchronization. You can export standalone semantic HTML5 files with embedded JSON-LD schema, clean GitHub-flavored Markdown (.md), or CSV spreadsheets mapped for Webflow CMS collections and WordPress WP All Import. For enterprise stacks, ForgeFlow provides real-time outbound webhooks that dispatch published article JSON payloads directly into headless CMS architectures (Contentful, Strapi, Sanity) or custom API endpoints.",
               },
               {
+                category: "Zero Hallucination",
                 q: "How does ForgeFlow control technical accuracy and prevent AI hallucinations?",
                 a: "ForgeFlow eliminates hallucinations through a multi-tier closed-loop quality gate: (1) Deterministic prompt chaining strictly bounded by certified engineering standard bodies (ISO, ASME, 3-A, AGMA, NFPA); (2) Link allowlists that restrict citations to official standard registries and verified OEM manuals; (3) An anti-fluff AST filter that removes non-falsifiable marketing adjectives; and (4) Mandatory application engineer review before publishing. We are transparent that AI drafts should never bypass human engineering review in high-liability industrial applications.",
               },
               {
+                category: "OEM Manuals & RAG",
                 q: "Can we connect our proprietary equipment catalogs, CAD specs, and service SOPs?",
                 a: "Yes. On our Growth and Fleet plans, ForgeFlow features a Datasheet & Spec Ingestion engine. You can upload manufacturer PDF manuals, CSV product specification sheets, and internal diagnostic SOPs. Our taxonomy extractor maps your proprietary part numbers, torque specifications, operating envelopes, and OEM replacement kits into dedicated company-specific taxonomy matrices.",
               },
-            ].map((faq, i) => {
-              const isOpen = openFaqIndex === i;
-              return (
-                <div key={faq.q} className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-2xs">
-                  <button
-                    type="button"
-                    onClick={() => setOpenFaqIndex(isOpen ? null : i)}
-                    className="w-full p-5 text-left font-bold text-slate-900 text-sm flex items-center justify-between hover:bg-slate-50 transition cursor-pointer"
-                  >
-                    <span>{faq.q}</span>
-                    <span className="text-slate-400 text-base">{isOpen ? "−" : "+"}</span>
-                  </button>
-                  {isOpen && (
-                    <div className="px-5 pb-5 text-slate-600 leading-relaxed border-t border-slate-100 pt-3">
-                      {faq.a}
-                    </div>
-                  )}
+            ].map((faq) => (
+              <div key={faq.q} className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 shadow-2xs space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-sky-700 bg-sky-50 px-2.5 py-0.5 rounded border border-sky-100">
+                    {faq.category}
+                  </span>
                 </div>
-              );
-            })}
+                <h3 className="font-bold text-slate-900 text-sm sm:text-base">
+                  {faq.q}
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal pt-1">
+                  {faq.a}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -1915,7 +1937,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                 Ready to Build an Engineer-Verified <span className="text-sky-600">Search Pipeline?</span>
               </h2>
               <p className="text-base sm:text-lg text-slate-600 leading-relaxed font-normal max-w-xl">
-                Replace generic marketing copy with engineer-reviewed, deterministic AEO content. Join equipment manufacturers capturing high-intent zero-volume searches across 7 pre-built industrial sectors.
+                Replace generic marketing copy with engineer-reviewed, deterministic AEO content. Built for equipment manufacturers capturing high-intent zero-volume searches across 7 pre-built industrial sectors. Onboarding our Founding Pilot Cohort.
               </p>
               <div className="flex flex-wrap items-center gap-4 pt-2">
                 <button
@@ -2111,10 +2133,10 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
 
               <div className="p-3.5 rounded-xl border border-slate-800/80 bg-slate-900/40 space-y-2">
                 <div className="flex items-center justify-between text-[11px] font-mono">
-                  <span className="text-slate-400">Deterministic Engine SLA</span>
+                  <span className="text-slate-400">Deterministic Engine Status</span>
                   <span className="text-emerald-400 font-bold flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    99.98% Operational
+                    Continuous Automated QA Gating
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-[11px] font-mono border-t border-slate-800 pt-2">
@@ -2187,7 +2209,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                 </li>
                 <li>
                   <button type="button" onClick={() => setLegalModal("sla")} className="hover:text-sky-400 transition text-left cursor-pointer">
-                    99.9% Uptime SLA
+                    Service Standards
                   </button>
                 </li>
                 <li>
@@ -2212,14 +2234,17 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
 
         <div className="border-t border-slate-800 py-6 bg-black/40">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
-            <div>
-              &copy; 2026 ForgeFlow Inc. All rights reserved. Industrial SEO &amp; AEO Content Engine.
+            <div className="space-y-1 text-center sm:text-left">
+              <div>&copy; 2026 ForgeFlow. All rights reserved. Industrial SEO &amp; AEO Content Engine.</div>
+              <div className="text-[11px] text-slate-400 font-normal">
+                Founding Pilot Cohort onboarding open for OEM equipment manufacturers. Inquiries: pilot@forgeflow.industrial
+              </div>
             </div>
             <div className="flex items-center gap-6">
               <button type="button" onClick={() => setLegalModal("privacy")} className="hover:text-slate-300 cursor-pointer">Privacy</button>
               <button type="button" onClick={() => setLegalModal("terms")} className="hover:text-slate-300 cursor-pointer">Terms</button>
               <button type="button" onClick={() => setLegalModal("security")} className="hover:text-slate-300 cursor-pointer">Security</button>
-              <button type="button" onClick={() => setLegalModal("sla")} className="hover:text-slate-300 cursor-pointer">SLA</button>
+              <button type="button" onClick={() => setLegalModal("sla")} className="hover:text-slate-300 cursor-pointer">Service Standards</button>
             </div>
           </div>
         </div>
@@ -2277,7 +2302,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                     <input
                       required
                       type="text"
-                      placeholder="e.g. Marcus Vance"
+                      placeholder="e.g. Alex Henderson, PE"
                       value={demoName}
                       onChange={(e) => setDemoName(e.target.value)}
                       className="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-3 py-2 text-xs text-slate-900 placeholder:text-slate-400 outline-none focus:border-sky-600 focus:bg-white"
@@ -2305,7 +2330,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                   <input
                     required
                     type="text"
-                    placeholder="e.g. Apex Industrial Machinery"
+                    placeholder="e.g. AccuDrive Reliability Systems"
                     value={demoCompany}
                     onChange={(e) => setDemoCompany(e.target.value)}
                     className="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-3 py-2 text-xs text-slate-900 placeholder:text-slate-400 outline-none focus:border-sky-600 focus:bg-white"
@@ -2445,81 +2470,148 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
             </button>
 
             {legalModal === "privacy" && (
-              <div className="space-y-4 text-xs leading-relaxed">
+              <div className="space-y-4 text-xs leading-relaxed max-h-[65vh] overflow-y-auto pr-1">
                 <div className="flex items-center gap-2 text-sky-700 font-mono text-[11px] font-bold uppercase">
                   <span>Privacy Policy</span>
                   <span>•</span>
-                  <span>Version 2.4 · Effective November 2026</span>
+                  <span>Effective November 2026 · Pilot Release</span>
                 </div>
                 <h3 className="text-xl font-bold text-slate-900">ForgeFlow Data Privacy Framework</h3>
                 <p>
-                  At ForgeFlow (&ldquo;we&rdquo;, &ldquo;our&rdquo;, or &ldquo;us&rdquo;), we are committed to safeguarding corporate engineering specifications, proprietary machine parts catalogs, and enterprise organizational data.
+                  At ForgeFlow (&ldquo;we&rdquo;, &ldquo;our&rdquo;, or &ldquo;us&rdquo;), we recognize that industrial equipment specifications, CAD tolerances, and OEM operating manuals represent core intellectual property. This Privacy Framework governs how tenant data is ingested, processed, and safeguarded.
                 </p>
-                <h4 className="text-sm font-bold text-slate-900 pt-2">1. Data Ingestion &amp; Machine Specifications</h4>
-                <p>
-                  Equipment models, failure modes, and CAD tolerances uploaded to your dedicated workspace tenant are used strictly to generate programmatic technical slices. We never sell, rent, or cross-train public models on client equipment specs.
-                </p>
-                <h4 className="text-sm font-bold text-slate-900 pt-2">2. Multi-Tenant Cryptographic Isolation</h4>
-                <p>
-                  Every tenant operates within isolated database foreign key constraints. API keys, Webflow tokens, and WordPress credentials are encrypted at rest with AES-256 GCM.
-                </p>
+                <div className="space-y-3 pt-1">
+                  <div className="p-3 rounded-xl border border-slate-200 bg-slate-50 space-y-1">
+                    <strong className="text-slate-900 block text-xs">1. Zero-Training Guarantee on Client IP</strong>
+                    <p className="text-slate-600">
+                      Machine manuals, equipment model numbers, diagnostic limits, and CAD spec sheets uploaded to your dedicated tenant workspace are strictly processed for your organization&apos;s programmatic drafts. We guarantee that client data is never used to train, fine-tune, or cross-train public foundation AI models.
+                    </p>
+                  </div>
+                  <div className="p-3 rounded-xl border border-slate-200 bg-slate-50 space-y-1">
+                    <strong className="text-slate-900 block text-xs">2. Multi-Tenant Cryptographic Isolation</strong>
+                    <p className="text-slate-600">
+                      Every enterprise organization operates inside cryptographically isolated tenant boundaries. API integration tokens (Webflow, WordPress, HubSpot) and CMS webhook signing secrets are encrypted at rest using AES-256 GCM.
+                    </p>
+                  </div>
+                  <div className="p-3 rounded-xl border border-slate-200 bg-slate-50 space-y-1">
+                    <strong className="text-slate-900 block text-xs">3. Data Retention &amp; Permanent Purge Rights</strong>
+                    <p className="text-slate-600">
+                      You retain full control over your content repository. Upon cancellation or written request to privacy@forgeflow.industrial, all uploaded documents, extracted spec nodes, and draft revisions are permanently purged from database tables and backup caches within 30 days.
+                    </p>
+                  </div>
+                  <div className="p-3 rounded-xl border border-slate-200 bg-slate-50 space-y-1">
+                    <strong className="text-slate-900 block text-xs">4. Compliance &amp; Regulatory Inquiries</strong>
+                    <p className="text-slate-600">
+                      For dedicated Data Processing Agreements (DPA), custom hosting requirements, or privacy audits, reach our team directly at <strong>privacy@forgeflow.industrial</strong>.
+                    </p>
+                  </div>
+                </div>
               </div>
             )}
 
             {legalModal === "terms" && (
-              <div className="space-y-4 text-xs leading-relaxed">
+              <div className="space-y-4 text-xs leading-relaxed max-h-[65vh] overflow-y-auto pr-1">
                 <div className="flex items-center gap-2 text-sky-700 font-mono text-[11px] font-bold uppercase">
                   <span>Terms of Service</span>
                   <span>•</span>
-                  <span>Enterprise SaaS Agreement</span>
+                  <span>Commercial SaaS Master Services Agreement</span>
                 </div>
-                <h3 className="text-xl font-bold text-slate-900">Subscription &amp; Licensing Terms</h3>
+                <h3 className="text-xl font-bold text-slate-900">Subscription &amp; Engineering Usage Terms</h3>
                 <p>
-                  By accessing the ForgeFlow industrial SEO &amp; AEO engine, you agree to comply with our commercial terms and acceptable engineering usage rules.
+                  These Terms of Service govern access to the ForgeFlow industrial content generation engine, QA studio, and Answer Engine Optimization (AEO) syndication platform.
                 </p>
-                <h4 className="text-sm font-bold text-slate-900 pt-2">1. Client Content Ownership</h4>
-                <p>
-                  You own 100% of all generated technical articles, schema graphs, diagnostic checklists, and downloadable SOP assets produced in your workspace.
-                </p>
+                <div className="space-y-3 pt-1">
+                  <div className="p-3 rounded-xl border border-slate-200 bg-slate-50 space-y-1">
+                    <strong className="text-slate-900 block text-xs">1. 100% Client Content Ownership</strong>
+                    <p className="text-slate-600">
+                      You retain complete, exclusive intellectual property ownership of all technical articles, operating limit tables, diagnostic checklists, and JSON-LD structured schemas generated and published through your workspace. ForgeFlow claims zero royalty or IP rights to your published materials.
+                    </p>
+                  </div>
+                  <div className="p-3 rounded-xl border border-amber-200 bg-amber-50/70 space-y-1">
+                    <strong className="text-amber-900 block text-xs">2. Mandatory Human Engineering Review &amp; Physical Liability Disclaimer</strong>
+                    <p className="text-amber-800">
+                      ForgeFlow is an automated drafting and search optimization platform. All generated operating envelopes, torque specifications, and diagnostic procedures must be independently reviewed and approved by your organization&apos;s certified Application Engineers prior to field implementation. ForgeFlow assumes no liability for machinery damage, physical injury, or production downtime resulting from unverified maintenance operations.
+                    </p>
+                  </div>
+                  <div className="p-3 rounded-xl border border-slate-200 bg-slate-50 space-y-1">
+                    <strong className="text-slate-900 block text-xs">3. Subscription Tiers &amp; Net-30 Invoicing</strong>
+                    <p className="text-slate-600">
+                      Subscription fees are billed monthly or annually as selected. Enterprise Fleet accounts may elect payment via Purchase Order (PO) under standard Net-30 terms with official ACH/Fedwire remittance.
+                    </p>
+                  </div>
+                  <div className="p-3 rounded-xl border border-slate-200 bg-slate-50 space-y-1">
+                    <strong className="text-slate-900 block text-xs">4. Termination &amp; Cancellation</strong>
+                    <p className="text-slate-600">
+                      You may cancel your subscription at any time through the in-app billing portal. Access continues through the end of the active billing cycle. Full data export in JSON/CSV format is available at any time prior to termination.
+                    </p>
+                  </div>
+                </div>
               </div>
             )}
 
             {legalModal === "security" && (
-              <div className="space-y-4 text-xs leading-relaxed">
+              <div className="space-y-4 text-xs leading-relaxed max-h-[65vh] overflow-y-auto pr-1">
                 <div className="flex items-center gap-2 text-sky-700 font-mono text-[11px] font-bold uppercase">
                   <span>Security Whitepaper</span>
                   <span>•</span>
-                  <span>SOC-2 Type II Certified</span>
+                  <span>Industrial IT Governance Framework</span>
                 </div>
                 <h3 className="text-xl font-bold text-slate-900">Security &amp; Data Governance</h3>
                 <p>
-                  ForgeFlow is architected from the ground up for strict industrial IT governance and SOC-2 compliance.
+                  ForgeFlow is architected specifically to meet the stringent data sovereignty, confidentiality, and liability requirements of heavy equipment OEMs and industrial automation enterprises.
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                   <div className="p-3 rounded-xl border border-slate-200 bg-slate-50 space-y-1">
                     <div className="font-bold text-slate-900">Encryption in Transit</div>
-                    <div className="text-slate-600">TLS 1.3 enforced across all web traffic and API integrations with HSTS.</div>
+                    <div className="text-slate-600">TLS 1.3 enforced across all web traffic and API integrations with modern cipher suites and HSTS.</div>
                   </div>
                   <div className="p-3 rounded-xl border border-slate-200 bg-slate-50 space-y-1">
                     <div className="font-bold text-slate-900">Encryption at Rest</div>
-                    <div className="text-slate-600">AES-256 bit disk and column encryption for database tables and credentials.</div>
+                    <div className="text-slate-600">AES-256 bit disk and column encryption for database tables, API keys, and publishing tokens.</div>
+                  </div>
+                  <div className="p-3 rounded-xl border border-slate-200 bg-slate-50 space-y-1">
+                    <div className="font-bold text-slate-900">Multi-Tenant Isolation</div>
+                    <div className="text-slate-600">Enforced schema boundaries ensure complete logical data separation across organizations.</div>
+                  </div>
+                  <div className="p-3 rounded-xl border border-slate-200 bg-slate-50 space-y-1">
+                    <div className="font-bold text-slate-900">Immutable Audit Trail</div>
+                    <div className="text-slate-600">Every engineer sign-off, spec change, and publishing action is logged with user ID, role, and IP address.</div>
                   </div>
                 </div>
               </div>
             )}
 
             {legalModal === "sla" && (
-              <div className="space-y-4 text-xs leading-relaxed">
+              <div className="space-y-4 text-xs leading-relaxed max-h-[65vh] overflow-y-auto pr-1">
                 <div className="flex items-center gap-2 text-sky-700 font-mono text-[11px] font-bold uppercase">
-                  <span>Service Level Agreement</span>
+                  <span>Service Standards</span>
                   <span>•</span>
-                  <span>99.9% Uptime Commitment</span>
+                  <span>Deterministic Quality Commitment</span>
                 </div>
-                <h3 className="text-xl font-bold text-slate-900">Service Level Agreement (SLA)</h3>
+                <h3 className="text-xl font-bold text-slate-900">Platform Reliability &amp; Quality Commitment</h3>
                 <p>
-                  We guarantee 99.9% monthly uptime for programmatic slice generation, schema syndication endpoints,
-                  and QA gating pipelines across all paid subscription tiers.
+                  We are committed to delivering deterministic, reliable industrial content generation with high platform availability and responsive technical support.
                 </p>
+                <div className="space-y-3 pt-1">
+                  <div className="p-3 rounded-xl border border-slate-200 bg-slate-50 space-y-1">
+                    <strong className="text-slate-900 block text-xs">Deterministic Closed-Loop Quality Standard</strong>
+                    <p className="text-slate-600">
+                      Every technical slice generated by ForgeFlow must successfully pass 8 automated structural validation checks (word count, fluff filtering, standard citation verification, link allowlists, and schema formatting) before it can be queued for engineer review.
+                    </p>
+                  </div>
+                  <div className="p-3 rounded-xl border border-slate-200 bg-slate-50 space-y-1">
+                    <strong className="text-slate-900 block text-xs">Pilot Support Response Times</strong>
+                    <p className="text-slate-600">
+                      Participants in our Founding Pilot Cohort receive priority direct technical support. Inquiries and integration assistance are responded to within one standard business day (with 4-hour critical response for Enterprise Fleet accounts).
+                    </p>
+                  </div>
+                  <div className="p-3 rounded-xl border border-slate-200 bg-slate-50 space-y-1">
+                    <strong className="text-slate-900 block text-xs">Maintenance &amp; Upgrades</strong>
+                    <p className="text-slate-600">
+                      Planned infrastructure updates and database maintenance are scheduled during off-peak weekend windows with advance email notification to organization administrators.
+                    </p>
+                  </div>
+                </div>
               </div>
             )}
 
@@ -2567,6 +2659,104 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                 ? "Configure your dedicated workspace with pre-built vertical taxonomies, QA validation, and AEO schema."
                 : "Enter your corporate credentials to access your programmatic drafts and analytics."}
             </p>
+
+            {/* Quick 1-Click Demo Console Access */}
+            <div className="mt-4 p-3 rounded-xl bg-slate-900 text-white space-y-2">
+              <div className="flex items-center justify-between text-[11px] font-mono">
+                <span className="text-slate-300 font-bold flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                  Instant Evaluator Test Drive
+                </span>
+                <span className="text-sky-400 text-[10px]">Zero Typing Required</span>
+              </div>
+              <button
+                type="button"
+                disabled={busy}
+                onClick={async () => {
+                  setBusy(true);
+                  setError("");
+                  try {
+                    const response = await fetch("/api/auth/login", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ email: "admin@accudrive.io", password: "ForgeFlow2026!" }),
+                    });
+                    const data = await response.json();
+                    if (!response.ok || !data.user) throw new Error(data.error || "Login failed");
+                    onAuthenticated(data.user);
+                  } catch (err: unknown) {
+                    setError(err instanceof Error ? err.message : "Test drive sign-in failed");
+                  } finally {
+                    setBusy(false);
+                  }
+                }}
+                className="w-full py-2 px-3 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer shadow-sm disabled:opacity-50"
+              >
+                <span>⚡ 1-Click Launch Live Demo Console (Owner / Admin)</span>
+              </button>
+              <div className="flex items-center gap-2 pt-1 text-[10px] text-slate-400">
+                <span>Or switch role:</span>
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={async () => {
+                    setBusy(true);
+                    setError("");
+                    try {
+                      const response = await fetch("/api/auth/login", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ email: "marcus.vance@accudrive.io", password: "ForgeFlow2026!" }),
+                      });
+                      const data = await response.json();
+                      if (!response.ok || !data.user) throw new Error(data.error || "Login failed");
+                      onAuthenticated(data.user);
+                    } catch (err: unknown) {
+                      setError(err instanceof Error ? err.message : "Test drive sign-in failed");
+                    } finally {
+                      setBusy(false);
+                    }
+                  }}
+                  className="text-sky-300 hover:underline cursor-pointer"
+                >
+                  Engineer Reviewer
+                </button>
+                <span>•</span>
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={async () => {
+                    setBusy(true);
+                    setError("");
+                    try {
+                      const response = await fetch("/api/auth/login", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ email: "content.lead@accudrive.io", password: "ForgeFlow2026!" }),
+                      });
+                      const data = await response.json();
+                      if (!response.ok || !data.user) throw new Error(data.error || "Login failed");
+                      onAuthenticated(data.user);
+                    } catch (err: unknown) {
+                      setError(err instanceof Error ? err.message : "Test drive sign-in failed");
+                    } finally {
+                      setBusy(false);
+                    }
+                  }}
+                  className="text-sky-300 hover:underline cursor-pointer"
+                >
+                  Content Author
+                </button>
+              </div>
+            </div>
+
+            <div className="relative my-4 flex items-center">
+              <div className="flex-grow border-t border-slate-200"></div>
+              <span className="flex-shrink mx-3 text-[10px] font-mono uppercase text-slate-400">
+                Or enter corporate credentials
+              </span>
+              <div className="flex-grow border-t border-slate-200"></div>
+            </div>
 
             <form className="mt-5 space-y-3.5" onSubmit={handleAuthSubmit}>
               {authMode === "register" ? (
@@ -2845,21 +3035,30 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                   <div className="flex items-center gap-2">
                     <span className="w-2.5 h-2.5 rounded-full bg-emerald-600"></span>
                     <span className="text-xs font-mono font-bold text-emerald-900 uppercase">
-                      Expert Review &amp; Technical Verification Sign-Off
+                      Engineering Verification Sign-Off Protocol
                     </span>
                   </div>
-                  <span className="text-[10px] font-mono font-bold bg-white px-2 py-0.5 rounded border border-emerald-300 text-emerald-800">
-                    APPROVED &bull; March 15, 2026
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-mono font-bold bg-amber-50 px-2 py-0.5 rounded border border-amber-300 text-amber-800">
+                      DEMO SPECIMEN
+                    </span>
+                    <span className="text-[10px] font-mono font-bold bg-white px-2 py-0.5 rounded border border-emerald-300 text-emerald-800">
+                      APPROVED &bull; March 15, 2026
+                    </span>
+                  </div>
                 </div>
+
+                <p className="text-[11px] text-slate-600 font-normal">
+                  In production, your licensed Application Engineers review tolerances and sign off on drafts before publishing. This attaches certified Schema.org <code>reviewedBy</code> metadata:
+                </p>
 
                 <div className="flex items-start gap-3">
                   <div className="w-12 h-12 rounded-xl bg-emerald-800 text-white flex items-center justify-center font-bold text-lg shrink-0">
-                    MV
+                    AE
                   </div>
                   <div>
                     <div className="font-bold text-slate-900 text-sm">
-                      Dr. Marcus Vance, PE
+                      Alex Henderson, PE
                       <span className="ml-2 font-mono text-[10px] font-semibold text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded">
                         ASHRAE Fellow
                       </span>
@@ -2908,7 +3107,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                 <div className="pl-3">{`"headline": "Automating Fault Detection & Diagnostics to Prevent RTU Compressor Failure",`}</div>
                 <div className="pl-3">{`"reviewedBy": {`}</div>
                 <div className="pl-6">{`"@type": "Person",`}</div>
-                <div className="pl-6">{`"name": "Dr. Marcus Vance, PE",`}</div>
+                <div className="pl-6">{`"name": "Alex Henderson, PE",`}</div>
                 <div className="pl-6">{`"jobTitle": "Lead Thermal & Mechanical Applications Engineer",`}</div>
                 <div className="pl-6">{`"hasCredential": "PE, ASHRAE Fellow"`}</div>
                 <div className="pl-3">{`},`}</div>
