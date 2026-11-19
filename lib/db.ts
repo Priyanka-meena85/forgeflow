@@ -202,6 +202,68 @@ export interface FallbackPageReview {
   reviewer?: FallbackExpertReviewer | null;
 }
 
+export interface FallbackSpecDocument {
+  id: string;
+  organizationId: string;
+  title: string;
+  fileName: string;
+  fileSize: number;
+  fileType: string;
+  extractedContent: string;
+  extractedNodesJson: string | null;
+  status: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface FallbackCmsIntegration {
+  id: string;
+  organizationId: string;
+  provider: string;
+  name: string;
+  endpointUrl: string;
+  apiKey: string | null;
+  targetCollectionId: string | null;
+  status: string;
+  autoPublishApproved: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface FallbackAeoTrackerQuery {
+  id: string;
+  organizationId: string;
+  draftId: string | null;
+  keyword: string;
+  targetUrl: string;
+  googleAeoCited: boolean;
+  googleAeoPosition: number | null;
+  perplexityCited: boolean;
+  perplexityCitationIndex: number | null;
+  chatGptIndexed: boolean;
+  aiSnippetSummary: string | null;
+  lastCheckedAt: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface FallbackInvoiceRequest {
+  id: string;
+  organizationId: string;
+  companyName: string;
+  billingContactName: string;
+  billingEmail: string;
+  purchaseOrderNumber: string | null;
+  taxIdOrGst: string | null;
+  plan: string;
+  amountUsd: number;
+  paymentTerms: string;
+  status: string;
+  invoicePdfUrl: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface FallbackStore {
   organizations: Map<string, FallbackOrg>;
   users: Map<string, FallbackUser>;
@@ -216,6 +278,10 @@ export interface FallbackStore {
   expertReviewers: Map<string, FallbackExpertReviewer>;
   pageReviews: Map<string, FallbackPageReview>;
   generationJobs: Map<string, FallbackGenerationJob>;
+  specDocuments: Map<string, FallbackSpecDocument>;
+  cmsIntegrations: Map<string, FallbackCmsIntegration>;
+  aeoTrackerQueries: Map<string, FallbackAeoTrackerQuery>;
+  invoiceRequests: Map<string, FallbackInvoiceRequest>;
 }
 
 const globalStore = globalThis as unknown as {
@@ -237,6 +303,10 @@ const store: FallbackStore = globalStore.__forgeflow_store__ ?? {
   expertReviewers: new Map(),
   pageReviews: new Map(),
   generationJobs: new Map(),
+  specDocuments: new Map(),
+  cmsIntegrations: new Map(),
+  aeoTrackerQueries: new Map(),
+  invoiceRequests: new Map(),
 };
 globalStore.__forgeflow_store__ = store;
 
@@ -363,6 +433,65 @@ for (const u of defaultSeedUsers) {
   }
 }
 
+// Default Seed Draft & Review for immediate testing & demonstration
+const defaultSeedDraft: FallbackDraft = {
+  id: "seed-draft-automotive",
+  organizationId: defaultSeedOrg.id,
+  authorId: "seed-usr-author",
+  title: "Root Cause Protocol: Stamping Die Galling & Weld Inspection Defects in IATF 16949 Assembly Lines",
+  keyword: "servo stamping press die galling IATF 16949",
+  vertical: "Automotive & Tier-1 Stamping",
+  targetEquipment: "Servo Stamping Press",
+  complianceStandard: "IATF 16949 Standard",
+  summary: "Deterministic engineering protocol for automotive plant reliability managers preventing die galling and weld inspection non-conformances in IATF 16949 certified production lines.",
+  sectionsJson: JSON.stringify([
+    { heading: "01. Galling Mechanism in High-Strength Stamping (DP600/DP800)", body: "Micro-welding failure analysis at boundary friction contact points during high-velocity progressive stamping." },
+    { heading: "02. Punch-to-Die Clearance Calibration SOP", body: "Calculated 8-10% material thickness clearance envelope to prevent burr formation and excessive tooling wear." },
+  ]),
+  faqsJson: JSON.stringify([
+    { q: "What is the recommended die surface coating?", a: "PVD CrN or TiAlN multi-layer coatings rated above 3,000 HV." },
+  ]),
+  schemaJson: JSON.stringify({
+    "@context": "https://schema.org",
+    "@graph": [{ "@type": "TechArticle", "headline": "Root Cause Protocol: Stamping Die Galling" }],
+  }),
+  status: DraftStatus.APPROVED,
+  qaScoresJson: JSON.stringify({ passed: true, overallScore: 98, riskScore: "Low" }),
+  specRiskScore: 0.05,
+  pipelineValueMin: 150000,
+  pipelineValueMax: 600000,
+  searchVolume: "20-40/mo",
+  reviewComment: "Verified compliant with IATF 16949 SOP and AEO readiness gates.",
+  publishedAt: null,
+  publishedUrl: null,
+  createdAt: new Date(Date.now() - 3600000 * 24),
+  updatedAt: new Date(Date.now() - 3600000 * 2),
+};
+
+if (!store.drafts.has(defaultSeedDraft.id)) {
+  store.drafts.set(defaultSeedDraft.id, defaultSeedDraft);
+}
+
+const defaultSeedPageReview: FallbackPageReview = {
+  id: "seed-prv-automotive",
+  draftId: defaultSeedDraft.id,
+  reviewerId: "rev_marcus_vance",
+  status: ReviewStatus.APPROVED,
+  reviewDate: new Date(Date.now() - 3600000 * 2),
+  reviewerNotes: "Verified compliant with IATF 16949 SOP, AISE Technical Report No. 9, and AEO structured data standards.",
+  verificationItemsJson: JSON.stringify([
+    "Spec Accuracy: Verified punch-to-die 8-10% clearance against OEM manual.",
+    "Operating Tolerances: Confirmed pressure and fatigue thresholds.",
+    "AEO Schema Validity: Validated multi-entity JSON-LD graphs with reviewedBy Person entity.",
+  ]),
+  createdAt: new Date(Date.now() - 3600000 * 2),
+  updatedAt: new Date(Date.now() - 3600000 * 2),
+};
+
+if (!store.pageReviews.has(defaultSeedDraft.id)) {
+  store.pageReviews.set(defaultSeedDraft.id, defaultSeedPageReview);
+}
+
 // Initial Audit Trail Seeds
 const defaultSeedAuditLogs: FallbackAuditLog[] = [
   {
@@ -398,6 +527,185 @@ const defaultSeedAuditLogs: FallbackAuditLog[] = [
 for (const l of defaultSeedAuditLogs) {
   if (!store.auditLogs.has(l.id)) {
     store.auditLogs.set(l.id, l);
+  }
+}
+
+// Default Seed Spec Documents (Feature 1: RAG Engine)
+const defaultSeedSpecDocuments: FallbackSpecDocument[] = [
+  {
+    id: "doc_carrier_rtu_48hc",
+    organizationId: defaultSeedOrg.id,
+    title: "Carrier WeatherMaster 48HC RTU Service Manual",
+    fileName: "Carrier-48HC-Service-Manual-Tolerances.pdf",
+    fileSize: 4210000,
+    fileType: "application/pdf",
+    extractedContent: "ASHRAE Standard 90.1 Rooftop Unit Operating Tolerances. Suction pressure range: 118-132 psig for R-410A. Normal suction superheat: 10°F to 14°F at standard ambient rating condition (95°F outdoor). Compressor floodback limit: Liquid slugging risk increases when superheat drops below 6°F for >120 continuous operating seconds. Crankcase heater must maintain sump temperature minimum 20°F above saturated suction temperature.",
+    extractedNodesJson: JSON.stringify([
+      { category: "TOLERANCE", parameter: "Suction Superheat", min: "10°F", max: "14°F", unit: "deg_F" },
+      { category: "PRESSURE", parameter: "Suction Operating Pressure", min: "118 psig", max: "132 psig", unit: "psig" },
+      { category: "CRITICAL_LIMIT", parameter: "Liquid Floodback Threshold", threshold: "< 6°F superheat for 120s" },
+      { category: "STANDARD", parameter: "AHRI 340/360 & ASHRAE 90.1", compliance: "Mandatory Commercial" },
+    ]),
+    status: "PARSED",
+    createdAt: new Date(Date.now() - 3600000 * 48),
+    updatedAt: new Date(Date.now() - 3600000 * 48),
+  },
+  {
+    id: "doc_accudrive_servo_die",
+    organizationId: defaultSeedOrg.id,
+    title: "AccuDrive SV-5000 Stamping Servo Calibration Spec",
+    fileName: "AccuDrive-SV-5000-Die-Clearance-SOP.pdf",
+    fileSize: 2840000,
+    fileType: "application/pdf",
+    extractedContent: "IATF 16949 Section 8.5.1 Progressive Die Galling Prevention. Maximum allowable punching die clearance tolerance: 8% to 10% of material thickness for high-strength steel (DP600/DP800). Maximum press ram tilt: 0.03 mm/m under 500-ton eccentric load. Lubricant film thickness minimum: 1.8 microns applied at 60 psi atomization pressure.",
+    extractedNodesJson: JSON.stringify([
+      { category: "TOLERANCE", parameter: "Die Punch Clearance", min: "8%", max: "10%", unit: "material_thickness_pct" },
+      { category: "DEFLECTION", parameter: "Ram Parallelism Tilt", max: "0.03 mm/m", unit: "mm_per_m" },
+      { category: "LUBRICATION", parameter: "Boundary Film Thickness", min: "1.8 microns", pressure: "60 psi" },
+      { category: "STANDARD", parameter: "IATF 16949 & AISE Technical Report No. 9", compliance: "Automotive Tier 1" },
+    ]),
+    status: "PARSED",
+    createdAt: new Date(Date.now() - 3600000 * 24),
+    updatedAt: new Date(Date.now() - 3600000 * 24),
+  },
+];
+
+for (const d of defaultSeedSpecDocuments) {
+  if (!store.specDocuments.has(d.id)) {
+    store.specDocuments.set(d.id, d);
+  }
+}
+
+// Default Seed CMS Integrations (Feature 2: 1-Click Publishing)
+const defaultSeedCmsIntegrations: FallbackCmsIntegration[] = [
+  {
+    id: "cms_webflow_portal",
+    organizationId: defaultSeedOrg.id,
+    provider: "WEBFLOW",
+    name: "Webflow (AccuDrive Plant Engineering Hub)",
+    endpointUrl: "https://api.webflow.com/v2/collections/658b1a8f9c0e2a3b4c5d6e7f/items",
+    apiKey: "wfl_live_accudrive_sample_secret_key",
+    targetCollectionId: "col_plant_articles_01",
+    status: "ACTIVE",
+    autoPublishApproved: true,
+    createdAt: new Date(Date.now() - 3600000 * 72),
+    updatedAt: new Date(Date.now() - 3600000 * 72),
+  },
+  {
+    id: "cms_hubspot_oem",
+    organizationId: defaultSeedOrg.id,
+    provider: "HUBSPOT",
+    name: "HubSpot CMS (OEM Knowledge Base)",
+    endpointUrl: "https://api.hubapi.com/cms/v3/blogs/posts",
+    apiKey: "pat-na1-sample-hubspot-token",
+    targetCollectionId: "hubspot_blog_2026",
+    status: "ACTIVE",
+    autoPublishApproved: false,
+    createdAt: new Date(Date.now() - 3600000 * 48),
+    updatedAt: new Date(Date.now() - 3600000 * 48),
+  },
+  {
+    id: "cms_wordpress_rest",
+    organizationId: defaultSeedOrg.id,
+    provider: "WORDPRESS",
+    name: "WordPress REST API (Technical Journal)",
+    endpointUrl: "https://journal.accudrive.example.com/wp-json/wp/v2/posts",
+    apiKey: "wp_app_pass_xyz123",
+    targetCollectionId: "category_reliability_eng",
+    status: "ACTIVE",
+    autoPublishApproved: false,
+    createdAt: new Date(Date.now() - 3600000 * 24),
+    updatedAt: new Date(Date.now() - 3600000 * 24),
+  },
+];
+
+for (const c of defaultSeedCmsIntegrations) {
+  if (!store.cmsIntegrations.has(c.id)) {
+    store.cmsIntegrations.set(c.id, c);
+  }
+}
+
+// Default Seed AEO Citation Queries (Feature 3: Live AEO Citation Tracker)
+const defaultSeedAeoQueries: FallbackAeoTrackerQuery[] = [
+  {
+    id: "aeo_rtu_floodback",
+    organizationId: defaultSeedOrg.id,
+    draftId: "seed-draft-automotive",
+    keyword: "commercial RTU suction floodback symptoms",
+    targetUrl: "https://accudrive.example.com/articles/stamping-die-galling",
+    googleAeoCited: true,
+    googleAeoPosition: 1,
+    perplexityCited: true,
+    perplexityCitationIndex: 1,
+    chatGptIndexed: true,
+    aiSnippetSummary: "AccuDrive's diagnostic protocol is cited as the primary engineering source for rooftop unit compressor liquid slugging prevention tolerances.",
+    lastCheckedAt: new Date(Date.now() - 3600000 * 4),
+    createdAt: new Date(Date.now() - 3600000 * 72),
+    updatedAt: new Date(Date.now() - 3600000 * 4),
+  },
+  {
+    id: "aeo_iatf_die_galling",
+    organizationId: defaultSeedOrg.id,
+    draftId: "seed-draft-automotive",
+    keyword: "IATF 16949 servo press die galling tolerances",
+    targetUrl: "https://accudrive.example.com/articles/stamping-die-galling",
+    googleAeoCited: true,
+    googleAeoPosition: 1,
+    perplexityCited: true,
+    perplexityCitationIndex: 2,
+    chatGptIndexed: true,
+    aiSnippetSummary: "Cited in Google AI Overview for progressive die clearance calculation rules and PVD TiAlN coating hardness thresholds.",
+    lastCheckedAt: new Date(Date.now() - 3600000 * 6),
+    createdAt: new Date(Date.now() - 3600000 * 48),
+    updatedAt: new Date(Date.now() - 3600000 * 6),
+  },
+  {
+    id: "aeo_pump_cavitation",
+    organizationId: defaultSeedOrg.id,
+    draftId: null,
+    keyword: "hydraulic piston pump cavitation ISO 4406",
+    targetUrl: "https://accudrive.example.com/articles/hydraulic-pump-cavitation",
+    googleAeoCited: true,
+    googleAeoPosition: 2,
+    perplexityCited: true,
+    perplexityCitationIndex: 1,
+    chatGptIndexed: true,
+    aiSnippetSummary: "Perplexity Copilot referenced AccuDrive's fluid power diagnostic table as authoritative for ISO 4406 solid contaminant particle counting.",
+    lastCheckedAt: new Date(Date.now() - 3600000 * 12),
+    createdAt: new Date(Date.now() - 3600000 * 36),
+    updatedAt: new Date(Date.now() - 3600000 * 12),
+  },
+];
+
+for (const q of defaultSeedAeoQueries) {
+  if (!store.aeoTrackerQueries.has(q.id)) {
+    store.aeoTrackerQueries.set(q.id, q);
+  }
+}
+
+// Default Seed Invoice Requests (Feature 5: Net-30 Enterprise Procurement)
+const defaultSeedInvoices: FallbackInvoiceRequest[] = [
+  {
+    id: "inv_po_2026_8941",
+    organizationId: defaultSeedOrg.id,
+    companyName: "Carrier Commercial Refrigeration Division",
+    billingContactName: "Jonathan Miller (VP of Procurement)",
+    billingEmail: "jmiller@carrier-procurement.example.com",
+    purchaseOrderNumber: "PO-2026-8941-CCR",
+    taxIdOrGst: "US-EIN-12-3456789",
+    plan: "fleet",
+    amountUsd: 7990,
+    paymentTerms: "NET_30",
+    status: "INVOICED",
+    invoicePdfUrl: "/api/billing/invoices/inv_po_2026_8941/download",
+    createdAt: new Date(Date.now() - 3600000 * 72),
+    updatedAt: new Date(Date.now() - 3600000 * 72),
+  },
+];
+
+for (const inv of defaultSeedInvoices) {
+  if (!store.invoiceRequests.has(inv.id)) {
+    store.invoiceRequests.set(inv.id, inv);
   }
 }
 
@@ -913,6 +1221,177 @@ const fallbackGenerationJob = {
   },
 };
 
+const fallbackSpecDocument = {
+  async create(args: { data: Partial<FallbackSpecDocument> & { organizationId: string; title: string; fileName: string; extractedContent: string } }): Promise<FallbackSpecDocument> {
+    const doc: FallbackSpecDocument = {
+      id: args.data.id || generateId("doc_"),
+      organizationId: args.data.organizationId,
+      title: args.data.title,
+      fileName: args.data.fileName,
+      fileSize: args.data.fileSize ?? 1024 * 250,
+      fileType: args.data.fileType ?? "pdf",
+      extractedContent: args.data.extractedContent,
+      extractedNodesJson: args.data.extractedNodesJson ?? null,
+      status: args.data.status ?? "PARSED",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    store.specDocuments.set(doc.id, doc);
+    return doc;
+  },
+  async findMany(args?: { where?: { organizationId?: string } }): Promise<FallbackSpecDocument[]> {
+    const list: FallbackSpecDocument[] = [];
+    for (const d of store.specDocuments.values()) {
+      if (args?.where?.organizationId && d.organizationId !== args.where.organizationId) continue;
+      list.push(d);
+    }
+    return list.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  },
+  async findUnique(args: { where: { id: string } }): Promise<FallbackSpecDocument | null> {
+    return store.specDocuments.get(args.where.id) || null;
+  },
+  async delete(args: { where: { id: string } }): Promise<FallbackSpecDocument | null> {
+    const existing = store.specDocuments.get(args.where.id) || null;
+    if (existing) store.specDocuments.delete(args.where.id);
+    return existing;
+  },
+};
+
+const fallbackCmsIntegration = {
+  async create(args: { data: Partial<FallbackCmsIntegration> & { organizationId: string; provider: string; name: string; endpointUrl: string } }): Promise<FallbackCmsIntegration> {
+    const cms: FallbackCmsIntegration = {
+      id: args.data.id || generateId("cms_"),
+      organizationId: args.data.organizationId,
+      provider: args.data.provider,
+      name: args.data.name,
+      endpointUrl: args.data.endpointUrl,
+      apiKey: args.data.apiKey ?? null,
+      targetCollectionId: args.data.targetCollectionId ?? null,
+      status: args.data.status ?? "CONNECTED",
+      autoPublishApproved: args.data.autoPublishApproved ?? false,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    store.cmsIntegrations.set(cms.id, cms);
+    return cms;
+  },
+  async findMany(args?: { where?: { organizationId?: string } }): Promise<FallbackCmsIntegration[]> {
+    const list: FallbackCmsIntegration[] = [];
+    for (const c of store.cmsIntegrations.values()) {
+      if (args?.where?.organizationId && c.organizationId !== args.where.organizationId) continue;
+      list.push(c);
+    }
+    return list.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  },
+  async findUnique(args: { where: { id: string } }): Promise<FallbackCmsIntegration | null> {
+    return store.cmsIntegrations.get(args.where.id) || null;
+  },
+  async update(args: { where: { id: string }; data: Partial<FallbackCmsIntegration> }): Promise<FallbackCmsIntegration> {
+    const existing = store.cmsIntegrations.get(args.where.id);
+    if (!existing) throw new Error(`CMS Integration ${args.where.id} not found.`);
+    const updated: FallbackCmsIntegration = { ...existing, ...args.data, updatedAt: new Date() };
+    store.cmsIntegrations.set(updated.id, updated);
+    return updated;
+  },
+  async delete(args: { where: { id: string } }): Promise<FallbackCmsIntegration | null> {
+    const existing = store.cmsIntegrations.get(args.where.id) || null;
+    if (existing) store.cmsIntegrations.delete(args.where.id);
+    return existing;
+  },
+};
+
+const fallbackAeoTrackerQuery = {
+  async create(args: { data: Partial<FallbackAeoTrackerQuery> & { organizationId: string; keyword: string; targetUrl: string } }): Promise<FallbackAeoTrackerQuery> {
+    const query: FallbackAeoTrackerQuery = {
+      id: args.data.id || generateId("aeo_"),
+      organizationId: args.data.organizationId,
+      draftId: args.data.draftId ?? null,
+      keyword: args.data.keyword,
+      targetUrl: args.data.targetUrl,
+      googleAeoCited: args.data.googleAeoCited ?? true,
+      googleAeoPosition: args.data.googleAeoPosition ?? 1,
+      perplexityCited: args.data.perplexityCited ?? true,
+      perplexityCitationIndex: args.data.perplexityCitationIndex ?? 1,
+      chatGptIndexed: args.data.chatGptIndexed ?? true,
+      aiSnippetSummary: args.data.aiSnippetSummary ?? null,
+      lastCheckedAt: args.data.lastCheckedAt ?? new Date(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    store.aeoTrackerQueries.set(query.id, query);
+    return query;
+  },
+  async findMany(args?: { where?: { organizationId?: string } }): Promise<FallbackAeoTrackerQuery[]> {
+    const list: FallbackAeoTrackerQuery[] = [];
+    for (const q of store.aeoTrackerQueries.values()) {
+      if (args?.where?.organizationId && q.organizationId !== args.where.organizationId) continue;
+      list.push(q);
+    }
+    return list.sort((a, b) => b.lastCheckedAt.getTime() - a.lastCheckedAt.getTime());
+  },
+  async findUnique(args: { where: { id: string } }): Promise<FallbackAeoTrackerQuery | null> {
+    return store.aeoTrackerQueries.get(args.where.id) || null;
+  },
+  async update(args: { where: { id: string }; data: Partial<FallbackAeoTrackerQuery> }): Promise<FallbackAeoTrackerQuery> {
+    const existing = store.aeoTrackerQueries.get(args.where.id);
+    if (!existing) throw new Error(`AEO query ${args.where.id} not found.`);
+    const updated: FallbackAeoTrackerQuery = { ...existing, ...args.data, updatedAt: new Date() };
+    store.aeoTrackerQueries.set(updated.id, updated);
+    return updated;
+  },
+  async delete(args: { where: { id: string } }): Promise<FallbackAeoTrackerQuery | null> {
+    const existing = store.aeoTrackerQueries.get(args.where.id) || null;
+    if (existing) store.aeoTrackerQueries.delete(args.where.id);
+    return existing;
+  },
+};
+
+const fallbackInvoiceRequest = {
+  async create(args: { data: Partial<FallbackInvoiceRequest> & { organizationId: string; companyName: string; billingContactName: string; billingEmail: string; plan: string; amountUsd: number } }): Promise<FallbackInvoiceRequest> {
+    const inv: FallbackInvoiceRequest = {
+      id: args.data.id || generateId("inv_"),
+      organizationId: args.data.organizationId,
+      companyName: args.data.companyName,
+      billingContactName: args.data.billingContactName,
+      billingEmail: args.data.billingEmail,
+      purchaseOrderNumber: args.data.purchaseOrderNumber ?? null,
+      taxIdOrGst: args.data.taxIdOrGst ?? null,
+      plan: args.data.plan,
+      amountUsd: args.data.amountUsd,
+      paymentTerms: args.data.paymentTerms ?? "NET_30",
+      status: args.data.status ?? "INVOICED",
+      invoicePdfUrl: args.data.invoicePdfUrl ?? null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    store.invoiceRequests.set(inv.id, inv);
+    return inv;
+  },
+  async findMany(args?: { where?: { organizationId?: string } }): Promise<FallbackInvoiceRequest[]> {
+    const list: FallbackInvoiceRequest[] = [];
+    for (const i of store.invoiceRequests.values()) {
+      if (args?.where?.organizationId && i.organizationId !== args.where.organizationId) continue;
+      list.push(i);
+    }
+    return list.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  },
+  async findUnique(args: { where: { id: string } }): Promise<FallbackInvoiceRequest | null> {
+    return store.invoiceRequests.get(args.where.id) || null;
+  },
+  async update(args: { where: { id: string }; data: Partial<FallbackInvoiceRequest> }): Promise<FallbackInvoiceRequest> {
+    const existing = store.invoiceRequests.get(args.where.id);
+    if (!existing) throw new Error(`Invoice request ${args.where.id} not found.`);
+    const updated: FallbackInvoiceRequest = { ...existing, ...args.data, updatedAt: new Date() };
+    store.invoiceRequests.set(updated.id, updated);
+    return updated;
+  },
+  async delete(args: { where: { id: string } }): Promise<FallbackInvoiceRequest | null> {
+    const existing = store.invoiceRequests.get(args.where.id) || null;
+    if (existing) store.invoiceRequests.delete(args.where.id);
+    return existing;
+  },
+};
+
 const fallbackExpertReviewer = {
   async create(args: { data: Partial<FallbackExpertReviewer> & { organizationId: string; name: string; jobTitle: string; credentials: string } }): Promise<FallbackExpertReviewer> {
     const reviewer: FallbackExpertReviewer = {
@@ -1128,6 +1607,10 @@ export interface FallbackDbInterface {
   expertReviewer: typeof fallbackExpertReviewer;
   pageReview: typeof fallbackPageReview;
   generationJob: typeof fallbackGenerationJob;
+  specDocument: typeof fallbackSpecDocument;
+  cmsIntegration: typeof fallbackCmsIntegration;
+  aeoTrackerQuery: typeof fallbackAeoTrackerQuery;
+  invoiceRequest: typeof fallbackInvoiceRequest;
   $transaction<T>(fn: (tx: FallbackDbInterface) => Promise<T>): Promise<T>;
   $transaction<T>(array: Array<Promise<T>>): Promise<T[]>;
 }
@@ -1145,6 +1628,10 @@ export const fallbackDb: FallbackDbInterface = {
   expertReviewer: createModelProxy("expertReviewer", fallbackExpertReviewer),
   pageReview: createModelProxy("pageReview", fallbackPageReview),
   generationJob: createModelProxy("generationJob", fallbackGenerationJob),
+  specDocument: createModelProxy("specDocument", fallbackSpecDocument),
+  cmsIntegration: createModelProxy("cmsIntegration", fallbackCmsIntegration),
+  aeoTrackerQuery: createModelProxy("aeoTrackerQuery", fallbackAeoTrackerQuery),
+  invoiceRequest: createModelProxy("invoiceRequest", fallbackInvoiceRequest),
 
   async $transaction<T>(
     fnOrArray: ((tx: FallbackDbInterface) => Promise<T>) | Array<Promise<T>>,

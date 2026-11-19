@@ -62,6 +62,12 @@ export async function getSessionUser() {
   return session.user;
 }
 
+export async function getSession() {
+  const user = await getSessionUser();
+  if (!user) return null;
+  return { user };
+}
+
 export async function deleteCurrentSession() {
   const cookieStore = await cookies();
   const token = cookieStore.get(sessionCookie)?.value;

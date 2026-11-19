@@ -63,6 +63,10 @@ model Organization {
   auditLogs             AuditLog[]
   reviewers             ExpertReviewer[]
   generationJobs        GenerationJob[]
+  specDocuments         SpecDocument[]
+  cmsIntegrations       CmsIntegration[]
+  aeoTrackerQueries     AeoTrackerQuery[]
+  invoiceRequests       InvoiceRequest[]
 
   @@index([createdAt])
 }
@@ -286,4 +290,78 @@ model GenerationJob {
 
   @@index([organizationId, createdAt])
   @@index([status])
+}
+
+model SpecDocument {
+  id                 String        @id @default(cuid())
+  organizationId     String
+  organization       Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  title              String
+  fileName           String
+  fileSize           Int           @default(0)
+  fileType           String        @default("pdf")
+  extractedContent   String
+  extractedNodesJson String?
+  status             String        @default("PARSED") // PARSED, INDEXED, FAILED
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  @@index([organizationId, createdAt])
+}
+
+model CmsIntegration {
+  id                  String        @id @default(cuid())
+  organizationId      String
+  organization        Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  provider            String        // WORDPRESS, WEBFLOW, HUBSPOT, CUSTOM_WEBHOOK
+  name                String
+  endpointUrl         String
+  apiKey              String?
+  targetCollectionId  String?
+  status              String        @default("CONNECTED") // CONNECTED, ERROR
+  autoPublishApproved Boolean       @default(false)
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+
+  @@index([organizationId])
+}
+
+model AeoTrackerQuery {
+  id                      String        @id @default(cuid())
+  organizationId          String
+  organization            Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  draftId                 String?
+  keyword                 String
+  targetUrl               String
+  googleAeoCited          Boolean       @default(false)
+  googleAeoPosition       Int?
+  perplexityCited         Boolean       @default(false)
+  perplexityCitationIndex Int?
+  chatGptIndexed          Boolean       @default(false)
+  aiSnippetSummary        String?
+  lastCheckedAt           DateTime      @default(now())
+  createdAt               DateTime      @default(now())
+  updatedAt               DateTime      @updatedAt
+
+  @@index([organizationId, lastCheckedAt])
+}
+
+model InvoiceRequest {
+  id                  String        @id @default(cuid())
+  organizationId      String
+  organization        Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  companyName         String
+  billingContactName  String
+  billingEmail        String
+  purchaseOrderNumber String?
+  taxIdOrGst          String?
+  plan                String        // GROWTH_ANNUAL, FLEET_ANNUAL, ENTERPRISE_CUSTOM
+  amountUsd           Int
+  paymentTerms        String        @default("NET_30")
+  status              String        @default("PENDING") // PENDING, INVOICED, PAID, CANCELED
+  invoicePdfUrl       String?
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+
+  @@index([organizationId, createdAt])
 }

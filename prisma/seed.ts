@@ -1,21 +1,9 @@
-import { PrismaClient, UserRole, DraftStatus } from "@prisma/client";
+import { PrismaClient, UserRole, DraftStatus, ReviewStatus } from "@prisma/client";
 import { randomBytes, scrypt as nodeScrypt } from "node:crypto";
 import { promisify } from "node:util";
 
-export const ReviewStatus = {
-  PENDING: "PENDING",
-  APPROVED: "APPROVED",
-  CHANGES_REQUESTED: "CHANGES_REQUESTED",
-} as const;
-export type ReviewStatus = (typeof ReviewStatus)[keyof typeof ReviewStatus];
-
-type ExtendedPrismaClient = PrismaClient & {
-  expertReviewer: any;
-  pageReview: any;
-};
-
 const scrypt = promisify(nodeScrypt);
-const prisma: ExtendedPrismaClient = new PrismaClient() as ExtendedPrismaClient;
+const prisma = new PrismaClient();
 
 async function hashPassword(password: string): Promise<string> {
   const salt = randomBytes(16).toString("hex");

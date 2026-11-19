@@ -15,17 +15,39 @@ export interface LogAuditParams {
     | "REVIEWER_CREATED" 
     | "REVIEWER_DELETED"
     | "QUOTA_EXCEEDED"
-    | "SUBSCRIPTION_UPDATED";
-  resourceType: "DRAFT" | "REVIEW" | "REVIEWER" | "ORGANIZATION" | "JOB";
+    | "SUBSCRIPTION_UPDATED"
+    | "1_CLICK_CMS_PUBLISHED"
+    | "CMS_INTEGRATION_CONNECTED"
+    | "OEM_DOCUMENT_INGESTED"
+    | "AEO_AUDIT_SCAN_COMPLETED"
+    | "ENTERPRISE_INVOICE_GENERATED"
+    | (string & {});
+  resourceType: 
+    | "DRAFT" 
+    | "REVIEW" 
+    | "REVIEWER" 
+    | "ORGANIZATION" 
+    | "JOB"
+    | "SPEC_DOCUMENT"
+    | "CMS_INTEGRATION"
+    | "AEO_TRACKER"
+    | "INVOICE"
+    | (string & {});
   resourceId?: string | null;
   metadata?: Record<string, unknown>;
   diff?: Record<string, unknown>;
-  details?: string;
+  details?: string | Record<string, unknown>;
   ipAddress?: string | null;
 }
 
 export async function logAuditEvent(params: LogAuditParams) {
   try {
+    const detailsJson = typeof params.details === "string" 
+      ? JSON.stringify({ summary: params.details }) 
+      : params.details 
+        ? JSON.stringify(params.details) 
+        : null;
+
     const log = await db.auditLog.create({
       data: {
         organizationId: params.organizationId,
@@ -36,7 +58,7 @@ export async function logAuditEvent(params: LogAuditParams) {
         resourceId: params.resourceId ?? null,
         metadataJson: params.metadata ? JSON.stringify(params.metadata) : null,
         diffJson: params.diff ? JSON.stringify(params.diff) : null,
-        detailsJson: params.details ? JSON.stringify({ summary: params.details }) : null,
+        detailsJson,
         ipAddress: params.ipAddress ?? null,
       },
     });
@@ -46,6 +68,8 @@ export async function logAuditEvent(params: LogAuditParams) {
     return null;
   }
 }
+
+export const recordAuditLog = logAuditEvent;
 
 export async function getOrganizationAuditLogs(organizationId: string, limit = 50) {
   try {

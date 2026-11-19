@@ -41,14 +41,29 @@ export async function POST(
     }
 
     const body: unknown = await request.json().catch(() => null);
-    const { targetCms, targetUrl, webhookUrl } = (body && typeof body === "object" ? body : {}) as Record<string, unknown>;
+    const { targetCms, targetUrl, webhookUrl, integrationId } = (body && typeof body === "object" ? body : {}) as Record<string, unknown>;
 
-    const appUrl = (process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000").replace(/\/+$/, "");
+    // 1-Click Direct CMS Publishing Integration
+    let cmsDispatchResult: { provider?: string; publishedUrl?: string; message?: string } | null = null;
+    try {
+      const { publishDraftToCms } = await import("@/lib/cmsPublishing");
+      const pub = await publishDraftToCms({
+        draftId: draft.id,
+        integrationId: typeof integrationId === "string" ? integrationId : undefined,
+        userId: user.id,
+        userRole: user.role,
+      });
+      cmsDispatchResult = pub;
+    } catch (cmsErr) {
+      console.warn("CMS dispatch warning:", cmsErr);
+    }
+
+    const appUrl = (process.env.NEXT_PUBLIC_APP_URL || "http://localhost:8080").replace(/\/+$/, "");
     const slug = draft.title
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)/g, "");
-    const publishedUrl = typeof targetUrl === "string" && targetUrl.trim() ? targetUrl.trim() : `${appUrl}/articles/${slug}`;
+    const publishedUrl = cmsDispatchResult?.publishedUrl || (typeof targetUrl === "string" && targetUrl.trim() ? targetUrl.trim() : `${appUrl}/articles/${slug}`);
 
     // Optional: Dispatch to real CMS Webhook (Zapier, Make, Webflow, WordPress REST API)
     let webhookStatus: string | null = null;

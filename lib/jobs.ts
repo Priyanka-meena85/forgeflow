@@ -91,10 +91,23 @@ async function runJobAsync(
       currentStep: "Synthesizing OEM failure modes & sensor thresholds...",
     });
 
-    // Step 2: Invoke AI Generation Engine
+    // Step 2: Retrieve OEM Grounding Specs & Invoke AI Generation Engine
+    let oemContextSnippet = "";
+    try {
+      const { retrieveRelevantOemSpecs } = await import("@/lib/rag");
+      const matchedSpecs = await retrieveRelevantOemSpecs(input.keywords || input.industry, organizationId);
+      if (matchedSpecs.length > 0) {
+        oemContextSnippet = matchedSpecs.map((s) => `${s.parameter}: ${s.valueOrRange} (Source: ${s.documentTitle})`).join("; ");
+      }
+    } catch {
+      // Non-blocking fallback
+    }
+
     const pages = await generateIndustrialDraftPages({
       topics: input.topics,
-      productDescription: input.productDescription,
+      productDescription: oemContextSnippet
+        ? `${input.productDescription}. Verified OEM Tolerances: ${oemContextSnippet}`
+        : input.productDescription,
       industry: input.industry,
       keywords: input.keywords,
       company: input.company || "Enterprise Industrial Manufacturer",
@@ -103,14 +116,26 @@ async function runJobAsync(
     await updateJobState(jobId, {
       status: "PROCESSING",
       progress: 55,
-      currentStep: "Executing 8-gate automated industrial QA audit...",
+      currentStep: "Executing 8-gate automated industrial QA audit & embedding diagnostic widgets...",
     });
 
-    // Step 3: Run Deterministic QA & Persist Drafts
+    // Step 3: Run Deterministic QA & Persist Drafts with Interactive Calculators
+    const { getRecommendedWidgetForVertical } = await import("@/lib/interactiveWidgets");
+    const diagnosticWidget = getRecommendedWidgetForVertical(input.industry);
     const createdDraftIds: string[] = [];
 
     for (let i = 0; i < pages.length; i++) {
       const page = pages[i];
+      const sections = [...page.sections];
+
+      // Embed Interactive Engineering Diagnostic Calculator Widget
+      if (diagnosticWidget && !sections.some((s) => s.heading.includes("Diagnostic"))) {
+        sections.push({
+          heading: `Interactive Diagnostic: ${diagnosticWidget.name}`,
+          body: `Utilize this verified engineering tool to validate operating envelope tolerances and prevent unpredicted component failure modes. Referenced standards: ${diagnosticWidget.standardsCited.join(", ")}.\n\n${diagnosticWidget.htmlEmbed}`,
+        });
+      }
+
       const qaReport = {
         passed: true,
         overallScore: 96,
@@ -152,7 +177,7 @@ async function runJobAsync(
           keyword: page.keyword,
           vertical: input.industry,
           summary: page.summary,
-          sectionsJson: JSON.stringify(page.sections),
+          sectionsJson: JSON.stringify(sections),
           faqsJson: JSON.stringify(page.faqs),
           schemaJson,
           status: DraftStatus.IN_REVIEW,
