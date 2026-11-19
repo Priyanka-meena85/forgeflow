@@ -76,16 +76,16 @@ type Draft = {
   publishedUrl?: string | null;
 };
 
-const navItems: Array<{ label: TabKey; badge?: string; icon: string }> = [
-  { label: "Mission Control", icon: "⚡" },
-  { label: "Taxonomy Matrix", icon: "🧬", badge: "7 Verticals" },
-  { label: "QA Review Studio", icon: "🛡️", badge: "Split-View" },
-  { label: "Risk & Compliance", icon: "⚠️", badge: "Low Risk" },
-  { label: "AEO Schema Hub", icon: "🤖", badge: "JSON-LD" },
-  { label: "Publishing Pipeline", icon: "🚀" },
-  { label: "Industrial Analytics", icon: "📊", badge: "Charts" },
-  { label: "Workspace & Rules", icon: "⚙️" },
-  { label: "Billing & Quotas", icon: "💳" },
+const navItems: Array<{ label: TabKey; badge?: string; iconClass: string }> = [
+  { label: "Mission Control", iconClass: "css-icon-bolt" },
+  { label: "Taxonomy Matrix", iconClass: "css-icon-grid", badge: "7 Verticals" },
+  { label: "QA Review Studio", iconClass: "css-icon-shield", badge: "Split-View" },
+  { label: "Risk & Compliance", iconClass: "css-icon-alert", badge: "Low Risk" },
+  { label: "AEO Schema Hub", iconClass: "css-icon-gear", badge: "JSON-LD" },
+  { label: "Publishing Pipeline", iconClass: "css-icon-launch" },
+  { label: "Industrial Analytics", iconClass: "css-icon-chart", badge: "Charts" },
+  { label: "Workspace & Rules", iconClass: "css-icon-gear" },
+  { label: "Billing & Quotas", iconClass: "css-icon-card" },
 ];
 
 const verticalTaxonomies: Record<
@@ -915,7 +915,7 @@ function ForgeFlowWorkspace() {
       setReviewDrafts((current) =>
         current.map((d) => (String(d.id) === String(draftId) ? { ...d, stage: "Published" as const, publishedUrl: data.publishedUrl } : d)),
       );
-      setActionMessage(`🎉 Published to CMS: ${data.publishedUrl || "Connected Domain"}`);
+      setActionMessage(`Published to CMS: ${data.publishedUrl || "Connected Domain"}`);
       void refreshAuditLogs();
     } catch (e: unknown) {
       setActionMessage(e instanceof Error ? e.message : "CMS Publishing failed.");
@@ -1417,7 +1417,7 @@ function ForgeFlowWorkspace() {
       };
 
       setGeminiSuggestions(data.suggestions);
-      setActionMessage("✨ Gemini generated high-intent industrial suggestions.");
+      setActionMessage("Gemini generated high-intent industrial suggestions.");
     } catch (err: unknown) {
       console.error("Gemini suggestion error:", err);
       setActionMessage(err instanceof Error ? err.message : "Gemini suggestions failed.");
@@ -1431,7 +1431,7 @@ function ForgeFlowWorkspace() {
     setReviewDrafts((cur) =>
       cur.map((d) => (d.id === selectedDraft.id ? { ...d, title } : d)),
     );
-    setActionMessage(`✨ Applied Gemini Title: "${title}"`);
+    setActionMessage(`Applied Gemini Title: "${title}"`);
     if (typeof selectedDraft.id === "string" && selectedDraft.id.length > 10) {
       void fetch(`/api/drafts/${encodeURIComponent(selectedDraft.id)}`, {
         method: "PUT",
@@ -1446,7 +1446,7 @@ function ForgeFlowWorkspace() {
     setReviewDrafts((cur) =>
       cur.map((d) => (d.id === selectedDraft.id ? { ...d, keyword } : d)),
     );
-    setActionMessage(`✨ Applied Gemini Keyword: "${keyword}"`);
+    setActionMessage(`Applied Gemini Keyword: "${keyword}"`);
     if (typeof selectedDraft.id === "string" && selectedDraft.id.length > 10) {
       void fetch(`/api/drafts/${encodeURIComponent(selectedDraft.id)}`, {
         method: "PUT",
@@ -1461,7 +1461,7 @@ function ForgeFlowWorkspace() {
     setReviewDrafts((cur) =>
       cur.map((d) => (d.id === selectedDraft.id ? { ...d, summary: metaDescription } : d)),
     );
-    setActionMessage("✨ Applied Gemini Meta Description to summary.");
+    setActionMessage("Applied Gemini Meta Description to summary.");
     if (typeof selectedDraft.id === "string" && selectedDraft.id.length > 10) {
       void fetch(`/api/drafts/${encodeURIComponent(selectedDraft.id)}`, {
         method: "PUT",
@@ -1486,7 +1486,7 @@ function ForgeFlowWorkspace() {
         return { ...d, summary: answerCapsule, sections: updatedSections };
       }),
     );
-    setActionMessage("✨ Applied Gemini AEO Answer Capsule directly into lead section & summary.");
+    setActionMessage("Applied Gemini AEO Answer Capsule directly into lead section & summary.");
   }
 
   // Execute Animated Closed-Loop Auto-Patch
@@ -1550,7 +1550,7 @@ function ForgeFlowWorkspace() {
       );
       setIsPatching(false);
       setPatchStep(0);
-      setActionMessage(`✔ Auto-Patch Successful: Injected ${draftEquipment} (${draftStandard}) CTA and validated QA rules.`);
+      setActionMessage(`Auto-Patch Successful: Injected ${draftEquipment} (${draftStandard}) CTA and validated QA rules.`);
 
       // Sync auto-patch to PostgreSQL
       if (selectedDraft?.id && !String(selectedDraft.id).startsWith("demo-")) {
@@ -1570,7 +1570,7 @@ function ForgeFlowWorkspace() {
     if (action === "publish") {
       const isApproved = selectedDraft.pageReview?.status === "APPROVED" || selectedDraft.stage === "Approved";
       if (!isApproved) {
-        setActionMessage("⚠️ Publishing Gate: Draft cannot be published until an application engineer reviews and approves the technical content.");
+        setActionMessage("Publishing Gate: Draft cannot be published until an application engineer reviews and approves the technical content.");
         return;
       }
     }
@@ -1851,7 +1851,7 @@ function ForgeFlowWorkspace() {
     setReviewDrafts((cur) => [dynamicDraft, ...cur.filter((d) => d.id !== dynamicDraft.id)]);
     setSelectedDraftId(dynamicDraft.id);
     setActiveTab("QA Review Studio");
-    setActionMessage(`✔ Generated programmatic slice: "${dynamicTopicTitle}". Switched to QA Review Studio.`);
+    setActionMessage(`Generated programmatic slice: "${dynamicTopicTitle}". Switched to QA Review Studio.`);
     setGenerationBusy(false);
 
     // Persist to PostgreSQL Database
@@ -1980,12 +1980,7 @@ function ForgeFlowWorkspace() {
           {/* My Tools Quick Bar */}
           <div className="rounded-xl bg-sky-50/70 border border-sky-100/90 px-3 py-2 flex items-center justify-between text-xs font-semibold text-slate-700 shadow-2xs">
             <div className="flex items-center gap-2">
-              <svg className="w-4 h-4 text-sky-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-                <rect x="3" y="3" width="7" height="7" rx="1.5" />
-                <rect x="14" y="3" width="7" height="7" rx="1.5" />
-                <rect x="14" y="14" width="7" height="7" rx="1.5" />
-                <rect x="3" y="14" width="7" height="7" rx="1.5" />
-              </svg>
+              <span className="css-icon-grid text-sky-600"></span>
               <span className="text-slate-800 font-medium">My tools</span>
             </div>
             <div className="flex items-center gap-2 text-slate-400">
@@ -1994,9 +1989,7 @@ function ForgeFlowWorkspace() {
                 onClick={() => setActionMessage("Quick tools collapsed")}
                 className="hover:text-slate-600 text-xs transition cursor-pointer"
                 title="Dismiss"
-              >
-                ✕
-              </button>
+              ><span className="css-icon-cross"></span></button>
               <button
                 type="button"
                 onClick={() => setShowQuickActionPalette(true)}
@@ -2022,24 +2015,11 @@ function ForgeFlowWorkspace() {
             >
               <div className="flex items-center gap-2.5">
                 <div className="w-7 h-7 rounded-lg bg-sky-100 text-sky-600 flex items-center justify-center border border-sky-200/60 shadow-2xs shrink-0">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-                    <rect x="4" y="3" width="16" height="18" rx="2" />
-                    <line x1="8" y1="8" x2="16" y2="8" />
-                    <line x1="8" y1="12" x2="16" y2="12" />
-                    <line x1="8" y1="16" x2="13" y2="16" />
-                  </svg>
+                  <span className="css-icon-doc text-sky-600"></span>
                 </div>
                 <span className="font-semibold text-slate-800">Maintenance</span>
               </div>
-              <svg
-                className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${engineMenuOpen ? "rotate-0" : "-rotate-90"}`}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                strokeWidth="2"
-              >
-                <polyline points="6 9 12 15 18 9" />
-              </svg>
+              <span className={`css-icon-chevron-down text-slate-400 transition-transform duration-200 ${engineMenuOpen ? "rotate-0" : "-rotate-90"}`}></span>
             </button>
 
             {/* Indented Sub-Items with Vertical Connector Line */}
@@ -2061,7 +2041,7 @@ function ForgeFlowWorkspace() {
                         }`}
                       >
                         <div className="flex items-center gap-2 min-w-0">
-                          <span className="text-sm shrink-0">{item.icon}</span>
+                          <span className={`${item.iconClass} shrink-0`}></span>
                           <span className="truncate">{item.label}</span>
                         </div>
                         {item.badge ? (
@@ -2097,10 +2077,7 @@ function ForgeFlowWorkspace() {
                 : "text-slate-600 hover:bg-slate-50 hover:text-slate-900 border border-transparent"
             }`}
           >
-            <svg className="w-4 h-4 text-slate-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-              <circle cx="12" cy="12" r="3" />
-              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
-            </svg>
+            <span className="css-icon-gear text-slate-500"></span>
             <span>Settings</span>
           </button>
 
@@ -2111,9 +2088,7 @@ function ForgeFlowWorkspace() {
             className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-sky-800 bg-sky-50/60 hover:bg-sky-100/70 border border-sky-200/60 transition cursor-pointer"
           >
             <div className="flex items-center gap-2.5">
-              <svg className="w-4 h-4 text-sky-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-                <path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14" />
-              </svg>
+              <span className="css-icon-grid text-sky-600"></span>
               <span>Upgrade</span>
             </div>
             <span className="text-[10px] font-bold uppercase text-sky-700 bg-sky-100 px-1.5 py-0.5 rounded">
@@ -2141,10 +2116,7 @@ function ForgeFlowWorkspace() {
                 </div>
               </div>
 
-              <svg className="w-4 h-4 text-slate-400 shrink-0 ml-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="7 15 12 20 17 15" />
-                <polyline points="7 9 12 4 17 9" />
-              </svg>
+              <span className="css-icon-selector text-slate-400 shrink-0 ml-1"></span>
             </div>
 
             {/* User Popover Menu */}
@@ -2219,9 +2191,7 @@ function ForgeFlowWorkspace() {
                 aria-label="Dismiss banner"
                 onClick={() => setShowAnnouncement(false)}
                 className="text-slate-400 hover:text-white transition"
-              >
-                ✕
-              </button>
+              ><span className="css-icon-cross"></span></button>
             </div>
           </div>
         )}
@@ -2276,7 +2246,7 @@ function ForgeFlowWorkspace() {
               className={`shrink-0 rounded-lg px-3 py-2 text-xs font-semibold ${activeTab === item.label ? "bg-sky-50 text-sky-700" : "text-slate-600 hover:bg-slate-50"
                 }`}
             >
-              {item.icon} {item.label}
+              <span className={`${item.iconClass} shrink-0`}></span> <span>{item.label}</span>
             </button>
           ))}
         </nav>
@@ -2308,9 +2278,7 @@ function ForgeFlowWorkspace() {
               <span className="w-2 h-2 rounded-full bg-sky-600"></span>
               <span className="font-medium">{actionMessage}</span>
             </div>
-            <button type="button" aria-label="Dismiss message" onClick={() => setActionMessage("")} className="text-sky-600 hover:text-sky-900 font-bold">
-              ✕
-            </button>
+            <button type="button" aria-label="Dismiss message" onClick={() => setActionMessage("")} className="text-sky-600 hover:text-sky-900 font-bold"><span className="css-icon-cross"></span></button>
           </div>
         ) : null}
 
@@ -2472,7 +2440,7 @@ function ForgeFlowWorkspace() {
                   <div className="flex flex-wrap gap-1.5">
                     {customStandards.map((std, idx) => (
                       <span key={idx} className="px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 font-mono text-[10px] font-bold">
-                        ✓ {std}
+                        <span className="css-icon-check"></span> {std}
                       </span>
                     ))}
                   </div>
@@ -2483,7 +2451,7 @@ function ForgeFlowWorkspace() {
                   <div className="flex flex-wrap gap-1.5">
                     {["Concentration: >2.5% NaOH", "Thermal: >80°C (176°F)", "Manifold Delta: 15 bar", "Spray Angle: 26° offset", "Viscosity: 450,000 SSU"].map((tol, idx) => (
                       <span key={idx} className="px-2 py-0.5 rounded bg-sky-50 text-sky-800 border border-sky-200 font-mono text-[10px] font-bold">
-                        ⚡ {tol}
+                        <span className="css-icon-bolt"></span> {tol}
                       </span>
                     ))}
                   </div>
@@ -2520,7 +2488,7 @@ function ForgeFlowWorkspace() {
                   onClick={() => setShowIngestModal(true)}
                   className="px-3.5 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs shadow-xs flex items-center gap-1.5 transition cursor-pointer"
                 >
-                  <span>📄</span>
+                  <span className="css-icon-doc"></span>
                   <span>Ingest Datasheet (PDF/Text)</span>
                 </button>
                 <span className="text-xs font-mono text-slate-500 font-bold">VERTICAL:</span>
@@ -2669,7 +2637,7 @@ function ForgeFlowWorkspace() {
                   }}
                   className="mt-2 w-full py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold rounded-xl transition shadow-xs flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
                 >
-                  <span>✨</span>
+                  <span className="css-icon-dot text-sky-500"></span>
                   <span>{geminiLoading && geminiActiveTarget === "taxonomy" ? "Gemini Analyzing Node…" : "Gemini Keyword & Title Intel"}</span>
                 </button>
               </div>
@@ -2680,9 +2648,7 @@ function ForgeFlowWorkspace() {
               <div className="p-5 rounded-2xl border-2 border-indigo-200 bg-gradient-to-br from-indigo-50/70 via-white to-purple-50/40 space-y-4 shadow-md animate-in fade-in zoom-in-95 duration-200">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-indigo-100 pb-3">
                   <div className="flex items-center gap-2.5">
-                    <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-600 text-white font-bold text-xs shadow-sm">
-                      ✨
-                    </span>
+                    <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-600 text-white font-bold text-xs shadow-sm"><span className="css-icon-dot text-white"></span></span>
                     <div>
                       <h3 className="text-sm font-black text-slate-900 tracking-tight flex items-center gap-2">
                         <span>Gemini Industrial Taxonomy &amp; AEO Suggestions</span>
@@ -2702,7 +2668,7 @@ function ForgeFlowWorkspace() {
                       onClick={() => void fetchGeminiSuggestions(dynamicTopicTitle, activeEquipment, activeStandard, selectedVertical)}
                       className="px-3 py-1 rounded-lg bg-white border border-indigo-200 text-indigo-700 hover:bg-indigo-50 text-xs font-semibold shadow-xs flex items-center gap-1 cursor-pointer"
                     >
-                      <span>🔄</span>
+                      <span className="css-icon-refresh"></span>
                       <span>{geminiLoading ? "Regenerating…" : "Regenerate"}</span>
                     </button>
                     <button
@@ -2710,9 +2676,7 @@ function ForgeFlowWorkspace() {
                       onClick={() => setGeminiPanelOpen(false)}
                       className="text-slate-400 hover:text-slate-600 p-1 text-sm font-bold cursor-pointer"
                       aria-label="Close Gemini Panel"
-                    >
-                      ✕
-                    </button>
+                    ><span className="css-icon-cross"></span></button>
                   </div>
                 </div>
 
@@ -2724,7 +2688,7 @@ function ForgeFlowWorkspace() {
                 ) : geminiSuggestions ? (
                   <div className="space-y-4">
                     <div className="p-3 rounded-xl bg-white border border-indigo-100 text-xs text-slate-700 flex items-start gap-2 shadow-2xs">
-                      <span className="text-indigo-600 font-bold shrink-0 mt-0.5">💡 Engineering Rationale:</span>
+                      <span className="text-indigo-600 font-bold shrink-0 mt-0.5">Engineering Rationale:</span>
                       <span className="font-medium text-slate-800">{geminiSuggestions.rationale}</span>
                     </div>
 
@@ -2733,7 +2697,7 @@ function ForgeFlowWorkspace() {
                       <div className="p-4 rounded-xl bg-white border border-slate-200 space-y-2.5 shadow-2xs">
                         <div className="flex items-center justify-between text-xs font-bold text-slate-800">
                           <span className="flex items-center gap-1.5 text-indigo-700">
-                            <span>🏷️</span>
+                            <span className="css-icon-tag"></span>
                             <span>Recommended High-CTR Titles (&lt;60 Chars)</span>
                           </span>
                           <span className="text-[10px] font-mono text-slate-400">SERP &amp; SGE</span>
@@ -2751,7 +2715,7 @@ function ForgeFlowWorkspace() {
                       <div className="p-4 rounded-xl bg-white border border-slate-200 space-y-2.5 shadow-2xs">
                         <div className="flex items-center justify-between text-xs font-bold text-slate-800">
                           <span className="flex items-center gap-1.5 text-amber-700">
-                            <span>🎯</span>
+                            <span className="css-icon-dot text-emerald-600"></span>
                             <span>Target Zero-Volume Technical Queries</span>
                           </span>
                           <span className="text-[10px] font-mono text-slate-400">High-Intent</span>
@@ -2772,7 +2736,7 @@ function ForgeFlowWorkspace() {
                       <div className="p-4 rounded-xl bg-white border border-slate-200 space-y-2.5 shadow-2xs">
                         <div className="flex items-center justify-between text-xs font-bold text-slate-800">
                           <span className="flex items-center gap-1.5 text-sky-700">
-                            <span>📝</span>
+                            <span className="css-icon-doc"></span>
                             <span>155-Char Answer-First Meta Description</span>
                           </span>
                           <span className="text-[10px] font-mono text-slate-400">{geminiSuggestions.metaDescription.length} chars</span>
@@ -2786,7 +2750,7 @@ function ForgeFlowWorkspace() {
                       <div className="p-4 rounded-xl bg-white border border-slate-200 space-y-2.5 shadow-2xs">
                         <div className="flex items-center justify-between text-xs font-bold text-slate-800">
                           <span className="flex items-center gap-1.5 text-emerald-700">
-                            <span>⚡</span>
+                            <span className="css-icon-bolt"></span>
                             <span>45-Word AEO Answer Capsule (Perplexity &amp; SGE)</span>
                           </span>
                           <span className="text-[10px] font-mono text-emerald-600 font-bold">LLM Cited</span>
@@ -2816,9 +2780,7 @@ function ForgeFlowWorkspace() {
                 <div className="bg-white rounded-2xl max-w-2xl w-full p-6 space-y-4 shadow-2xl border border-slate-200">
                   <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                     <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center font-bold text-sm">
-                        📄
-                      </div>
+                      <div className="w-8 h-8 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center font-bold text-sm"><span className="css-icon-doc"></span></div>
                       <div>
                         <h3 className="text-base font-bold text-slate-900">Ingest Equipment Datasheet / Spec Sheet</h3>
                         <p className="text-xs text-slate-500">Extracts equipment nodes, failure modes, ASTM/ISO standards using Gemini</p>
@@ -2832,9 +2794,7 @@ function ForgeFlowWorkspace() {
                         setUploadedFileName("");
                       }}
                       className="text-slate-400 hover:text-slate-700 font-bold p-1 rounded-lg cursor-pointer"
-                    >
-                      ✕
-                    </button>
+                    ><span className="css-icon-cross"></span></button>
                   </div>
 
                   <div className="space-y-3">
@@ -2875,7 +2835,7 @@ function ForgeFlowWorkspace() {
                         }}
                       />
                       <div className="flex flex-col items-center gap-1 text-xs">
-                        <span className="text-xl">📁</span>
+                        <span className="css-icon-box"></span>
                         <span className="font-bold text-slate-800">
                           {uploadedFileName ? `Attached: ${uploadedFileName}` : "Drag & Drop Equipment Datasheet (.pdf, .txt, .csv, .md) or Click to Browse"}
                         </span>
@@ -2911,7 +2871,7 @@ function ForgeFlowWorkspace() {
                           </>
                         ) : (
                           <>
-                            <span>⚡</span>
+                            <span className="css-icon-bolt"></span>
                             <span>Extract Industrial Slice</span>
                           </>
                         )}
@@ -2955,7 +2915,7 @@ function ForgeFlowWorkspace() {
                           }}
                           className="w-full py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition cursor-pointer"
                         >
-                          ✓ Commit Slice to Active Matrix
+                          Commit Slice to Active Matrix
                         </button>
                       </div>
                     )}
@@ -3004,7 +2964,7 @@ function ForgeFlowWorkspace() {
                   }}
                   className="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold flex items-center gap-2 shadow-sm transition disabled:opacity-50 cursor-pointer"
                 >
-                  <span>✨</span>
+                  <span className="css-icon-dot text-sky-500"></span>
                   <span>{geminiLoading && geminiActiveTarget === "qa" ? "Gemini Optimizing…" : "Gemini AEO Suggestions"}</span>
                 </button>
 
@@ -3013,7 +2973,7 @@ function ForgeFlowWorkspace() {
                   onClick={() => runAutoPatch()}
                   className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-2 shadow-sm transition disabled:opacity-50"
                 >
-                  <span>{isPatching ? "⏳" : "⚡"}</span>
+                  <span className={isPatching ? "css-icon-clock" : "css-icon-bolt"}></span>
                   <span>{isPatching ? `Step ${patchStep}/4: Auto-Patching…` : "Run Auto-Patch Closed Loop"}</span>
                 </button>
 
@@ -3029,7 +2989,7 @@ function ForgeFlowWorkspace() {
                   onClick={() => setShowSignOffModal(true)}
                   className="px-4 py-2 rounded-xl bg-sky-700 hover:bg-sky-600 text-white text-xs font-bold shadow-sm flex items-center gap-1.5 cursor-pointer"
                 >
-                  <span>✍️</span>
+                  <span className="css-icon-edit"></span>
                   <span>Engineering Sign-Off</span>
                 </button>
 
@@ -3038,7 +2998,7 @@ function ForgeFlowWorkspace() {
                   onClick={() => updateDraftStage("publish")}
                   className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow-sm flex items-center gap-1.5 cursor-pointer"
                 >
-                  <span>🚀</span>
+                  <span className="css-icon-launch"></span>
                   <span>Publish to CMS</span>
                 </button>
               </div>
@@ -3048,7 +3008,7 @@ function ForgeFlowWorkspace() {
             {(!selectedDraft.pageReview || selectedDraft.pageReview.status !== "APPROVED") && (
               <div className="p-4 rounded-xl border border-amber-300 bg-amber-50/90 flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs shadow-xs animate-fade-in">
                 <div className="flex items-start gap-3">
-                  <span className="text-xl shrink-0 mt-0.5">⚠️</span>
+                  <span className="css-icon-alert shrink-0 mt-0.5"></span>
                   <div>
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-bold text-amber-900 uppercase font-mono tracking-wider">
@@ -3077,7 +3037,7 @@ function ForgeFlowWorkspace() {
                     onClick={() => setShowSignOffModal(true)}
                     className="px-3.5 py-2 rounded-xl bg-amber-700 hover:bg-amber-800 text-white font-bold text-xs shadow-xs flex items-center gap-1.5 cursor-pointer transition"
                   >
-                    <span>🔍</span>
+                    <span className="css-icon-search"></span>
                     <span>Review &amp; Sign Off Now</span>
                   </button>
                 </div>
@@ -3091,12 +3051,12 @@ function ForgeFlowWorkspace() {
                   <span className="text-xs font-mono font-bold text-slate-500 uppercase">Review Status:</span>
                   {selectedDraft.pageReview?.status === "APPROVED" ? (
                     <span className="px-3 py-1 rounded-full text-xs font-mono font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1.5 shadow-2xs">
-                      <span>✓</span>
+                      <span className="css-icon-check"></span>
                       <span>Approved: {selectedDraft.pageReview.reviewer?.name || "Certified Application Engineer"}</span>
                     </span>
                   ) : selectedDraft.pageReview?.status === "CHANGES_REQUESTED" ? (
                     <span className="px-3 py-1 rounded-full text-xs font-mono font-bold bg-amber-100 text-amber-800 border border-amber-200 flex items-center gap-1.5 shadow-2xs">
-                      <span>⚠️</span>
+                      <span className="css-icon-alert"></span>
                       <span>Changes Requested</span>
                     </span>
                   ) : selectedDraft.pageReview?.status === "PENDING" ? (
@@ -3106,7 +3066,7 @@ function ForgeFlowWorkspace() {
                     </span>
                   ) : (
                     <span className="px-3 py-1 rounded-full text-xs font-mono font-bold bg-red-100 text-red-800 border border-red-200 flex items-center gap-1.5 shadow-2xs">
-                      <span>⛔</span>
+                      <span className="css-icon-alert text-red-600"></span>
                       <span>Not expert reviewed</span>
                     </span>
                   )}
@@ -3156,7 +3116,7 @@ function ForgeFlowWorkspace() {
                   }}
                   className="px-3.5 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold shadow-xs flex items-center gap-1.5 cursor-pointer transition"
                 >
-                  <span>✍️</span>
+                  <span className="css-icon-edit"></span>
                   <span>Sign-Off &amp; Redline</span>
                 </button>
 
@@ -3166,7 +3126,7 @@ function ForgeFlowWorkspace() {
                   onClick={() => setShowReviewerModal(true)}
                   className="px-3.5 py-1.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-semibold shadow-2xs flex items-center gap-1.5 cursor-pointer transition"
                 >
-                  <span>👥</span>
+                  <span className="css-icon-user"></span>
                   <span>Reviewers Directory</span>
                 </button>
               </div>
@@ -3208,9 +3168,7 @@ function ForgeFlowWorkspace() {
               <div className="p-5 rounded-2xl border-2 border-indigo-200 bg-gradient-to-br from-indigo-50/70 via-white to-purple-50/40 space-y-4 shadow-md animate-in fade-in zoom-in-95 duration-200">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-indigo-100 pb-3">
                   <div className="flex items-center gap-2.5">
-                    <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-600 text-white font-bold text-xs shadow-sm">
-                      ✨
-                    </span>
+                    <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-600 text-white font-bold text-xs shadow-sm"><span className="css-icon-dot text-white"></span></span>
                     <div>
                       <h3 className="text-sm font-black text-slate-900 tracking-tight flex items-center gap-2">
                         <span>Gemini Industrial SEO &amp; AEO Optimizer</span>
@@ -3230,7 +3188,7 @@ function ForgeFlowWorkspace() {
                       onClick={() => void fetchGeminiSuggestions()}
                       className="px-3 py-1 rounded-lg bg-white border border-indigo-200 text-indigo-700 hover:bg-indigo-50 text-xs font-semibold shadow-xs flex items-center gap-1 cursor-pointer"
                     >
-                      <span>🔄</span>
+                      <span className="css-icon-refresh"></span>
                       <span>{geminiLoading ? "Regenerating…" : "Regenerate"}</span>
                     </button>
                     <button
@@ -3238,9 +3196,7 @@ function ForgeFlowWorkspace() {
                       onClick={() => setGeminiPanelOpen(false)}
                       className="text-slate-400 hover:text-slate-600 p-1 text-sm font-bold cursor-pointer"
                       aria-label="Close Gemini Panel"
-                    >
-                      ✕
-                    </button>
+                    ><span className="css-icon-cross"></span></button>
                   </div>
                 </div>
 
@@ -3253,7 +3209,7 @@ function ForgeFlowWorkspace() {
                   <div className="space-y-4">
                     {/* Rationale Bar */}
                     <div className="p-3 rounded-xl bg-white border border-indigo-100 text-xs text-slate-700 flex items-start gap-2 shadow-2xs">
-                      <span className="text-indigo-600 font-bold shrink-0 mt-0.5">💡 Engineering Rationale:</span>
+                      <span className="text-indigo-600 font-bold shrink-0 mt-0.5">Engineering Rationale:</span>
                       <span className="font-medium text-slate-800">{geminiSuggestions.rationale}</span>
                     </div>
 
@@ -3262,7 +3218,7 @@ function ForgeFlowWorkspace() {
                       <div className="p-4 rounded-xl bg-white border border-slate-200 space-y-2.5 shadow-2xs">
                         <div className="flex items-center justify-between text-xs font-bold text-slate-800">
                           <span className="flex items-center gap-1.5 text-indigo-700">
-                            <span>🏷️</span>
+                            <span className="css-icon-tag"></span>
                             <span>High-CTR Industrial Titles (&lt;60 Chars)</span>
                           </span>
                           <span className="text-[10px] font-mono text-slate-400">SERP &amp; SGE</span>
@@ -3287,7 +3243,7 @@ function ForgeFlowWorkspace() {
                       <div className="p-4 rounded-xl bg-white border border-slate-200 space-y-2.5 shadow-2xs">
                         <div className="flex items-center justify-between text-xs font-bold text-slate-800">
                           <span className="flex items-center gap-1.5 text-amber-700">
-                            <span>🎯</span>
+                            <span className="css-icon-dot text-emerald-600"></span>
                             <span>Zero-Volume B2B Technical Keywords</span>
                           </span>
                           <span className="text-[10px] font-mono text-slate-400">High-Intent</span>
@@ -3315,7 +3271,7 @@ function ForgeFlowWorkspace() {
                       <div className="p-4 rounded-xl bg-white border border-slate-200 space-y-2.5 shadow-2xs">
                         <div className="flex items-center justify-between text-xs font-bold text-slate-800">
                           <span className="flex items-center gap-1.5 text-sky-700">
-                            <span>📝</span>
+                            <span className="css-icon-doc"></span>
                             <span>155-Char Answer-First Meta Description</span>
                           </span>
                           <span className="text-[10px] font-mono text-slate-400">{geminiSuggestions.metaDescription.length} chars</span>
@@ -3336,7 +3292,7 @@ function ForgeFlowWorkspace() {
                       <div className="p-4 rounded-xl bg-white border border-slate-200 space-y-2.5 shadow-2xs">
                         <div className="flex items-center justify-between text-xs font-bold text-slate-800">
                           <span className="flex items-center gap-1.5 text-emerald-700">
-                            <span>⚡</span>
+                            <span className="css-icon-bolt"></span>
                             <span>45-Word AEO Answer Capsule (Perplexity &amp; SGE)</span>
                           </span>
                           <span className="text-[10px] font-mono text-emerald-600 font-bold">LLM Cited</span>
@@ -3363,10 +3319,10 @@ function ForgeFlowWorkspace() {
               <div className="flex flex-wrap items-center gap-2">
                 <span className="font-bold text-slate-700 uppercase tracking-wider text-xs mr-1">QA Status Strip:</span>
                 <span className="px-2.5 py-1 rounded text-xs font-bold border bg-emerald-50 text-emerald-800 border-emerald-200 animate-badge-pop">
-                  ✅ Word count
+                  <span className="css-icon-check text-emerald-600"></span> Word count
                 </span>
                 <span className="px-2.5 py-1 rounded text-xs font-bold border bg-emerald-50 text-emerald-800 border-emerald-200 animate-badge-pop">
-                  ✅ FAQ · 5
+                  <span className="css-icon-check text-emerald-600"></span> FAQ · 5
                 </span>
                 <span
                   className={`px-2.5 py-1 rounded text-xs font-bold border transition-all ${selectedDraft.qa.ctaCount === "Pass"
@@ -3374,16 +3330,16 @@ function ForgeFlowWorkspace() {
                     : "bg-red-50 text-red-800 border-red-200"
                     }`}
                 >
-                  {selectedDraft.qa.ctaCount === "Pass" ? "✅ CTA · 1" : "❌ CTA missing"}
+                  {selectedDraft.qa.ctaCount === "Pass" ? "CTA · 1" : "CTA missing"}
                 </span>
                 <span className="px-2.5 py-1 rounded text-xs font-bold border bg-emerald-50 text-emerald-800 border-emerald-200 animate-badge-pop">
-                  ✅ Links OK
+                  <span className="css-icon-check text-emerald-600"></span> Links OK
                 </span>
                 <span className="px-2.5 py-1 rounded text-xs font-bold border bg-emerald-50 text-emerald-800 border-emerald-200 animate-badge-pop">
-                  ✅ Unique
+                  <span className="css-icon-check text-emerald-600"></span> Unique
                 </span>
                 <span className="px-2.5 py-1 rounded text-xs font-bold border bg-emerald-50 text-emerald-800 border-emerald-200 animate-badge-pop">
-                  ✅ Schema
+                  <span className="css-icon-check text-emerald-600"></span> Schema
                 </span>
               </div>
               <span className="text-xs text-slate-500 font-sans hidden sm:inline">
@@ -3512,7 +3468,7 @@ function ForgeFlowWorkspace() {
                     <div className="p-4 rounded-xl border border-amber-200 bg-amber-50/60 mb-6 space-y-4 animate-fade-in text-xs">
                       <div className="flex items-center justify-between pb-2 border-b border-amber-200">
                         <div className="flex items-center gap-2 font-bold text-amber-950">
-                          <span>✏️</span>
+                          <span className="css-icon-edit"></span>
                           <span>Chief Reliability Engineer — Content Modification Mode</span>
                         </div>
                         <div className="flex items-center gap-2">
@@ -3529,7 +3485,7 @@ function ForgeFlowWorkspace() {
                             disabled={isSavingEdit}
                             className="px-3.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold transition flex items-center gap-1 cursor-pointer disabled:opacity-50"
                           >
-                            {isSavingEdit ? "Saving..." : "💾 Save Changes to Database"}
+                            {isSavingEdit ? "Saving..." : "Save Changes to Database"}
                           </button>
                         </div>
                       </div>
@@ -3620,7 +3576,7 @@ function ForgeFlowWorkspace() {
                       {/* AEO Answer Capsule Highlight */}
                       <div className="p-4 rounded-xl border border-emerald-200 bg-emerald-50/60 text-slate-800">
                         <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase text-emerald-800 mb-1">
-                          <span>⚡ AEO / GEO Answer Capsule (Target for Perplexity & Google AI Overviews)</span>
+                          <span className="flex items-center gap-1.5"><span className="css-icon-bolt"></span> <span>AEO / GEO Answer Capsule</span> (Target for Perplexity & Google AI Overviews)</span>
                         </div>
                         <p className="text-sm font-semibold leading-relaxed text-slate-900">
                           {selectedDraft.vertical && verticalTaxonomies[selectedDraft.vertical]?.capsuleText
@@ -3820,7 +3776,7 @@ function ForgeFlowWorkspace() {
                           <div className="p-4 rounded-xl border border-sky-200 bg-sky-50/50 space-y-3 text-xs mt-4 animate-fade-in">
                             <div className="flex items-center justify-between font-bold text-slate-900">
                               <div className="flex items-center gap-2">
-                                <span className="text-sm">🏆</span>
+                                <span className="css-icon-check text-amber-500"></span>
                                 <span>AEO Competitive Source Citation Algorithm Analysis</span>
                               </div>
                               <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-sky-200 text-sky-800">
@@ -3923,7 +3879,7 @@ function ForgeFlowWorkspace() {
                   <div className="flex flex-wrap gap-1.5">
                     {customStandards.map((std, idx) => (
                       <span key={idx} className="px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 font-mono text-[10px] font-bold">
-                        ✓ {std}
+                        <span className="css-icon-check"></span> {std}
                       </span>
                     ))}
                   </div>
@@ -3934,7 +3890,7 @@ function ForgeFlowWorkspace() {
                   <div className="flex flex-wrap gap-1.5">
                     {["Concentration: >2.5% NaOH", "Thermal: >80°C (176°F)", "Manifold Delta: 15 bar", "Spray Angle: 26° offset", "Viscosity: 450,000 SSU"].map((tol, idx) => (
                       <span key={idx} className="px-2 py-0.5 rounded bg-sky-50 text-sky-800 border border-sky-200 font-mono text-[10px] font-bold">
-                        ⚡ {tol}
+                        <span className="css-icon-bolt"></span> {tol}
                       </span>
                     ))}
                   </div>
@@ -4005,7 +3961,7 @@ function ForgeFlowWorkspace() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 pt-2">
                   {complianceAuditResult.auditChecks?.map((chk: ComplianceAuditCheck, idx: number) => (
                     <div key={idx} className="p-3 rounded-xl bg-white border border-emerald-100 flex items-start gap-2.5 text-xs">
-                      <span className="text-emerald-600 font-bold shrink-0 mt-0.5">✓</span>
+                      <span className="text-emerald-600 font-bold shrink-0 mt-0.5"><span className="css-icon-check"></span></span>
                       <div>
                         <div className="font-bold text-slate-900">{chk.check}</div>
                         <div className="text-slate-600 mt-0.5">{chk.detail}</div>
@@ -4117,7 +4073,7 @@ function ForgeFlowWorkspace() {
                   <div className="flex flex-wrap gap-1.5">
                     {customStandards.map((std, idx) => (
                       <span key={idx} className="px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 font-mono text-[10px] font-bold">
-                        ✓ {std}
+                        <span className="css-icon-check"></span> {std}
                       </span>
                     ))}
                   </div>
@@ -4128,7 +4084,7 @@ function ForgeFlowWorkspace() {
                   <div className="flex flex-wrap gap-1.5">
                     {["Concentration: >2.5% NaOH", "Thermal: >80°C (176°F)", "Manifold Delta: 15 bar", "Spray Angle: 26° offset", "Viscosity: 450,000 SSU"].map((tol, idx) => (
                       <span key={idx} className="px-2 py-0.5 rounded bg-sky-50 text-sky-800 border border-sky-200 font-mono text-[10px] font-bold">
-                        ⚡ {tol}
+                        <span className="css-icon-bolt"></span> {tol}
                       </span>
                     ))}
                   </div>
@@ -4165,7 +4121,7 @@ function ForgeFlowWorkspace() {
                   onClick={() => setShowExecutiveRoiModal(true)}
                   className="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-xs flex items-center gap-1.5 transition cursor-pointer"
                 >
-                  <span>📊 Executive ROI Digest</span>
+                  <span className="css-icon-chart"></span><span>Executive ROI Digest</span>
                 </button>
                 {(["FAQPage", "HowTo", "TechSpec"] as const).map((type) => (
                   <button
@@ -4301,7 +4257,7 @@ function ForgeFlowWorkspace() {
                   <div className="flex flex-wrap gap-1.5">
                     {customStandards.map((std, idx) => (
                       <span key={idx} className="px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 font-mono text-[10px] font-bold">
-                        ✓ {std}
+                        <span className="css-icon-check"></span> {std}
                       </span>
                     ))}
                   </div>
@@ -4312,7 +4268,7 @@ function ForgeFlowWorkspace() {
                   <div className="flex flex-wrap gap-1.5">
                     {["Concentration: >2.5% NaOH", "Thermal: >80°C (176°F)", "Manifold Delta: 15 bar", "Spray Angle: 26° offset", "Viscosity: 450,000 SSU"].map((tol, idx) => (
                       <span key={idx} className="px-2 py-0.5 rounded bg-sky-50 text-sky-800 border border-sky-200 font-mono text-[10px] font-bold">
-                        ⚡ {tol}
+                        <span className="css-icon-bolt"></span> {tol}
                       </span>
                     ))}
                   </div>
@@ -4375,7 +4331,7 @@ function ForgeFlowWorkspace() {
                   onClick={() => window.open("/api/drafts/export-all?format=csv", "_blank")}
                   className="px-3 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold flex items-center gap-1.5 transition cursor-pointer"
                 >
-                  <span>📦</span>
+                  <span className="css-icon-box"></span>
                   <span>Export All Published CSV</span>
                 </button>
               </div>
@@ -4428,11 +4384,11 @@ function ForgeFlowWorkspace() {
                     <div className="flex items-center gap-2 flex-wrap">
                       {d.pageReview?.status === "APPROVED" ? (
                         <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
-                          ✓ Reviewed: {d.pageReview.reviewer?.name?.split(",")[0] || "Engineer"}
+                          Reviewed: {d.pageReview.reviewer?.name?.split(",")[0] || "Engineer"}
                         </span>
                       ) : d.pageReview?.status === "CHANGES_REQUESTED" ? (
                         <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-100 text-amber-800 border border-amber-200">
-                          ⚠️ Changes Requested
+                          Changes Requested
                         </span>
                       ) : d.pageReview?.status === "PENDING" ? (
                         <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-sky-100 text-sky-800 border border-sky-200">
@@ -4440,7 +4396,7 @@ function ForgeFlowWorkspace() {
                         </span>
                       ) : (
                         <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-red-100 text-red-800 border border-red-200">
-                          ⛔ Not expert reviewed
+                          Not expert reviewed
                         </span>
                       )}
 
@@ -4451,7 +4407,7 @@ function ForgeFlowWorkspace() {
                           onClick={() => void handlePublishDraftToCms(d.id, selectedCmsId)}
                           className="px-3 py-1 rounded bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-xs flex items-center gap-1 cursor-pointer transition disabled:opacity-50"
                         >
-                          <span>🚀</span>
+                          <span className="css-icon-launch"></span>
                           <span>1-Click Publish to CMS</span>
                         </button>
                       )}
@@ -4463,7 +4419,7 @@ function ForgeFlowWorkspace() {
                           rel="noopener noreferrer"
                           className="px-2.5 py-1 rounded text-xs font-mono font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 hover:bg-emerald-200 flex items-center gap-1"
                         >
-                          <span>🔗</span>
+                          <span className="css-icon-launch"></span>
                           <span>Live URL</span>
                         </a>
                       ) : (
@@ -4499,7 +4455,7 @@ function ForgeFlowWorkspace() {
                   <div className="flex flex-wrap gap-1.5">
                     {customStandards.map((std, idx) => (
                       <span key={idx} className="px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 font-mono text-[10px] font-bold">
-                        ✓ {std}
+                        <span className="css-icon-check"></span> {std}
                       </span>
                     ))}
                   </div>
@@ -4510,7 +4466,7 @@ function ForgeFlowWorkspace() {
                   <div className="flex flex-wrap gap-1.5">
                     {["Concentration: >2.5% NaOH", "Thermal: >80°C (176°F)", "Manifold Delta: 15 bar", "Spray Angle: 26° offset", "Viscosity: 450,000 SSU"].map((tol, idx) => (
                       <span key={idx} className="px-2 py-0.5 rounded bg-sky-50 text-sky-800 border border-sky-200 font-mono text-[10px] font-bold">
-                        ⚡ {tol}
+                        <span className="css-icon-bolt"></span> {tol}
                       </span>
                     ))}
                   </div>
@@ -4547,7 +4503,7 @@ function ForgeFlowWorkspace() {
                   onClick={() => setShowExecutiveRoiModal(true)}
                   className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-xs flex items-center gap-1.5 transition cursor-pointer"
                 >
-                  <span>📊 Export Executive ROI Digest (PDF)</span>
+                  <span className="css-icon-chart"></span><span>Export Executive ROI Digest (PDF)</span>
                 </button>
                 <span className="text-xs font-mono px-3 py-1 rounded bg-sky-50 text-sky-800 border border-sky-200 font-bold flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-sky-600 radar-ping"></span>
@@ -4583,7 +4539,7 @@ function ForgeFlowWorkspace() {
                   onClick={openStripePortal}
                   className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition shadow-xs cursor-pointer flex items-center gap-2 shrink-0"
                 >
-                  <span>💳</span>
+                  <span className="css-icon-card"></span>
                   <span>Manage Billing & Invoices (Stripe Portal)</span>
                 </button>
               </div>
@@ -4729,7 +4685,7 @@ function ForgeFlowWorkspace() {
                   <div className="flex flex-wrap gap-1.5">
                     {customStandards.map((std, idx) => (
                       <span key={idx} className="px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 font-mono text-[10px] font-bold">
-                        ✓ {std}
+                        <span className="css-icon-check"></span> {std}
                       </span>
                     ))}
                   </div>
@@ -4740,7 +4696,7 @@ function ForgeFlowWorkspace() {
                   <div className="flex flex-wrap gap-1.5">
                     {["Concentration: >2.5% NaOH", "Thermal: >80°C (176°F)", "Manifold Delta: 15 bar", "Spray Angle: 26° offset", "Viscosity: 450,000 SSU"].map((tol, idx) => (
                       <span key={idx} className="px-2 py-0.5 rounded bg-sky-50 text-sky-800 border border-sky-200 font-mono text-[10px] font-bold">
-                        ⚡ {tol}
+                        <span className="css-icon-bolt"></span> {tol}
                       </span>
                     ))}
                   </div>
@@ -4880,7 +4836,7 @@ function ForgeFlowWorkspace() {
               <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                 <div>
                   <h3 className="text-sm font-bold text-slate-900 uppercase font-mono flex items-center gap-2">
-                    <span>📜</span>
+                    <span className="css-icon-doc"></span>
                     <span>Engineering Audit Trail & Compliance Log</span>
                   </h3>
                   <p className="text-xs text-slate-500">
@@ -4892,7 +4848,7 @@ function ForgeFlowWorkspace() {
                   onClick={refreshAuditLogs}
                   className="px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 text-xs font-bold text-slate-700 transition cursor-pointer flex items-center gap-1.5"
                 >
-                  <span>🔄</span>
+                  <span className="css-icon-refresh"></span>
                   <span>Refresh</span>
                 </button>
               </div>
@@ -4977,9 +4933,7 @@ function ForgeFlowWorkspace() {
                           type="button"
                           onClick={() => setCustomBannedWords(customBannedWords.filter((_, i) => i !== idx))}
                           className="hover:text-red-900 font-bold ml-1 cursor-pointer"
-                        >
-                          ✕
-                        </button>
+                        ><span className="css-icon-cross"></span></button>
                       </span>
                     ))}
                   </div>
@@ -5013,14 +4967,12 @@ function ForgeFlowWorkspace() {
                   <div className="flex flex-wrap gap-1.5 pt-1">
                     {customStandards.map((std, idx) => (
                       <span key={idx} className="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 font-mono text-xs flex items-center gap-1.5">
-                        <span>✓ {std}</span>
+                        <span><span className="css-icon-check"></span> {std}</span>
                         <button
                           type="button"
                           onClick={() => setCustomStandards(customStandards.filter((_, i) => i !== idx))}
                           className="hover:text-emerald-950 font-bold ml-1 cursor-pointer"
-                        >
-                          ✕
-                        </button>
+                        ><span className="css-icon-cross"></span></button>
                       </span>
                     ))}
                   </div>
@@ -5036,9 +4988,7 @@ function ForgeFlowWorkspace() {
           <div className="bg-white rounded-2xl max-w-xl w-full p-6 space-y-4 shadow-2xl border border-slate-200 animate-in zoom-in-95 duration-150">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-sky-100 text-sky-700 flex items-center justify-center font-bold text-sm">
-                  ⚡
-                </div>
+                <div className="w-8 h-8 rounded-lg bg-sky-100 text-sky-700 flex items-center justify-center font-bold text-sm"><span className="css-icon-bolt"></span></div>
                 <div>
                   <h3 className="text-base font-bold text-slate-900">ForgeFlow Quick Action Palette</h3>
                   <p className="text-xs text-slate-500">Autonomous shortcuts for plant reliability & content operations</p>
@@ -5048,9 +4998,7 @@ function ForgeFlowWorkspace() {
                 type="button"
                 onClick={() => setShowQuickActionPalette(false)}
                 className="text-slate-400 hover:text-slate-700 font-bold p-1 rounded-lg cursor-pointer"
-              >
-                ✕
-              </button>
+              ><span className="css-icon-cross"></span></button>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
@@ -5063,7 +5011,7 @@ function ForgeFlowWorkspace() {
                 className="p-3.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-sky-50 hover:border-sky-300 text-left space-y-1 transition group cursor-pointer"
               >
                 <div className="font-bold text-slate-900 group-hover:text-sky-700 flex items-center gap-2">
-                  <span>🚀</span>
+                  <span className="css-icon-launch"></span>
                   <span>New Fast Batch Generator</span>
                 </div>
                 <p className="text-slate-500 text-[11px]">Generate 1-5 technical slices with Gemini AI</p>
@@ -5078,7 +5026,7 @@ function ForgeFlowWorkspace() {
                 className="p-3.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-purple-50 hover:border-purple-300 text-left space-y-1 transition group cursor-pointer"
               >
                 <div className="font-bold text-slate-900 group-hover:text-purple-700 flex items-center gap-2">
-                  <span>📄</span>
+                  <span className="css-icon-doc"></span>
                   <span>Ingest Equipment Datasheet</span>
                 </div>
                 <p className="text-slate-500 text-[11px]">Drop PDF or text to extract ASTM/ISO nodes</p>
@@ -5094,7 +5042,7 @@ function ForgeFlowWorkspace() {
                 className="p-3.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-emerald-50 hover:border-emerald-300 text-left space-y-1 transition group cursor-pointer"
               >
                 <div className="font-bold text-slate-900 group-hover:text-emerald-700 flex items-center gap-2">
-                  <span>🛡️</span>
+                  <span className="css-icon-shield"></span>
                   <span>Run Live Compliance Audit</span>
                 </div>
                 <p className="text-slate-500 text-[11px]">Audit physical tolerances & sanitize fluff</p>
@@ -5111,7 +5059,7 @@ function ForgeFlowWorkspace() {
                 className="p-3.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-amber-50 hover:border-amber-300 text-left space-y-1 transition group cursor-pointer"
               >
                 <div className="font-bold text-slate-900 group-hover:text-amber-700 flex items-center gap-2">
-                  <span>🤖</span>
+                  <span className="css-icon-gear"></span>
                   <span>AI Answer Simulator</span>
                 </div>
                 <p className="text-slate-500 text-[11px]">Simulate Perplexity & Google SGE citations</p>
@@ -5126,7 +5074,7 @@ function ForgeFlowWorkspace() {
                 className="p-3.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-emerald-50 hover:border-emerald-300 text-left space-y-1 transition group cursor-pointer"
               >
                 <div className="font-bold text-slate-900 group-hover:text-emerald-700 flex items-center gap-2">
-                  <span>📦</span>
+                  <span className="css-icon-box"></span>
                   <span>Bulk Export Entire Batch</span>
                 </div>
                 <p className="text-slate-500 text-[11px]">Download consolidated Webflow CSV file</p>
@@ -5141,7 +5089,7 @@ function ForgeFlowWorkspace() {
                 className="p-3.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 hover:border-slate-300 text-left space-y-1 transition group cursor-pointer"
               >
                 <div className="font-bold text-slate-900 flex items-center gap-2">
-                  <span>⚙️</span>
+                  <span className="css-icon-gear"></span>
                   <span>Plant Rules & Banned Fluff</span>
                 </div>
                 <p className="text-slate-500 text-[11px]">Configure voice register and mandatory standards</p>
@@ -5188,7 +5136,7 @@ function ForgeFlowWorkspace() {
                   onClick={openStripePortal}
                   className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition shadow-xs cursor-pointer flex items-center gap-2 shrink-0"
                 >
-                  <span>💳</span>
+                  <span className="css-icon-card"></span>
                   <span>Manage Billing & Invoices (Stripe Portal)</span>
                 </button>
               </div>
@@ -5205,11 +5153,11 @@ function ForgeFlowWorkspace() {
                   </div>
                   <p className="text-xs text-slate-500 mt-2">For single-facility manufacturers and solo industrial marketers.</p>
                   <div className="mt-6 space-y-2 text-xs border-t border-slate-100 pt-4 text-slate-700">
-                    <div>✔ 20 QA-Validated Pages / mo</div>
-                    <div>✔ 1 Connected Domain</div>
-                    <div>✔ 2 Industrial Verticals</div>
-                    <div>✔ FAQPage &amp; Article JSON-LD</div>
-                    <div>✔ CMS Export (HTML/MD)</div>
+                    <div className="flex items-center gap-1.5"><span className="css-icon-check text-emerald-600"></span> 20 QA-Validated Pages / mo</div>
+                    <div className="flex items-center gap-1.5"><span className="css-icon-check text-emerald-600"></span> 1 Connected Domain</div>
+                    <div className="flex items-center gap-1.5"><span className="css-icon-check text-emerald-600"></span> 2 Industrial Verticals</div>
+                    <div className="flex items-center gap-1.5"><span className="css-icon-check text-emerald-600"></span> FAQPage &amp; Article JSON-LD</div>
+                    <div className="flex items-center gap-1.5"><span className="css-icon-check text-emerald-600"></span> CMS Export (HTML/MD)</div>
                   </div>
                 </div>
                 <button
@@ -5233,12 +5181,12 @@ function ForgeFlowWorkspace() {
                   </div>
                   <p className="text-xs text-slate-500 mt-2">For scaling industrial B2B tech SaaS and multi-plant operations.</p>
                   <div className="mt-6 space-y-2 text-xs border-t border-slate-100 pt-4 text-slate-700">
-                    <div>✔ 100 QA-Validated Pages / mo</div>
-                    <div>✔ 3 Connected Domains</div>
-                    <div>✔ All 7 Pre-Built Verticals</div>
-                    <div>✔ Multi-Schema (HowTo + Specs)</div>
-                    <div>✔ Direct Webflow/WordPress API</div>
-                    <div>✔ Custom URL Allowlists &amp; Fluff Gating</div>
+                    <div className="flex items-center gap-1.5"><span className="css-icon-check text-emerald-600"></span> 100 QA-Validated Pages / mo</div>
+                    <div className="flex items-center gap-1.5"><span className="css-icon-check text-emerald-600"></span> 3 Connected Domains</div>
+                    <div className="flex items-center gap-1.5"><span className="css-icon-check text-emerald-600"></span> All 7 Pre-Built Verticals</div>
+                    <div className="flex items-center gap-1.5"><span className="css-icon-check text-emerald-600"></span> Multi-Schema (HowTo + Specs)</div>
+                    <div className="flex items-center gap-1.5"><span className="css-icon-check text-emerald-600"></span> Direct Webflow/WordPress API</div>
+                    <div className="flex items-center gap-1.5"><span className="css-icon-check text-emerald-600"></span> Custom URL Allowlists &amp; Fluff Gating</div>
                   </div>
                 </div>
                 <button
@@ -5259,11 +5207,11 @@ function ForgeFlowWorkspace() {
                   </div>
                   <p className="text-xs text-slate-500 mt-2">For specialized B2B agencies managing multiple client retainers.</p>
                   <div className="mt-6 space-y-2 text-xs border-t border-slate-100 pt-4 text-slate-700">
-                    <div>✔ 400 Pages included (+$1.75/pg overage)</div>
-                    <div>✔ Unlimited Client Tenants</div>
-                    <div>✔ White-Label Portal &amp; CNAME</div>
-                    <div>✔ 15 Team &amp; Client Seats</div>
-                    <div>✔ Dedicated Taxonomy Engineer</div>
+                    <div className="flex items-center gap-1.5"><span className="css-icon-check text-emerald-600"></span> 400 Pages included (+$1.75/pg overage)</div>
+                    <div className="flex items-center gap-1.5"><span className="css-icon-check text-emerald-600"></span> Unlimited Client Tenants</div>
+                    <div className="flex items-center gap-1.5"><span className="css-icon-check text-emerald-600"></span> White-Label Portal &amp; CNAME</div>
+                    <div className="flex items-center gap-1.5"><span className="css-icon-check text-emerald-600"></span> 15 Team &amp; Client Seats</div>
+                    <div className="flex items-center gap-1.5"><span className="css-icon-check text-emerald-600"></span> Dedicated Taxonomy Engineer</div>
                   </div>
                 </div>
                 <button
@@ -5297,7 +5245,7 @@ function ForgeFlowWorkspace() {
                   <div className="flex flex-wrap gap-1.5">
                     {customStandards.map((std, idx) => (
                       <span key={idx} className="px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 font-mono text-[10px] font-bold">
-                        ✓ {std}
+                        <span className="css-icon-check"></span> {std}
                       </span>
                     ))}
                   </div>
@@ -5308,7 +5256,7 @@ function ForgeFlowWorkspace() {
                   <div className="flex flex-wrap gap-1.5">
                     {["Concentration: >2.5% NaOH", "Thermal: >80°C (176°F)", "Manifold Delta: 15 bar", "Spray Angle: 26° offset", "Viscosity: 450,000 SSU"].map((tol, idx) => (
                       <span key={idx} className="px-2 py-0.5 rounded bg-sky-50 text-sky-800 border border-sky-200 font-mono text-[10px] font-bold">
-                        ⚡ {tol}
+                        <span className="css-icon-bolt"></span> {tol}
                       </span>
                     ))}
                   </div>
@@ -5410,9 +5358,7 @@ function ForgeFlowWorkspace() {
                 onClick={() => setInviteModalOpen(false)}
                 className="text-slate-400 hover:text-slate-600 text-lg leading-none p-1 cursor-pointer"
                 aria-label="Close"
-              >
-                ✕
-              </button>
+              ><span className="css-icon-cross"></span></button>
             </div>
 
             <form onSubmit={handleSendInvite} className="space-y-4">
@@ -5481,9 +5427,7 @@ function ForgeFlowWorkspace() {
             <div className="p-5 border-b border-slate-200 flex items-start justify-between bg-slate-50">
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-sky-600 text-white font-bold text-xs">
-                    👥
-                  </span>
+                  <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-sky-600 text-white font-bold text-xs"><span className="css-icon-user"></span></span>
                   <h3 className="text-base font-bold text-slate-900">Application Engineering Reviewers</h3>
                 </div>
                 <p className="text-xs text-slate-500 mt-1">
@@ -5495,9 +5439,7 @@ function ForgeFlowWorkspace() {
                 onClick={() => setShowReviewerModal(false)}
                 className="text-slate-400 hover:text-slate-600 text-lg leading-none p-1 cursor-pointer"
                 aria-label="Close"
-              >
-                ✕
-              </button>
+              ><span className="css-icon-cross"></span></button>
             </div>
 
             <div className="p-6 overflow-y-auto space-y-6 flex-1">
@@ -5676,9 +5618,7 @@ function ForgeFlowWorkspace() {
             <div className="p-5 border-b border-slate-200 flex items-start justify-between bg-slate-50">
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-sky-700 text-white font-bold text-xs">
-                    ✍️
-                  </span>
+                  <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-sky-700 text-white font-bold text-xs"><span className="css-icon-edit"></span></span>
                   <h3 className="text-base font-bold text-slate-900">Application Engineering Sign-Off</h3>
                 </div>
                 <p className="text-xs text-slate-500 mt-1">
@@ -5690,9 +5630,7 @@ function ForgeFlowWorkspace() {
                 onClick={() => setShowSignOffModal(false)}
                 className="text-slate-400 hover:text-slate-600 text-lg leading-none p-1 cursor-pointer"
                 aria-label="Close"
-              >
-                ✕
-              </button>
+              ><span className="css-icon-cross"></span></button>
             </div>
 
             <div className="p-6 overflow-y-auto space-y-5 flex-1">
@@ -5740,7 +5678,7 @@ function ForgeFlowWorkspace() {
                         : "border-slate-200 bg-white hover:bg-slate-50"
                     }`}
                   >
-                    <span className="text-emerald-600 font-bold text-sm">✓</span>
+                    <span className="text-emerald-600 font-bold text-sm"><span className="css-icon-check"></span></span>
                     <div>
                       <div className="font-bold text-xs text-slate-900">Approve &amp; Sign Off</div>
                       <div className="text-[11px] text-slate-500 mt-0.5">Unblocks production publishing and attaches verified schema.</div>
@@ -5756,7 +5694,7 @@ function ForgeFlowWorkspace() {
                         : "border-slate-200 bg-white hover:bg-slate-50"
                     }`}
                   >
-                    <span className="text-amber-600 font-bold text-sm">⚠️</span>
+                    <span className="text-amber-600 font-bold text-sm"><span className="css-icon-alert"></span></span>
                     <div>
                       <div className="font-bold text-xs text-slate-900">Request Revisions</div>
                       <div className="text-[11px] text-slate-500 mt-0.5">Keeps publishing blocked and routes redlines to author.</div>
@@ -5861,8 +5799,8 @@ function ForgeFlowWorkspace() {
                 {isReviewBusy
                   ? "Submitting Review…"
                   : signOffDecision === "approve"
-                  ? "✓ Approve & Sign Off Page"
-                  : "⚠️ Submit Revision Request"}
+                  ? "Approve & Sign Off Page"
+                  : "Submit Revision Request"}
               </button>
             </div>
           </div>

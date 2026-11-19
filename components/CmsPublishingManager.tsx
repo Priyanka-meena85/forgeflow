@@ -46,7 +46,7 @@ export function CmsPublishingManager({ integrations, onRefresh, onActionMessage 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to add connector");
 
-      onActionMessage(`✔ Connected 1-Click Publishing connector: ${name}`);
+      onActionMessage(`Connected 1-Click Publishing connector: ${name}`);
       setName("");
       setEndpointUrl("");
       setApiKey("");
@@ -108,9 +108,9 @@ export function CmsPublishingManager({ integrations, onRefresh, onActionMessage 
               <button
                 type="button"
                 onClick={() => setShowModal(false)}
-                className="text-slate-400 hover:text-slate-700 font-bold p-1 rounded-lg cursor-pointer"
+                className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 cursor-pointer transition"
               >
-                ✕
+                <span className="css-icon-cross"></span>
               </button>
             </div>
 

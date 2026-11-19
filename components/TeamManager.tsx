@@ -73,7 +73,7 @@ export function TeamManager({ currentUserRole = UserRole.OWNER, onActionMessage 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to invite teammate");
 
-      onActionMessage(`✔ Invitation sent to ${inviteEmail} as ${inviteRole}.`);
+      onActionMessage(`Invitation sent to ${inviteEmail} as ${inviteRole}.`);
       setInviteEmail("");
       setShowInviteModal(false);
       fetchTeam();
@@ -91,7 +91,7 @@ export function TeamManager({ currentUserRole = UserRole.OWNER, onActionMessage 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to revoke invitation");
 
-      onActionMessage(`✔ Revoked invitation for ${email}.`);
+      onActionMessage(`Revoked invitation for ${email}.`);
       fetchTeam();
     } catch (err: unknown) {
       onActionMessage(err instanceof Error ? err.message : "Revocation failed.");
@@ -289,9 +289,9 @@ export function TeamManager({ currentUserRole = UserRole.OWNER, onActionMessage 
               <button
                 type="button"
                 onClick={() => setShowInviteModal(false)}
-                className="text-slate-400 hover:text-slate-600 cursor-pointer"
+                className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 cursor-pointer transition"
               >
-                ✕
+                <span className="css-icon-cross"></span>
               </button>
             </div>
 

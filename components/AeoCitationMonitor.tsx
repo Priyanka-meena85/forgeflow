@@ -39,7 +39,7 @@ export function AeoCitationMonitor({ summary, queries, onRefresh, onActionMessag
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "AEO Scan failed");
 
-      onActionMessage(`✔ AEO Audit Scan complete: ${data.summary?.aggregateCitationShare}% LLM visibility rate.`);
+      onActionMessage(`AEO Audit Scan complete: ${data.summary?.aggregateCitationShare}% LLM visibility rate.`);
       onRefresh();
     } catch (e: unknown) {
       onActionMessage(e instanceof Error ? e.message : "AEO Scan failed.");
@@ -60,7 +60,7 @@ export function AeoCitationMonitor({ summary, queries, onRefresh, onActionMessag
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to add query");
 
-      onActionMessage(`✔ Now tracking AEO query: "${newKeyword.trim()}"`);
+      onActionMessage(`Now tracking AEO query: "${newKeyword.trim()}"`);
       setNewKeyword("");
       onRefresh();
     } catch (e: unknown) {
@@ -91,7 +91,7 @@ export function AeoCitationMonitor({ summary, queries, onRefresh, onActionMessag
             onClick={handleRunScan}
             className="px-3.5 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs shadow-xs flex items-center gap-1.5 transition cursor-pointer disabled:opacity-50"
           >
-            <span>{isScanning ? "⏳" : "🔄"}</span>
+            <span className={isScanning ? "css-icon-clock" : "css-icon-refresh"}></span>
             <span>{isScanning ? "Auditing LLM Citations…" : "Run Live Citation Audit"}</span>
           </button>
         </div>

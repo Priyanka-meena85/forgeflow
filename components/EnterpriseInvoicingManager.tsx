@@ -56,7 +56,7 @@ export function EnterpriseInvoicingManager({ invoices, onRefresh, onActionMessag
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "PO submission failed");
 
-      onActionMessage(`✔ Enterprise Net-30 invoice #${data.invoice?.invoiceNumber || "NEW"} generated.`);
+      onActionMessage(`Enterprise Net-30 invoice #${data.invoice?.invoiceNumber || "NEW"} generated.`);
       setCompanyName("");
       setContactName("");
       setEmail("");
@@ -127,9 +127,9 @@ export function EnterpriseInvoicingManager({ invoices, onRefresh, onActionMessag
                     href={`/api/billing/invoices/${inv.id}?format=html`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="px-2.5 py-1 rounded bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-mono text-[11px] font-bold border border-indigo-200 inline-flex items-center gap-1"
+                    className="px-2.5 py-1 rounded bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-mono text-[11px] font-bold border border-indigo-200 inline-flex items-center gap-1.5"
                   >
-                    <span>📄</span>
+                    <span className="css-icon-doc"></span>
                     <span>Print Official Invoice</span>
                   </a>
                 </td>
@@ -147,9 +147,9 @@ export function EnterpriseInvoicingManager({ invoices, onRefresh, onActionMessag
               <button
                 type="button"
                 onClick={() => setShowModal(false)}
-                className="text-slate-400 hover:text-slate-700 font-bold p-1 rounded-lg cursor-pointer"
+                className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 cursor-pointer transition"
               >
-                ✕
+                <span className="css-icon-cross"></span>
               </button>
             </div>
 

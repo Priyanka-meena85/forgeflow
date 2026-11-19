@@ -315,7 +315,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                     onClick={() => { setActiveFeatureTab("matrix"); setActiveNavDropdown(null); }}
                     className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition"
                   >
-                    <span className="text-base">🧬</span>
+                    <span className="css-icon-grid"></span>
                     <div>
                       <div className="font-bold text-slate-900 text-xs">Taxonomy Matrix</div>
                       <div className="text-[11px] text-slate-500 font-normal">Cross-index equipment, failure modes, &amp; specs</div>
@@ -326,7 +326,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                     onClick={() => { setActiveFeatureTab("qa"); setActiveNavDropdown(null); }}
                     className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition"
                   >
-                    <span className="text-base">🛡️</span>
+                    <span className="css-icon-shield"></span>
                     <div>
                       <div className="font-bold text-slate-900 text-xs">Deterministic QA Studio</div>
                       <div className="text-[11px] text-slate-500 font-normal">Closed-loop word count, fluff &amp; spec validation</div>
@@ -337,7 +337,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                     onClick={() => { setActiveFeatureTab("schema"); setActiveNavDropdown(null); }}
                     className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition"
                   >
-                    <span className="text-base">🤖</span>
+                    <span className="css-icon-gear"></span>
                     <div>
                       <div className="font-bold text-slate-900 text-xs">AEO Schema Graph Hub</div>
                       <div className="text-[11px] text-slate-500 font-normal">JSON-LD TechArticle &amp; FAQPage syndication</div>
@@ -348,7 +348,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                     onClick={() => { setActiveFeatureTab("risk"); setActiveNavDropdown(null); }}
                     className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition"
                   >
-                    <span className="text-base">⚠️</span>
+                    <span className="css-icon-alert"></span>
                     <div>
                       <div className="font-bold text-slate-900 text-xs">Risk &amp; Compliance Gating</div>
                       <div className="text-[11px] text-slate-500 font-normal">Zero-hallucination engineering tolerances</div>
@@ -359,7 +359,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                     onClick={() => { setActiveFeatureTab("kanban"); setActiveNavDropdown(null); }}
                     className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition"
                   >
-                    <span className="text-base">🚀</span>
+                    <span className="css-icon-launch"></span>
                     <div>
                       <div className="font-bold text-slate-900 text-xs">Publishing Kanban</div>
                       <div className="text-[11px] text-slate-500 font-normal">Human-in-the-loop review &amp; CMS webhooks</div>
@@ -370,7 +370,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                     onClick={() => { setActiveFeatureTab("analytics"); setActiveNavDropdown(null); }}
                     className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition"
                   >
-                    <span className="text-base">📊</span>
+                    <span className="css-icon-chart"></span>
                     <div>
                       <div className="font-bold text-slate-900 text-xs">Answer Engine Analytics</div>
                       <div className="text-[11px] text-slate-500 font-normal">Track zero-volume LLM citations &amp; RFQs</div>
@@ -465,7 +465,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
               className="lg:hidden p-2 rounded-lg text-slate-600 hover:bg-slate-100"
               aria-label="Toggle Menu"
             >
-              ☰
+              <span className="css-icon-menu"></span>
             </button>
           </div>
         </div>
@@ -552,19 +552,19 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
 
               <div className="pt-4 grid grid-cols-2 sm:grid-cols-4 gap-4 border-t border-slate-200 text-xs text-slate-500 font-medium">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-emerald-600 font-bold">✔</span>
+                  <span className="css-icon-check text-emerald-600"></span>
                   <span>Human Engineer Sign-Off</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <span className="text-emerald-600 font-bold">✔</span>
+                  <span className="css-icon-check text-emerald-600"></span>
                   <span>8 Automated QA Gates</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <span className="text-emerald-600 font-bold">✔</span>
+                  <span className="css-icon-check text-emerald-600"></span>
                   <span>Deterministic Schema.org</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <span className="text-emerald-600 font-bold">✔</span>
+                  <span className="css-icon-check text-emerald-600"></span>
                   <span>Webflow / WP Native</span>
                 </div>
               </div>
@@ -730,9 +730,9 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                 and requires sign-off from a credentialed applications engineer before publishing.
               </p>
               <div className="flex flex-wrap gap-4 pt-1 text-xs font-mono text-slate-700">
-                <span className="flex items-center gap-1.5"><strong className="text-emerald-700">✓</strong> Pre-built taxonomies across 7 heavy sectors</span>
-                <span className="flex items-center gap-1.5"><strong className="text-emerald-700">✓</strong> Grounded in ASME, ASHRAE, ISO, and 3-A standards</span>
-                <span className="flex items-center gap-1.5"><strong className="text-emerald-700">✓</strong> Deterministic schema for Google AI Overviews &amp; Perplexity</span>
+                <span className="flex items-center gap-1.5"><span className="css-icon-check text-emerald-700"></span> Pre-built taxonomies across 7 heavy sectors</span>
+                <span className="flex items-center gap-1.5"><span className="css-icon-check text-emerald-700"></span> Grounded in ASME, ASHRAE, ISO, and 3-A standards</span>
+                <span className="flex items-center gap-1.5"><span className="css-icon-check text-emerald-700"></span> Deterministic schema for Google AI Overviews &amp; Perplexity</span>
               </div>
             </div>
 
@@ -807,12 +807,12 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
           {/* Feature Tab Selector */}
           <div className="flex flex-wrap items-center justify-center gap-2">
             {[
-              { id: "matrix", label: "Taxonomy Matrix", icon: "🧬" },
-              { id: "qa", label: "Deterministic QA", icon: "🛡️" },
-              { id: "schema", label: "AEO Schema Hub", icon: "🤖" },
-              { id: "risk", label: "Risk & Spec Gating", icon: "⚠️" },
-              { id: "kanban", label: "Publishing Kanban", icon: "🚀" },
-              { id: "analytics", label: "Zero-Volume Analytics", icon: "📊" },
+              { id: "matrix", label: "Taxonomy Matrix", iconClass: "css-icon-grid" },
+              { id: "qa", label: "Deterministic QA", iconClass: "css-icon-shield" },
+              { id: "schema", label: "AEO Schema Hub", iconClass: "css-icon-gear" },
+              { id: "risk", label: "Risk & Spec Gating", iconClass: "css-icon-alert" },
+              { id: "kanban", label: "Publishing Kanban", iconClass: "css-icon-launch" },
+              { id: "analytics", label: "Zero-Volume Analytics", iconClass: "css-icon-chart" },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -824,7 +824,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                     : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
                 }`}
               >
-                <span>{tab.icon}</span>
+                <span><span className={tab.iconClass}></span></span>
                 <span>{tab.label}</span>
               </button>
             ))}
@@ -846,15 +846,15 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                   </p>
                   <div className="space-y-2 pt-2 text-xs text-slate-700">
                     <div className="flex items-center gap-2">
-                      <span className="text-emerald-600 font-bold">✔</span>
+                      <span className="css-icon-check text-emerald-600"></span>
                       <span>1,200+ equipment types, component assemblies, and failure taxonomies.</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-emerald-600 font-bold">✔</span>
+                      <span className="css-icon-check text-emerald-600"></span>
                       <span>Automatic cross-indexing of diagnostic SOPs and OEM replacement specs.</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-emerald-600 font-bold">✔</span>
+                      <span className="css-icon-check text-emerald-600"></span>
                       <span>High-intent zero-volume keyword generation ready for LLM ingestion.</span>
                     </div>
                   </div>
@@ -896,15 +896,15 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                   </p>
                   <div className="space-y-2 pt-2 text-xs text-slate-700">
                     <div className="flex items-center gap-2">
-                      <span className="text-emerald-600 font-bold">✔</span>
+                      <span className="css-icon-check text-emerald-600"></span>
                       <span>Zero-fluff filter: instantly strips buzzwords, hyperbole, and vague filler.</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-emerald-600 font-bold">✔</span>
+                      <span className="css-icon-check text-emerald-600"></span>
                       <span>Allowlist enforcement: only authorized ISO, ANSI, and OEM links permitted.</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-emerald-600 font-bold">✔</span>
+                      <span className="css-icon-check text-emerald-600"></span>
                       <span>One-click Auto-Patch: fixes CTA formats, word count minimums, and schema syntax.</span>
                     </div>
                   </div>
@@ -956,15 +956,15 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                   </p>
                   <div className="space-y-2 pt-2 text-xs text-slate-700">
                     <div className="flex items-center gap-2">
-                      <span className="text-emerald-600 font-bold">✔</span>
+                      <span className="css-icon-check text-emerald-600"></span>
                       <span>Native Schema.org validation against Google Rich Results standards.</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-emerald-600 font-bold">✔</span>
+                      <span className="css-icon-check text-emerald-600"></span>
                       <span>Direct Answer capsules engineered for Google AI Overviews.</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-emerald-600 font-bold">✔</span>
+                      <span className="css-icon-check text-emerald-600"></span>
                       <span>Auto-injects step-by-step diagnostic workflows as HowTo nodes.</span>
                     </div>
                   </div>
@@ -1014,15 +1014,15 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                   </p>
                   <div className="space-y-2 pt-2 text-xs text-slate-700">
                     <div className="flex items-center gap-2">
-                      <span className="text-emerald-600 font-bold">✔</span>
+                      <span className="css-icon-check text-emerald-600"></span>
                       <span>OSHA, NFPA, and ISO compliance rulebooks built into generation prompts.</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-emerald-600 font-bold">✔</span>
+                      <span className="css-icon-check text-emerald-600"></span>
                       <span>Flags unverified operating pressure, voltage, and temperature claims.</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-emerald-600 font-bold">✔</span>
+                      <span className="css-icon-check text-emerald-600"></span>
                       <span>Enterprise audit trail recording human review timestamps and changes.</span>
                     </div>
                   </div>
@@ -1061,15 +1061,15 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                   </p>
                   <div className="space-y-2 pt-2 text-xs text-slate-700">
                     <div className="flex items-center gap-2">
-                      <span className="text-emerald-600 font-bold">✔</span>
+                      <span className="css-icon-check text-emerald-600"></span>
                       <span>Stages: Generated → In Review → Approved → Published.</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-emerald-600 font-bold">✔</span>
+                      <span className="css-icon-check text-emerald-600"></span>
                       <span>Direct Webflow Collection and WordPress REST API publishing.</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-emerald-600 font-bold">✔</span>
+                      <span className="css-icon-check text-emerald-600"></span>
                       <span>Clean HTML and JSON webhook exports for enterprise headless architectures.</span>
                     </div>
                   </div>
@@ -1112,15 +1112,15 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                   </p>
                   <div className="space-y-2 pt-2 text-xs text-slate-700">
                     <div className="flex items-center gap-2">
-                      <span className="text-emerald-600 font-bold">✔</span>
+                      <span className="css-icon-check text-emerald-600"></span>
                       <span>Answer Engine Citation Tracker: monitor ChatGPT, Claude, and Perplexity indexation.</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-emerald-600 font-bold">✔</span>
+                      <span className="css-icon-check text-emerald-600"></span>
                       <span>RFQ conversion tracking linked to specific equipment taxonomy slices.</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-emerald-600 font-bold">✔</span>
+                      <span className="css-icon-check text-emerald-600"></span>
                       <span>Competitor displacement monitoring across zero-volume technical queries.</span>
                     </div>
                   </div>
@@ -1663,12 +1663,12 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                 </div>
                 <p className="text-xs text-slate-500 mt-2">For mid-size equipment makers testing programmatic AEO.</p>
                 <div className="mt-6 space-y-2.5 text-xs border-t border-slate-100 pt-5 text-slate-700">
-                  <div className="flex items-center gap-2">✔ <span>50 Spec-Verified Technical Slices / mo</span></div>
-                  <div className="flex items-center gap-2">✔ <span>1 Verified Corporate Domain</span></div>
-                  <div className="flex items-center gap-2">✔ <span>2 Pre-Built Vertical Taxonomies</span></div>
-                  <div className="flex items-center gap-2">✔ <span>Closed-Loop QA &amp; Anti-Fluff Stripper</span></div>
-                  <div className="flex items-center gap-2">✔ <span>Native TechArticle JSON-LD Schema</span></div>
-                  <div className="flex items-center gap-2">✔ <span>3 Application Engineering Seats</span></div>
+                  <div className="flex items-center gap-2"><span className="css-icon-check text-emerald-600"></span> <span>50 Spec-Verified Technical Slices / mo</span></div>
+                  <div className="flex items-center gap-2"><span className="css-icon-check text-emerald-600"></span> <span>1 Verified Corporate Domain</span></div>
+                  <div className="flex items-center gap-2"><span className="css-icon-check text-emerald-600"></span> <span>2 Pre-Built Vertical Taxonomies</span></div>
+                  <div className="flex items-center gap-2"><span className="css-icon-check text-emerald-600"></span> <span>Closed-Loop QA &amp; Anti-Fluff Stripper</span></div>
+                  <div className="flex items-center gap-2"><span className="css-icon-check text-emerald-600"></span> <span>Native TechArticle JSON-LD Schema</span></div>
+                  <div className="flex items-center gap-2"><span className="css-icon-check text-emerald-600"></span> <span>3 Application Engineering Seats</span></div>
                 </div>
               </div>
               <button
@@ -1695,13 +1695,13 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                 </div>
                 <p className="text-xs text-slate-500 mt-2">For scaling equipment brands dominating multiple product lines.</p>
                 <div className="mt-6 space-y-2.5 text-xs border-t border-slate-100 pt-5 text-slate-700">
-                  <div className="flex items-center gap-2">✔ <span>150 Spec-Verified Technical Slices / mo</span></div>
-                  <div className="flex items-center gap-2">✔ <span>3 Connected Corporate Domains</span></div>
-                  <div className="flex items-center gap-2">✔ <span>All 7 Pre-Built Industrial Taxonomies</span></div>
-                  <div className="flex items-center gap-2">✔ <span>Full Multi-Schema (TechArticle + HowTo + FAQ)</span></div>
-                  <div className="flex items-center gap-2">✔ <span>Google AI Overviews &amp; Perplexity Syndication</span></div>
-                  <div className="flex items-center gap-2">✔ <span>Direct Webflow &amp; WordPress CMS API Sync</span></div>
-                  <div className="flex items-center gap-2">✔ <span>7 Engineering Seats + Role-Based Access</span></div>
+                  <div className="flex items-center gap-2"><span className="css-icon-check text-emerald-600"></span> <span>150 Spec-Verified Technical Slices / mo</span></div>
+                  <div className="flex items-center gap-2"><span className="css-icon-check text-emerald-600"></span> <span>3 Connected Corporate Domains</span></div>
+                  <div className="flex items-center gap-2"><span className="css-icon-check text-emerald-600"></span> <span>All 7 Pre-Built Industrial Taxonomies</span></div>
+                  <div className="flex items-center gap-2"><span className="css-icon-check text-emerald-600"></span> <span>Full Multi-Schema (TechArticle + HowTo + FAQ)</span></div>
+                  <div className="flex items-center gap-2"><span className="css-icon-check text-emerald-600"></span> <span>Google AI Overviews &amp; Perplexity Syndication</span></div>
+                  <div className="flex items-center gap-2"><span className="css-icon-check text-emerald-600"></span> <span>Direct Webflow &amp; WordPress CMS API Sync</span></div>
+                  <div className="flex items-center gap-2"><span className="css-icon-check text-emerald-600"></span> <span>7 Engineering Seats + Role-Based Access</span></div>
                 </div>
               </div>
               <button
@@ -1725,12 +1725,12 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                 </div>
                 <p className="text-xs text-slate-500 mt-2">For multi-brand conglomerates &amp; industrial B2B agencies.</p>
                 <div className="mt-6 space-y-2.5 text-xs border-t border-slate-100 pt-5 text-slate-700">
-                  <div className="flex items-center gap-2">✔ <span>400+ Technical Slices included</span></div>
-                  <div className="flex items-center gap-2">✔ <span>Unlimited Client Tenants &amp; Domains</span></div>
-                  <div className="flex items-center gap-2">✔ <span>Custom CAD &amp; Equipment Specs Ingestion</span></div>
-                  <div className="flex items-center gap-2">✔ <span>White-Label Client Portal &amp; CNAME</span></div>
-                  <div className="flex items-center gap-2">✔ <span>Zero-Hallucination SLA Guarantee</span></div>
-                  <div className="flex items-center gap-2">✔ <span>Dedicated Taxonomy Solutions Architect</span></div>
+                  <div className="flex items-center gap-2"><span className="css-icon-check text-emerald-600"></span> <span>400+ Technical Slices included</span></div>
+                  <div className="flex items-center gap-2"><span className="css-icon-check text-emerald-600"></span> <span>Unlimited Client Tenants &amp; Domains</span></div>
+                  <div className="flex items-center gap-2"><span className="css-icon-check text-emerald-600"></span> <span>Custom CAD &amp; Equipment Specs Ingestion</span></div>
+                  <div className="flex items-center gap-2"><span className="css-icon-check text-emerald-600"></span> <span>White-Label Client Portal &amp; CNAME</span></div>
+                  <div className="flex items-center gap-2"><span className="css-icon-check text-emerald-600"></span> <span>Zero-Hallucination SLA Guarantee</span></div>
+                  <div className="flex items-center gap-2"><span className="css-icon-check text-emerald-600"></span> <span>Dedicated Taxonomy Solutions Architect</span></div>
                 </div>
               </div>
               <button
@@ -1826,7 +1826,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
               <div className="space-y-3">
                 <div className="flex items-start gap-3">
                   <div className="w-12 h-12 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-xl shrink-0">
-                    ⚙️
+                    <span className="css-icon-gear"></span>
                   </div>
                   <div>
                     <div className="font-bold text-sm text-white">Lead Applications Engineer</div>
@@ -1964,7 +1964,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
               <div className="w-[210px] sm:w-[230px] rounded-2xl bg-white shadow-xl shadow-slate-300/40 border border-slate-200/80 overflow-hidden shrink-0">
                 <div className="bg-gradient-to-r from-slate-900 to-sky-950 px-4 py-3 text-white text-xs font-bold tracking-tight text-center sm:text-left flex items-center justify-between border-b border-sky-900/40">
                   <span className="flex items-center gap-1.5 font-mono">
-                    <span className="text-sky-400">⚡</span>
+                    <span className="css-icon-bolt text-sky-400"></span>
                     <span>AEO Content Monitor</span>
                   </span>
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
@@ -1979,8 +1979,8 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                   </div>
 
                   <div className="flex items-start gap-2.5">
-                    <span className="mt-0.5 w-4 h-4 rounded-full border border-emerald-600 text-emerald-600 flex items-center justify-center text-[9px] shrink-0 font-bold bg-emerald-50">
-                      ✓
+                    <span className="mt-0.5 w-4 h-4 rounded-full border border-emerald-600 text-emerald-600 flex items-center justify-center shrink-0 bg-emerald-50">
+                      <span className="css-icon-check"></span>
                     </span>
                     <div>
                       <div className="text-xs font-semibold text-slate-800">ASHRAE 90.1 Specs</div>
@@ -1991,8 +1991,8 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                   <div className="border-t border-slate-100" />
 
                   <div className="flex items-start gap-2.5">
-                    <span className="mt-0.5 w-4 h-4 rounded-full border border-emerald-600 text-emerald-600 flex items-center justify-center text-[9px] shrink-0 font-bold bg-emerald-50">
-                      ✓
+                    <span className="mt-0.5 w-4 h-4 rounded-full border border-emerald-600 text-emerald-600 flex items-center justify-center shrink-0 bg-emerald-50">
+                      <span className="css-icon-check"></span>
                     </span>
                     <div>
                       <div className="text-xs font-semibold text-slate-800">Application Sign-Off</div>
@@ -2003,8 +2003,8 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                   <div className="border-t border-slate-100" />
 
                   <div className="flex items-start gap-2.5">
-                    <span className="mt-0.5 w-4 h-4 rounded-full border border-emerald-600 text-emerald-600 flex items-center justify-center text-[9px] shrink-0 font-bold bg-emerald-50">
-                      ✓
+                    <span className="mt-0.5 w-4 h-4 rounded-full border border-emerald-600 text-emerald-600 flex items-center justify-center shrink-0 bg-emerald-50">
+                      <span className="css-icon-check"></span>
                     </span>
                     <div>
                       <div className="text-xs font-semibold text-slate-800">Schema JSON-LD</div>
@@ -2018,7 +2018,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
               <div className="w-[210px] sm:w-[230px] rounded-2xl bg-white shadow-xl shadow-slate-300/40 border border-slate-200/80 overflow-hidden shrink-0">
                 <div className="bg-gradient-to-r from-sky-600 to-blue-700 px-4 py-3 text-white text-xs font-bold tracking-tight text-center sm:text-left flex items-center justify-between border-b border-sky-500/40">
                   <span className="flex items-center gap-1.5 font-mono">
-                    <span>✨</span>
+                    <span className="css-icon-dot text-sky-500"></span>
                     <span>AI Engine Citations</span>
                   </span>
                   <span className="w-2 h-2 rounded-full bg-sky-200 animate-pulse"></span>
@@ -2083,7 +2083,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
               <div className="md:col-span-5">
                 {newsletterSubscribed ? (
                   <div className="rounded-xl bg-emerald-950/60 border border-emerald-800 p-3 text-emerald-300 text-xs font-medium flex items-center gap-2">
-                    <span className="text-emerald-400 font-bold">✔</span>
+                    <span className="css-icon-check text-emerald-400"></span>
                     <span>Subscribed! Welcome to the Industrial AEO Briefing.</span>
                   </div>
                 ) : (
@@ -2259,9 +2259,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
               onClick={() => setDemoModalOpen(false)}
               className="absolute top-5 right-5 text-slate-400 hover:text-slate-600 text-lg leading-none p-1 cursor-pointer"
               aria-label="Close"
-            >
-              ✕
-            </button>
+            ><span className="css-icon-cross"></span></button>
 
             <div className="mb-6 flex items-center gap-3 border-b border-slate-100 pb-4">
               <Image src="/logo-icon.png" alt="ForgeFlow Logo" width={44} height={44} className="h-11 w-11 object-contain shrink-0" />
@@ -2273,8 +2271,8 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
 
             {demoSubmitted ? (
               <div className="py-8 text-center space-y-3">
-                <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-700 font-bold text-xl mx-auto flex items-center justify-center">
-                  ✓
+                <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-700 mx-auto flex items-center justify-center">
+                  <span className="css-icon-check"></span>
                 </div>
                 <h4 className="text-base font-bold text-slate-900">Demo Scheduled!</h4>
                 <p className="text-xs text-slate-600 max-w-sm mx-auto leading-relaxed">
@@ -2377,9 +2375,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
               onClick={() => setTimedSignupOpen(false)}
               className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-sm font-bold cursor-pointer transition"
               aria-label="Dismiss signup popup"
-            >
-              ✕
-            </button>
+            ><span className="css-icon-cross"></span></button>
 
             <div className="flex items-center gap-3 mb-3">
               <Image src="/logo-icon.png" alt="ForgeFlow" width={32} height={32} className="h-8 w-8 object-contain shrink-0" />
@@ -2465,9 +2461,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
               onClick={() => setLegalModal(null)}
               className="absolute top-5 right-5 text-slate-400 hover:text-slate-600 text-lg leading-none p-1 cursor-pointer"
               aria-label="Close"
-            >
-              ✕
-            </button>
+            ><span className="css-icon-cross"></span></button>
 
             {legalModal === "privacy" && (
               <div className="space-y-4 text-xs leading-relaxed max-h-[65vh] overflow-y-auto pr-1">
@@ -2637,9 +2631,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
               onClick={() => setAuthModalOpen(false)}
               className="absolute top-5 right-5 text-slate-400 hover:text-slate-600 text-lg leading-none p-1 cursor-pointer"
               aria-label="Close"
-            >
-              ✕
-            </button>
+            ><span className="css-icon-cross"></span></button>
 
             <div className="mb-6 flex items-center gap-3 border-b border-slate-100 pb-4">
               <Image src="/logo-icon.png" alt="ForgeFlow Logo" width={44} height={44} className="h-11 w-11 object-contain shrink-0" />
@@ -2692,7 +2684,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                 }}
                 className="w-full py-2 px-3 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer shadow-sm disabled:opacity-50"
               >
-                <span>⚡ 1-Click Launch Live Demo Console (Owner / Admin)</span>
+                <span className="flex items-center gap-1.5"><span className="css-icon-bolt"></span> 1-Click Launch Live Demo Console (Owner / Admin)</span>
               </button>
               <div className="flex items-center gap-2 pt-1 text-[10px] text-slate-400">
                 <span>Or switch role:</span>
@@ -2825,7 +2817,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                 {authMode === "register" ? (
                   <div className="mt-1 flex items-center justify-between text-[11px]">
                     <span className={password.length >= 8 ? "text-emerald-700 font-medium" : "text-slate-500"}>
-                      {password.length >= 8 ? "✓ Minimum 8 characters met" : "Requires minimum 8 characters"}
+                      {password.length >= 8 ? "Minimum 8 characters met" : "Requires minimum 8 characters"}
                     </span>
                     <span className="font-mono text-slate-400">{password.length}/8+</span>
                   </div>
@@ -2934,9 +2926,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                   onClick={() => setSampleArticleModalOpen(false)}
                   className="w-8 h-8 rounded-full bg-slate-200 hover:bg-slate-300 text-slate-700 flex items-center justify-center text-sm font-bold cursor-pointer transition"
                   aria-label="Close sample article modal"
-                >
-                  ✕
-                </button>
+                ><span className="css-icon-cross"></span></button>
               </div>
             </div>
 
@@ -3074,10 +3064,10 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[10px] font-mono text-emerald-800">
-                  <div className="bg-white p-2 rounded border border-emerald-200">✓ Spec Accuracy PASS</div>
-                  <div className="bg-white p-2 rounded border border-emerald-200">✓ ASHRAE 90.1 PASS</div>
-                  <div className="bg-white p-2 rounded border border-emerald-200">✓ Tolerances PASS</div>
-                  <div className="bg-white p-2 rounded border border-emerald-200">✓ Schema.org PASS</div>
+                  <div className="bg-white p-2 rounded border border-emerald-200"><span className="css-icon-check text-emerald-700"></span> Spec Accuracy PASS</div>
+                  <div className="bg-white p-2 rounded border border-emerald-200"><span className="css-icon-check text-emerald-700"></span> ASHRAE 90.1 PASS</div>
+                  <div className="bg-white p-2 rounded border border-emerald-200"><span className="css-icon-check text-emerald-700"></span> Tolerances PASS</div>
+                  <div className="bg-white p-2 rounded border border-emerald-200"><span className="css-icon-check text-emerald-700"></span> Schema.org PASS</div>
                 </div>
               </div>
 
@@ -3239,9 +3229,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
         className="fixed bottom-6 right-6 z-40 w-11 h-11 rounded-full border-2 border-sky-600 bg-white text-sky-600 hover:bg-sky-600 hover:text-white shadow-lg shadow-sky-600/25 transition flex items-center justify-center cursor-pointer"
         aria-label="Back to top"
       >
-        <svg className="w-5 h-5 stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
-        </svg>
+        <span className="css-icon-chevron-up"></span>
       </button>
     </div>
   );

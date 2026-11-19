@@ -106,7 +106,7 @@ export function InteractiveDiagnosticStudio({ onActionMessage }: InteractiveDiag
                   ? "bg-red-950 text-red-300 border border-red-800"
                   : "bg-emerald-950 text-emerald-300 border border-emerald-800"
               }`}>
-                {isFloodback ? "⚠️ Liquid Slugging Risk (<6°F)" : isStarved ? "⛔ Evaporator Starved (>18°F)" : "✓ Optimal Envelope (10-14°F)"}
+                {isFloodback ? "Liquid Slugging Risk (<6°F)" : isStarved ? "Evaporator Starved (>18°F)" : "Optimal Envelope (10-14°F)"}
               </span>
             </div>
           </div>
@@ -158,7 +158,7 @@ export function InteractiveDiagnosticStudio({ onActionMessage }: InteractiveDiag
             <div className="text-right">
               <div className="text-[10px] uppercase font-mono text-slate-400">ISO 4406 Cleanliness Gate</div>
               <span className="px-2.5 py-1 rounded-full text-xs font-mono font-bold inline-block mt-0.5 bg-cyan-950 text-cyan-300 border border-cyan-800">
-                {velocity > 20 ? "⛔ Pressure Line High" : isCavitation ? "⚠️ Suction Cavitation Risk (>4 fps)" : "✓ Normal Pressure Velocity"}
+                {velocity > 20 ? "Pressure Line High" : isCavitation ? "Suction Cavitation Risk (>4 fps)" : "Normal Pressure Velocity"}
               </span>
             </div>
           </div>
@@ -222,7 +222,7 @@ export function InteractiveDiagnosticStudio({ onActionMessage }: InteractiveDiag
           onClick={() => {
             if (typeof window !== "undefined") {
               navigator.clipboard.writeText(`<iframe src="${window.location.origin}/api/widgets" width="100%" height="320" frameborder="0"></iframe>`);
-              onActionMessage("✔ Diagnostic Calculator embed code copied to clipboard!");
+              onActionMessage("Diagnostic Calculator embed code copied to clipboard!");
             }
           }}
           className="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-sky-400 text-xs font-mono font-bold cursor-pointer transition"

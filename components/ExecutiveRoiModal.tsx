@@ -22,7 +22,9 @@ export function ExecutiveRoiModal({
       <div className="bg-white rounded-3xl border border-slate-200 shadow-2xl max-w-2xl w-full p-6 sm:p-8 space-y-6">
         <div className="flex items-center justify-between border-b border-slate-100 pb-4">
           <div className="flex items-center gap-2.5">
-            <span className="text-xl">📊</span>
+            <span className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center border border-emerald-200 shrink-0">
+              <span className="css-icon-chart text-emerald-700"></span>
+            </span>
             <div>
               <h3 className="font-extrabold text-slate-900 text-base">
                 Executive AEO &amp; Search ROI Digest
@@ -35,9 +37,9 @@ export function ExecutiveRoiModal({
           <button
             type="button"
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-600 text-lg leading-none cursor-pointer"
+            className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 cursor-pointer transition"
           >
-            ✕
+            <span className="css-icon-cross"></span>
           </button>
         </div>
 
@@ -96,8 +98,9 @@ export function ExecutiveRoiModal({
             onClick={handleOpenPrintable}
             className="px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs shadow-md shadow-sky-600/20 transition flex items-center gap-2 cursor-pointer"
           >
-            <span>🖨️ Open &amp; Print Executive PDF</span>
-            <span>↗</span>
+            <span className="css-icon-doc"></span>
+            <span>Open &amp; Print Executive PDF</span>
+            <span className="css-icon-launch"></span>
           </button>
         </div>
       </div>

@@ -30,7 +30,7 @@ export function SlackReviewBotConfig({ onActionMessage }: SlackReviewBotConfigPr
       if (!res.ok) throw new Error(data.error || "Webhook dispatch failed");
 
       setLastDispatchedPayload(data.payload);
-      onActionMessage(`✔ Dispatched interactive engineering review alert to ${channel}.`);
+      onActionMessage(`Dispatched interactive engineering review alert to ${channel}.`);
     } catch (e: unknown) {
       onActionMessage(e instanceof Error ? e.message : "Webhook failed");
     } finally {
@@ -58,7 +58,8 @@ export function SlackReviewBotConfig({ onActionMessage }: SlackReviewBotConfigPr
           onClick={handleTestDispatch}
           className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-xs flex items-center gap-1.5 transition shrink-0 cursor-pointer disabled:opacity-50"
         >
-          <span>{busy ? "Dispatching…" : "⚡ Test Slack Alert Dispatch"}</span>
+          <span className="css-icon-bolt"></span>
+          <span>{busy ? "Dispatching…" : "Test Slack Alert Dispatch"}</span>
         </button>
       </div>
 
@@ -91,7 +92,10 @@ export function SlackReviewBotConfig({ onActionMessage }: SlackReviewBotConfigPr
       {lastDispatchedPayload && (
         <div className="p-3.5 rounded-xl bg-slate-900 text-slate-200 font-mono text-[11px] space-y-1.5 border border-slate-800">
           <div className="text-emerald-400 font-bold flex items-center justify-between">
-            <span>✔ Live Outbound Payload Generated:</span>
+            <span className="flex items-center gap-1.5">
+              <span className="css-icon-check"></span>
+              <span>Live Outbound Payload Generated:</span>
+            </span>
             <span className="text-[10px] text-slate-400">{channel}</span>
           </div>
           <pre className="text-[10px] overflow-x-auto text-slate-300 max-h-36">

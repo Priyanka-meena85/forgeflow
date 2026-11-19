@@ -44,7 +44,7 @@ export function OemRagManager({ documents, onRefresh, onActionMessage }: OemRagM
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Ingestion failed");
 
-      onActionMessage(`✔ Successfully ingested '${title}' with ${data.document?.extractedNodesCount || 0} extracted engineering tolerances.`);
+      onActionMessage(`Successfully ingested '${title}' with ${data.document?.extractedNodesCount || 0} extracted engineering tolerances.`);
       setTitle("");
       setRawText("");
       setUploadedFileName("");
@@ -92,7 +92,8 @@ export function OemRagManager({ documents, onRefresh, onActionMessage }: OemRagM
           onClick={() => setShowModal(true)}
           className="px-3.5 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs shadow-xs flex items-center gap-1.5 transition shrink-0 cursor-pointer"
         >
-          <span>+ Ingest Spec Document</span>
+          <span className="css-icon-plus"></span>
+          <span>Ingest Spec Document</span>
         </button>
       </div>
 
@@ -124,15 +125,17 @@ export function OemRagManager({ documents, onRefresh, onActionMessage }: OemRagM
           <div className="bg-white rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl border border-slate-200">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <div className="flex items-center gap-2">
-                <span className="text-xl">📄</span>
+                <span className="w-7 h-7 rounded-lg bg-purple-50 text-purple-700 flex items-center justify-center border border-purple-200">
+                  <span className="css-icon-doc"></span>
+                </span>
                 <h3 className="text-base font-bold text-slate-900">Ingest OEM Spec Sheet into RAG</h3>
               </div>
               <button
                 type="button"
                 onClick={() => setShowModal(false)}
-                className="text-slate-400 hover:text-slate-700 font-bold p-1 rounded-lg cursor-pointer"
+                className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 cursor-pointer transition"
               >
-                ✕
+                <span className="css-icon-cross"></span>
               </button>
             </div>
 
@@ -224,7 +227,8 @@ export function OemRagManager({ documents, onRefresh, onActionMessage }: OemRagM
                   onClick={handleIngest}
                   className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white font-bold text-xs shadow-sm flex items-center gap-2 cursor-pointer"
                 >
-                  {isIngesting ? "Extracting Specs…" : "⚡ Ingest into RAG Engine"}
+                  <span className="css-icon-bolt"></span>
+                  <span>{isIngesting ? "Extracting Specs…" : "Ingest into RAG Engine"}</span>
                 </button>
               </div>
             </div>

@@ -35,7 +35,7 @@ export function RfqLeadManager({ onActionMessage }: RfqLeadManagerProps) {
 
   const copyEmbedCode = () => {
     const code = `<div class="forgeflow-rfq-widget" data-org="seed-org-industrial" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin:28px 0;">
-  <h4 style="margin:0 0 8px;font-size:16px;color:#0f172a;">🛠️ Request Factory Certified Diagnostic Tolerances</h4>
+  <h4 style="margin:0 0 8px;font-size:16px;color:#0f172a;">Request Factory Certified Diagnostic Tolerances</h4>
   <p style="font-size:12px;color:#475569;margin:0 0 16px;">Direct engineering support from certified applications engineers. We benchmark operating limits against official OEM manuals.</p>
   <form action="https://forgeflow.industrial/api/leads" method="POST" style="display:flex;gap:8px;flex-wrap:wrap;">
     <input type="email" name="contactEmail" placeholder="engineer@plant.com" required style="padding:8px 12px;border:1px solid #cbd5e1;border-radius:8px;font-size:12px;flex:1;min-width:200px;" />
@@ -43,7 +43,7 @@ export function RfqLeadManager({ onActionMessage }: RfqLeadManagerProps) {
   </form>
 </div>`;
     navigator.clipboard.writeText(code);
-    onActionMessage("✔ In-page RFQ capture widget embed code copied to clipboard!");
+    onActionMessage("In-page RFQ capture widget embed code copied to clipboard!");
   };
 
   const getStatusBadge = (status: RfqLead["status"]) => {
@@ -79,9 +79,10 @@ export function RfqLeadManager({ onActionMessage }: RfqLeadManagerProps) {
           <button
             type="button"
             onClick={() => setShowEmbedModal(true)}
-            className="px-3.5 py-1.5 rounded-xl border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold text-xs transition cursor-pointer"
+            className="px-3.5 py-1.5 rounded-xl border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold text-xs transition cursor-pointer flex items-center gap-1.5"
           >
-            📋 In-Page Lead Hook Embed
+            <span className="css-icon-doc"></span>
+            <span>In-Page Lead Hook Embed</span>
           </button>
         </div>
       </div>
@@ -146,9 +147,9 @@ export function RfqLeadManager({ onActionMessage }: RfqLeadManagerProps) {
               <button
                 type="button"
                 onClick={() => setShowEmbedModal(false)}
-                className="text-slate-400 hover:text-slate-600 cursor-pointer"
+                className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 cursor-pointer transition"
               >
-                ✕
+                <span className="css-icon-cross"></span>
               </button>
             </div>
             <p className="text-slate-600 leading-relaxed">
@@ -156,7 +157,7 @@ export function RfqLeadManager({ onActionMessage }: RfqLeadManagerProps) {
             </p>
             <div className="p-3 rounded-xl bg-slate-900 text-slate-200 font-mono text-[10px] overflow-x-auto max-h-48 border border-slate-800">
               <code>{`<div class="forgeflow-rfq-widget" data-org="seed-org-industrial">
-  <h4>🛠️ Request Factory Certified Diagnostic Tolerances</h4>
+  <h4>Request Factory Certified Diagnostic Tolerances</h4>
   <p>Direct engineering support from certified applications engineers...</p>
   <form action="/api/leads" method="POST">...</form>
 </div>`}</code>
