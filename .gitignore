@@ -33,8 +33,12 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # env files (local secrets ignored, base .env tracked)
+.env
 .env.local
 .env.*.local
+
+# scratch temporary scripts
+scratch/
 
 # vercel
 .vercel

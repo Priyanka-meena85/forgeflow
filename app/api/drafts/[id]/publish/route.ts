@@ -20,14 +20,43 @@ export async function POST(
     if (!draft) return errorResponse("Draft not found.", 404);
 
     const body: unknown = await request.json().catch(() => null);
-    const { targetCms, targetUrl } = (body && typeof body === "object" ? body : {}) as Record<string, unknown>;
+    const { targetCms, targetUrl, webhookUrl } = (body && typeof body === "object" ? body : {}) as Record<string, unknown>;
 
     const appUrl = (process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000").replace(/\/+$/, "");
     const slug = draft.title
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)/g, "");
-    const publishedUrl = typeof targetUrl === "string" ? targetUrl : `${appUrl}/articles/${slug}`;
+    const publishedUrl = typeof targetUrl === "string" && targetUrl.trim() ? targetUrl.trim() : `${appUrl}/articles/${slug}`;
+
+    // Optional: Dispatch to real CMS Webhook (Zapier, Make, Webflow, WordPress REST API)
+    let webhookStatus: string | null = null;
+    if (typeof webhookUrl === "string" && (webhookUrl.startsWith("http://") || webhookUrl.startsWith("https://"))) {
+      try {
+        const sections = JSON.parse(draft.sectionsJson);
+        const faqs = JSON.parse(draft.faqsJson);
+        const whRes = await fetch(webhookUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "X-ForgeFlow-Event": "draft.published" },
+          body: JSON.stringify({
+            event: "draft.published",
+            id: draft.id,
+            title: draft.title,
+            slug,
+            vertical: draft.vertical,
+            summary: draft.summary,
+            sections,
+            faqs,
+            schemaJson: draft.schemaJson,
+            targetCms: typeof targetCms === "string" ? targetCms : "Custom Webhook",
+            timestamp: new Date().toISOString(),
+          }),
+        });
+        webhookStatus = `Webhook dispatched: HTTP ${whRes.status}`;
+      } catch (whErr) {
+        webhookStatus = `Webhook error: ${whErr instanceof Error ? whErr.message : "Dispatch failed"}`;
+      }
+    }
 
     const updated = await db.draft.update({
       where: { id: draft.id },
@@ -35,7 +64,7 @@ export async function POST(
         status: DraftStatus.PUBLISHED,
         publishedAt: new Date(),
         publishedUrl,
-        reviewComment: `Published via ${typeof targetCms === "string" ? targetCms : "Direct Webhook"} to ${publishedUrl}`,
+        reviewComment: `Published via ${typeof targetCms === "string" ? targetCms : "Direct Pipeline"} to ${publishedUrl}${webhookStatus ? ` (${webhookStatus})` : ""}`,
       },
     });
 
@@ -46,7 +75,7 @@ export async function POST(
         action: "DRAFT_PUBLISHED",
         resourceType: "Draft",
         resourceId: draft.id,
-        metadataJson: JSON.stringify({ publishedUrl, targetCms }),
+        metadataJson: JSON.stringify({ publishedUrl, targetCms, webhookStatus }),
       },
     });
 
@@ -54,6 +83,7 @@ export async function POST(
       success: true,
       draft: serializeDraft(updated),
       publishedUrl,
+      webhookStatus,
       message: `Draft "${updated.title}" successfully published.`,
     });
   } catch (error) {

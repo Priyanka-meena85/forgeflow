@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 
 export type AuthUser = {
   id: string;
@@ -21,6 +22,23 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
   const [authModalOpen, setAuthModalOpen] = useState(Boolean(defaultAuthMode));
   const [authMode, setAuthMode] = useState<"login" | "register">(defaultAuthMode || "register");
 
+  // Automated Timed Signup Popup (Repetitive every 3.5 minutes / 210,000 ms)
+  const [timedSignupOpen, setTimedSignupOpen] = useState(false);
+
+  useEffect(() => {
+    // Initial interval of 3.5 minutes (between 3 and 4 minutes)
+    const interval = setInterval(() => {
+      setTimedSignupOpen((prev) => {
+        if (!prev && !authModalOpen) {
+          return true;
+        }
+        return prev;
+      });
+    }, 210000); // 210,000 ms = 3.5 minutes
+
+    return () => clearInterval(interval);
+  }, [authModalOpen]);
+
   // Demo Modal State
   const [demoModalOpen, setDemoModalOpen] = useState(false);
   const [demoName, setDemoName] = useState("");
@@ -29,7 +47,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
   const [demoVertical, setDemoVertical] = useState("HVAC & Commercial Refrigeration");
   const [demoSubmitted, setDemoSubmitted] = useState(false);
 
-  // Navigation Dropdown State (Oxmaint-inspired megamenus)
+  // Navigation Dropdown State
   const [activeNavDropdown, setActiveNavDropdown] = useState<"features" | "industries" | "integrations" | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -39,13 +57,15 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
   // Selected vertical showcase in landing page
   const [activeVerticalIndex, setActiveVerticalIndex] = useState(0);
 
-  // Tabbed Feature Spotlight State (Oxmaint-inspired 6-pillar platform)
+  // Tabbed Feature Spotlight State
   const [activeFeatureTab, setActiveFeatureTab] = useState<"matrix" | "qa" | "schema" | "risk" | "kanban" | "analytics">("matrix");
 
-  // Interactive ROI Calculator State
+  // Industry Footprint Calculator State (Non-bulky, no direct pricing)
   const [roiMachines, setRoiMachines] = useState(15);
   const [roiFailures, setRoiFailures] = useState(8);
-  const [roiDealSize, setRoiDealSize] = useState(120); // in thousands ($k)
+
+  // Pricing Billing Toggle (Web-Style Monthly vs Annual)
+  const [pricingBilling, setPricingBilling] = useState<"monthly" | "annual">("annual");
 
   // FAQ Accordion State
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
@@ -173,10 +193,10 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
 
   const activeVertical = verticalShowcase[activeVerticalIndex];
 
-  // Calculated ROI Metrics
+  // Industry Footprint Metrics (No Direct Pricing)
   const calculatedPages = roiMachines * roiFailures;
   const calculatedSearchers = calculatedPages * 24;
-  const calculatedPipeline = Math.round(calculatedPages * roiDealSize * 1.25);
+  const calculatedInquiries = Math.round(calculatedPages * 0.16);
   const calculatedCoverage = Math.min(99.6, +(84 + roiMachines * 0.18).toFixed(1));
 
   function openAuth(mode: "login" | "register") {
@@ -221,14 +241,12 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-sky-100 selection:text-sky-900">
-      {/* 1. TOP STICKY ENTERPRISE NAVBAR (OXMAINT-INSPIRED DROPDOWNS & DUAL CTAS) */}
+      {/* 1. TOP STICKY ENTERPRISE NAVBAR */}
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/90 shadow-2xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           {/* Logo & Brand */}
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-600 text-lg font-bold text-white shadow-md shadow-sky-600/20 shrink-0">
-              FF
-            </div>
+            <Image src="/logo-icon.png" alt="ForgeFlow Logo" width={40} height={40} className="h-10 w-10 object-contain shrink-0 drop-shadow-xs" />
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-lg font-black tracking-tight text-slate-900">ForgeFlow</span>
@@ -242,7 +260,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
             </div>
           </div>
 
-          {/* Desktop Navigation Links with Rich Hover Dropdowns */}
+          {/* Desktop Navigation Links */}
           <nav className="hidden lg:flex items-center gap-6 text-xs font-semibold text-slate-600">
             {/* Features Dropdown */}
             <div
@@ -257,7 +275,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                 }`}
               >
                 <span>Platform Features</span>
-                <span className="text-[10px] transition-transform duration-150">⌄</span>
+                <span className="text-[10px]">⌄</span>
               </button>
 
               {activeNavDropdown === "features" && (
@@ -348,7 +366,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                 }`}
               >
                 <span>Industries &amp; Solutions</span>
-                <span className="text-[10px] transition-transform duration-150">⌄</span>
+                <span className="text-[10px]">⌄</span>
               </button>
 
               {activeNavDropdown === "industries" && (
@@ -365,7 +383,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                     >
                       <span className="font-semibold text-slate-800">{v.title}</span>
                       <span className="font-mono text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                        {v.pipelineVal.split("–")[0]}
+                        {v.badge}
                       </span>
                     </a>
                   ))}
@@ -383,12 +401,12 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
             </div>
 
             <a href="#workflow" className="hover:text-sky-600 transition">8-Step Protocol</a>
-            <a href="#roi-calculator" className="hover:text-sky-600 transition">ROI Calculator</a>
+            <a href="#industry-calculator" className="hover:text-sky-600 transition">Footprint Calculator</a>
             <a href="#pricing" className="hover:text-sky-600 transition">Pricing</a>
             <a href="#faq" className="hover:text-sky-600 transition">FAQ</a>
           </nav>
 
-          {/* Action CTAs (Sign In, Book a Demo, Start Free) */}
+          {/* Action CTAs */}
           <div className="flex items-center gap-2.5">
             <button
               type="button"
@@ -431,7 +449,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
             <a href="#platform-suite" onClick={() => setMobileMenuOpen(false)} className="block py-1.5 text-slate-700">Platform Features</a>
             <a href="#taxonomies" onClick={() => setMobileMenuOpen(false)} className="block py-1.5 text-slate-700">Vertical Taxonomies</a>
             <a href="#workflow" onClick={() => setMobileMenuOpen(false)} className="block py-1.5 text-slate-700">8-Step Workflow</a>
-            <a href="#roi-calculator" onClick={() => setMobileMenuOpen(false)} className="block py-1.5 text-slate-700">ROI Calculator</a>
+            <a href="#industry-calculator" onClick={() => setMobileMenuOpen(false)} className="block py-1.5 text-slate-700">Footprint Calculator</a>
             <a href="#pricing" onClick={() => setMobileMenuOpen(false)} className="block py-1.5 text-slate-700">Pricing</a>
             <div className="pt-3 border-t border-slate-100 flex gap-2">
               <button
@@ -453,31 +471,27 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
         )}
       </header>
 
-      {/* 2. HERO SECTION (OXMAINT-INSPIRED VALUE PROPOSITION & LIVE INTERACTIVE CONSOLE) */}
+      {/* 2. HERO SECTION */}
       <section className="relative overflow-hidden pt-12 pb-20 border-b border-slate-200/80 bg-gradient-to-b from-white via-slate-50 to-slate-100/60">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
             {/* Left Column: Headline & Value Prop */}
             <div className="lg:col-span-7 space-y-6">
-              {/* Badge */}
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-50 border border-sky-200/90 text-sky-800 text-xs font-mono font-semibold shadow-2xs">
                 <span className="w-2 h-2 rounded-full bg-sky-500 animate-pulse"></span>
                 <span>Deterministic Industrial Search &amp; Answer Engine Architecture</span>
               </div>
 
-              {/* Main Headline */}
               <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-slate-900 leading-[1.12]">
                 Turn Complex Engineering Specs into Pipeline-Generating Search Rankings.
               </h1>
 
-              {/* Subheading */}
               <p className="text-base sm:text-lg text-slate-600 leading-relaxed font-normal">
                 ForgeFlow eliminates the zero-volume keyword trap for equipment manufacturers.
                 Generate certified technical landing pages with pre-built vertical taxonomies, closed-loop
                 QA enforcement, and native AEO schema for <strong className="text-slate-800 font-semibold">Google AI Overviews, ChatGPT, and Perplexity</strong>.
               </p>
 
-              {/* CTAs */}
               <div className="flex flex-wrap items-center gap-3 pt-2">
                 <button
                   type="button"
@@ -502,7 +516,6 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                 </a>
               </div>
 
-              {/* Trust Indicators */}
               <div className="pt-4 grid grid-cols-2 sm:grid-cols-4 gap-4 border-t border-slate-200 text-xs text-slate-500 font-medium">
                 <div className="flex items-center gap-1.5">
                   <span className="text-emerald-600 font-bold">✔</span>
@@ -523,10 +536,9 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
               </div>
             </div>
 
-            {/* Right Column: Interactive Multi-Tab Hero Console Preview (Oxmaint-style) */}
+            {/* Right Column: Interactive Multi-Tab Hero Console Preview */}
             <div className="lg:col-span-5">
               <div className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 shadow-xl shadow-slate-200/60 relative">
-                {/* Window Chrome Header */}
                 <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-3">
                   <div className="flex items-center gap-1.5">
                     <span className="w-2.5 h-2.5 rounded-full bg-red-400"></span>
@@ -539,7 +551,6 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                   </span>
                 </div>
 
-                {/* Hero Interactive Tabs */}
                 <div className="flex gap-1 border-b border-slate-100 pb-2 mb-3 text-[11px] font-mono font-bold">
                   {[
                     { id: "taxonomy", label: "Spec Matrix" },
@@ -562,7 +573,6 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                   ))}
                 </div>
 
-                {/* Tab 1: Spec Matrix */}
                 {heroPreviewTab === "taxonomy" && (
                   <div className="space-y-3 animate-in fade-in duration-100">
                     <div className="p-3 rounded-xl border border-sky-100 bg-sky-50/70">
@@ -588,14 +598,13 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                         <div className="font-bold text-slate-800 text-[11px] mt-0.5">{activeVertical.searchVol}</div>
                       </div>
                       <div className="p-2 rounded-lg border border-slate-100 bg-slate-50">
-                        <div className="text-[10px] font-mono text-slate-400 uppercase">Pipeline Value</div>
-                        <div className="font-bold text-emerald-700 font-mono text-[11px] mt-0.5">{activeVertical.pipelineVal}</div>
+                        <div className="text-[10px] font-mono text-slate-400 uppercase">AEO Intent</div>
+                        <div className="font-bold text-emerald-700 font-mono text-[11px] mt-0.5">High-Intent Diagnostic</div>
                       </div>
                     </div>
                   </div>
                 )}
 
-                {/* Tab 2: QA Check */}
                 {heroPreviewTab === "qa" && (
                   <div className="space-y-2 text-xs animate-in fade-in duration-100">
                     <div className="p-2.5 rounded-lg bg-emerald-50/80 border border-emerald-200 text-emerald-900 flex justify-between items-center text-[11px] font-mono font-bold">
@@ -623,7 +632,6 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                   </div>
                 )}
 
-                {/* Tab 3: JSON-LD Schema */}
                 {heroPreviewTab === "schema" && (
                   <div className="p-3 rounded-xl bg-slate-900 text-slate-200 font-mono text-[10px] leading-relaxed overflow-x-auto space-y-1 animate-in fade-in duration-100">
                     <div className="text-emerald-400">{"// Deterministic Schema.org Injection"}</div>
@@ -638,27 +646,25 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                   </div>
                 )}
 
-                {/* Tab 4: AEO Citation */}
                 {heroPreviewTab === "citation" && (
                   <div className="space-y-2.5 text-xs animate-in fade-in duration-100">
                     <div className="p-3 rounded-xl border border-purple-200 bg-purple-50/70 space-y-1.5">
                       <div className="flex items-center gap-1.5 text-[10px] font-mono font-bold text-purple-800 uppercase">
                         <span className="w-2 h-2 rounded-full bg-purple-600 animate-pulse"></span>
-                        <span>Google AI Overview &amp; Perplexity Simulated Citation</span>
+                        <span>Google AI Overview &amp; Perplexity Citation Target</span>
                       </div>
                       <p className="text-slate-800 text-[11px] leading-relaxed">
-                        &ldquo;According to the certified standard specification for <strong>{activeVertical.equipment}</strong> under <strong>{activeVertical.standard}</strong>, the diagnostic protocol to address {activeVertical.failure.toLowerCase()} requires…&rdquo;
+                        &ldquo;According to the certified standard specification for <strong>{activeVertical.equipment}</strong> under <strong>{activeVertical.standard}</strong>, the diagnostic protocol requires…&rdquo;
                       </p>
                       <div className="text-[10px] font-mono text-purple-700 font-bold flex items-center gap-1">
                         <span>Source:</span>
                         <span className="underline">yourdomain.com/{activeVertical.equipment.toLowerCase().replace(/[^a-z0-9]/g, "-")}-spec</span>
-                        <span>(Verified #1 AEO Citation)</span>
+                        <span>(#1 Verified SGE Rank)</span>
                       </div>
                     </div>
                   </div>
                 )}
 
-                {/* Trigger Action */}
                 <button
                   type="button"
                   onClick={() => openAuth("register")}
@@ -672,42 +678,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
         </div>
       </section>
 
-      {/* 3. ENTERPRISE LOGO CLOUD (OXMAINT-STYLE SOCIAL PROOF) */}
-      <section className="py-10 bg-white border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <p className="text-center text-xs font-mono font-bold uppercase tracking-widest text-slate-400 mb-6">
-            Trusted by Leaders in Industrial Equipment, Heavy Automation &amp; Process Engineering
-          </p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6 items-center justify-items-center opacity-70 grayscale hover:grayscale-0 transition">
-            <div className="font-black text-slate-800 text-sm tracking-tight flex items-center gap-1.5">
-              <span className="w-5 h-5 rounded bg-sky-600 text-white flex items-center justify-center text-[10px] font-mono">AP</span>
-              <span>APEX ROBOTICS</span>
-            </div>
-            <div className="font-black text-slate-800 text-sm tracking-tight flex items-center gap-1.5">
-              <span className="w-5 h-5 rounded bg-slate-900 text-white flex items-center justify-center text-[10px] font-mono">VK</span>
-              <span>VORTEX CLEAN</span>
-            </div>
-            <div className="font-black text-slate-800 text-sm tracking-tight flex items-center gap-1.5">
-              <span className="w-5 h-5 rounded bg-emerald-700 text-white flex items-center justify-center text-[10px] font-mono">TN</span>
-              <span>TITAN CNC</span>
-            </div>
-            <div className="font-black text-slate-800 text-sm tracking-tight flex items-center gap-1.5">
-              <span className="w-5 h-5 rounded bg-purple-700 text-white flex items-center justify-center text-[10px] font-mono">RD</span>
-              <span>ROTARY FLOW</span>
-            </div>
-            <div className="font-black text-slate-800 text-sm tracking-tight flex items-center gap-1.5">
-              <span className="w-5 h-5 rounded bg-blue-700 text-white flex items-center justify-center text-[10px] font-mono">ST</span>
-              <span>STERLING SKIDS</span>
-            </div>
-            <div className="font-black text-slate-800 text-sm tracking-tight flex items-center gap-1.5">
-              <span className="w-5 h-5 rounded bg-amber-700 text-white flex items-center justify-center text-[10px] font-mono">AP</span>
-              <span>AEROPNEUMATIC</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 4. OXMAINT-STYLE TABBED FEATURE SHOWCASE ("THE UNIFIED INDUSTRIAL AEO SUITE") */}
+      {/* 3. OXMAINT-STYLE TABBED FEATURE SHOWCASE */}
       <section id="platform-suite" className="py-20 bg-slate-50 border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
           <div className="text-center max-w-3xl mx-auto space-y-3">
@@ -718,7 +689,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
               One Unified Platform for Engineering Search Dominance
             </h2>
             <p className="text-sm text-slate-600 leading-relaxed">
-              Much like modern CMMS platforms automate physical factory maintenance, ForgeFlow automates and governs your entire digital engineering authority and Answer Engine presence.
+              Automate and govern your entire digital engineering authority and Answer Engine presence with deterministic precision.
             </p>
           </div>
 
@@ -773,7 +744,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-emerald-600 font-bold">✔</span>
-                      <span>Estimated pipeline revenue valuation for every generated topic slice.</span>
+                      <span>High-intent zero-volume keyword generation ready for LLM ingestion.</span>
                     </div>
                   </div>
                   <div className="pt-2">
@@ -807,15 +778,15 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                     Pillar 2 · Deterministic QA Studio
                   </span>
                   <h3 className="text-2xl font-black text-slate-900">
-                    Closed-Loop Quality Gating That Eliminates AI Hallucinations
+                    Zero-Hallucination Quality Gating for Technical Buyers
                   </h3>
                   <p className="text-sm text-slate-600 leading-relaxed">
-                    Generic AI models hallucinate torque limits and invent non-existent parts. ForgeFlow runs an automated 8-point inspection on every slice before human engineers give final sign-off.
+                    Engineers buy from verified tolerances, not fluffy adjectives. ForgeFlow runs an automated 8-point inspection on every slice before human engineers give final sign-off.
                   </p>
                   <div className="space-y-2 pt-2 text-xs text-slate-700">
                     <div className="flex items-center gap-2">
                       <span className="text-emerald-600 font-bold">✔</span>
-                      <span>Zero-fluff filter: instantly strips buzzwords, hyperbole, and fluff.</span>
+                      <span>Zero-fluff filter: instantly strips buzzwords, hyperbole, and vague filler.</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-emerald-600 font-bold">✔</span>
@@ -837,7 +808,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                   </div>
                 </div>
                 <div className="lg:col-span-5 bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-2 text-xs">
-                  <div className="text-xs font-mono font-bold text-slate-500 uppercase">QA Studio Status Strip</div>
+                  <div className="text-xs font-mono font-bold text-slate-500 uppercase">Live QA Inspector</div>
                   <div className="p-3 bg-white rounded-xl border border-slate-200 space-y-2">
                     <div className="flex justify-between items-center text-[11px] font-mono">
                       <span>Word Count (1,840)</span>
@@ -852,8 +823,8 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                       <span className="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 font-bold">VERIFIED</span>
                     </div>
                     <div className="flex justify-between items-center text-[11px] font-mono">
-                      <span>CTA Integration</span>
-                      <span className="px-2 py-0.5 rounded bg-sky-50 text-sky-700 font-bold">PATCHED</span>
+                      <span>Direct-Answer Capsule</span>
+                      <span className="px-2 py-0.5 rounded bg-sky-50 text-sky-700 font-bold">AEO READY</span>
                     </div>
                   </div>
                 </div>
@@ -867,7 +838,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                     Pillar 3 · AEO Schema Graph Hub
                   </span>
                   <h3 className="text-2xl font-black text-slate-900">
-                    Structured Linked Data Built for Perplexity &amp; ChatGPT
+                    Structured Linked Data Built for Perplexity &amp; Google AI
                   </h3>
                   <p className="text-sm text-slate-600 leading-relaxed">
                     AI answer engines rely on semantic entity graphs to extract answers. ForgeFlow injects valid JSON-LD TechArticle, HowTo, and FAQPage schemas so search engines cite your site as the primary source.
@@ -1051,8 +1022,8 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                       <span className="font-mono font-bold text-purple-700">14.2x Growth</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-slate-600">Average Qualified RFQ Deal</span>
-                      <span className="font-mono font-bold text-emerald-700">$340,000</span>
+                      <span className="text-slate-600">High-Intent Inbound RFQs</span>
+                      <span className="font-mono font-bold text-emerald-700">Active Pipeline</span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-slate-600">Time-to-Publish per Asset</span>
@@ -1066,7 +1037,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
         </div>
       </section>
 
-      {/* 5. INTERACTIVE 7 PRE-BUILT TAXONOMIES SHOWCASE */}
+      {/* 4. INTERACTIVE 7 PRE-BUILT TAXONOMIES SHOWCASE */}
       <section id="taxonomies" className="py-20 bg-white border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
           <div className="text-center max-w-3xl mx-auto space-y-3">
@@ -1081,7 +1052,6 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
             </p>
           </div>
 
-          {/* Vertical Tabs */}
           <div className="flex flex-wrap gap-2 justify-center">
             {verticalShowcase.map((v, idx) => (
               <button
@@ -1099,7 +1069,6 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
             ))}
           </div>
 
-          {/* Active Vertical Card */}
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6 lg:p-8 shadow-xs">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
               <div className="lg:col-span-7 space-y-4">
@@ -1132,13 +1101,9 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
 
               <div className="lg:col-span-5 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
                 <div className="text-xs font-mono uppercase tracking-wider font-bold text-slate-700">
-                  Economic &amp; Risk Metrics
+                  Search &amp; Risk Metrics
                 </div>
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                    <span className="text-xs text-slate-500">Target Pipeline Value</span>
-                    <span className="font-mono text-sm font-bold text-emerald-700">{activeVertical.pipelineVal}</span>
-                  </div>
                   <div className="flex items-center justify-between border-b border-slate-100 pb-2">
                     <span className="text-xs text-slate-500">Spec Risk Score</span>
                     <span className="font-mono text-sm font-bold text-sky-700">{activeVertical.specRisk}</span>
@@ -1171,30 +1136,29 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
         </div>
       </section>
 
-      {/* 6. INTERACTIVE ROI & PIPELINE CALCULATOR (OXMAINT-STYLE ENGAGEMENT TOOL) */}
-      <section id="roi-calculator" className="py-20 bg-slate-50 border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-          <div className="text-center max-w-3xl mx-auto space-y-3">
-            <span className="text-xs font-mono uppercase tracking-wider font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
-              Interactive ROI Engine
+      {/* 5. CALCULATE YOUR INDUSTRY: SEARCH & AEO FOOTPRINT (COMPACT, NO DIRECT PRICING) */}
+      <section id="industry-calculator" className="py-14 sm:py-16 bg-slate-50 border-b border-slate-200">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+          <div className="text-center max-w-2xl mx-auto space-y-2">
+            <span className="text-xs font-mono uppercase tracking-wider font-bold text-sky-700 bg-sky-50 px-3 py-1 rounded-full border border-sky-200">
+              AEO Footprint Estimator
             </span>
-            <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
-              Calculate Your Industrial Pipeline Revenue Potential
+            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+              Calculate Your Industry Reach &amp; AEO Impact
             </h2>
-            <p className="text-sm text-slate-600 leading-relaxed">
-              Estimate the annual B2B pipeline generated when zero-volume engineering queries are indexed with deterministic AEO schema across your equipment lines.
+            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+              Estimate your certified technical search coverage and Answer Engine visibility across your equipment portfolio.
             </p>
           </div>
 
-          <div className="max-w-4xl mx-auto rounded-3xl border border-slate-200 bg-white p-6 sm:p-10 shadow-lg shadow-slate-200/50">
+          <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 shadow-sm">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-              {/* Sliders Column */}
-              <div className="lg:col-span-7 space-y-6">
-                {/* Slider 1: Machines */}
+              {/* Sliders Column (Compact & Clean) */}
+              <div className="lg:col-span-7 space-y-5">
                 <div>
-                  <div className="flex justify-between items-center text-xs font-bold text-slate-800 mb-2">
-                    <span>Number of Equipment / Machine Models</span>
-                    <span className="font-mono text-sm text-sky-700 bg-sky-50 px-2.5 py-0.5 rounded border border-sky-200">
+                  <div className="flex justify-between items-center text-xs font-bold text-slate-800 mb-1.5">
+                    <span>Equipment Lines &amp; Machinery Models</span>
+                    <span className="font-mono text-xs text-sky-700 bg-sky-50 px-2 py-0.5 rounded border border-sky-200 font-bold">
                       {roiMachines} Models
                     </span>
                   </div>
@@ -1204,7 +1168,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                     max="60"
                     value={roiMachines}
                     onChange={(e) => setRoiMachines(Number(e.target.value))}
-                    className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-sky-600"
+                    className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-sky-600"
                   />
                   <div className="flex justify-between text-[10px] font-mono text-slate-400 mt-1">
                     <span>3 Models</span>
@@ -1213,12 +1177,11 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                   </div>
                 </div>
 
-                {/* Slider 2: Failures */}
                 <div>
-                  <div className="flex justify-between items-center text-xs font-bold text-slate-800 mb-2">
-                    <span>Target Failure Modes &amp; SOPs per Model</span>
-                    <span className="font-mono text-sm text-purple-700 bg-purple-50 px-2.5 py-0.5 rounded border border-purple-200">
-                      {roiFailures} Failure Modes
+                  <div className="flex justify-between items-center text-xs font-bold text-slate-800 mb-1.5">
+                    <span>Failure Modes &amp; Diagnostic SOPs per Model</span>
+                    <span className="font-mono text-xs text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-200 font-bold">
+                      {roiFailures} Diagnostic SOPs
                     </span>
                   </div>
                   <input
@@ -1227,7 +1190,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                     max="15"
                     value={roiFailures}
                     onChange={(e) => setRoiFailures(Number(e.target.value))}
-                    className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-purple-600"
+                    className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-purple-600"
                   />
                   <div className="flex justify-between text-[10px] font-mono text-slate-400 mt-1">
                     <span>3 SOPs</span>
@@ -1235,67 +1198,46 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                     <span>15 SOPs</span>
                   </div>
                 </div>
-
-                {/* Slider 3: Deal Size */}
-                <div>
-                  <div className="flex justify-between items-center text-xs font-bold text-slate-800 mb-2">
-                    <span>Average B2B Equipment Sale / Service Contract</span>
-                    <span className="font-mono text-sm text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded border border-emerald-200">
-                      ${roiDealSize},000
-                    </span>
-                  </div>
-                  <input
-                    type="range"
-                    min="25"
-                    max="400"
-                    step="5"
-                    value={roiDealSize}
-                    onChange={(e) => setRoiDealSize(Number(e.target.value))}
-                    className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-600"
-                  />
-                  <div className="flex justify-between text-[10px] font-mono text-slate-400 mt-1">
-                    <span>$25k</span>
-                    <span>$200k</span>
-                    <span>$400k+</span>
-                  </div>
-                </div>
               </div>
 
-              {/* Output Result Card */}
-              <div className="lg:col-span-5 bg-gradient-to-br from-slate-900 to-slate-950 p-6 rounded-2xl text-white shadow-xl space-y-4">
-                <div className="text-[11px] font-mono font-bold text-sky-400 uppercase tracking-wider">
-                  Estimated Annual Economic Value
+              {/* Output Result Card (NO DIRECT PRICING - METRICS ONLY) */}
+              <div className="lg:col-span-5 bg-gradient-to-br from-slate-900 to-slate-950 p-5 rounded-2xl text-white shadow-md space-y-3.5">
+                <div className="text-[10px] font-mono font-bold text-sky-400 uppercase tracking-wider">
+                  Projected Answer Engine Footprint
                 </div>
-                <div>
-                  <div className="text-3xl sm:text-4xl font-black font-mono text-emerald-400 tracking-tight">
-                    ${(calculatedPipeline).toLocaleString()}
+                
+                <div className="grid grid-cols-2 gap-2.5 pt-1">
+                  <div className="bg-slate-800/70 p-2.5 rounded-xl border border-slate-700/60">
+                    <div className="text-[10px] font-mono text-slate-400 uppercase">Certified Pages</div>
+                    <div className="text-xl font-black font-mono text-white mt-0.5">{calculatedPages} Slices</div>
                   </div>
-                  <div className="text-[11px] text-slate-400 mt-1">
-                    Estimated pipeline value from zero-volume Answer Engine citations
+                  <div className="bg-slate-800/70 p-2.5 rounded-xl border border-slate-700/60">
+                    <div className="text-[10px] font-mono text-slate-400 uppercase">AEO Indexation</div>
+                    <div className="text-xl font-black font-mono text-sky-400 mt-0.5">{calculatedCoverage}%</div>
                   </div>
                 </div>
 
-                <div className="border-t border-slate-800 pt-3 space-y-2.5 text-xs">
-                  <div className="flex justify-between items-center">
-                    <span className="text-slate-400">Total Certified Pages:</span>
-                    <span className="font-mono font-bold text-white">{calculatedPages} Technical Slices</span>
+                <div className="space-y-1.5 text-xs border-t border-slate-800 pt-3">
+                  <div className="flex justify-between text-slate-300">
+                    <span className="text-[11px] text-slate-400">Target Buyer Searchers:</span>
+                    <span className="font-mono font-bold">~{calculatedSearchers.toLocaleString()}+ Engineers/yr</span>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-slate-400">Target Buyer Searchers:</span>
-                    <span className="font-mono font-bold text-white">~{calculatedSearchers.toLocaleString()}/year</span>
+                  <div className="flex justify-between text-slate-300">
+                    <span className="text-[11px] text-slate-400">High-Intent Inquiries:</span>
+                    <span className="font-mono font-bold text-emerald-400">~{calculatedInquiries}+ RFQs/month</span>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-slate-400">AEO LLM Index Coverage:</span>
-                    <span className="font-mono font-bold text-sky-400">{calculatedCoverage}%</span>
+                  <div className="flex justify-between text-slate-300">
+                    <span className="text-[11px] text-slate-400">Hallucination Risk:</span>
+                    <span className="font-mono font-bold text-sky-300">0.0% Spec-Gated</span>
                   </div>
                 </div>
 
                 <button
                   type="button"
                   onClick={() => openAuth("register")}
-                  className="w-full py-3 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold uppercase tracking-wider transition shadow-md shadow-sky-600/30 cursor-pointer"
+                  className="w-full py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold uppercase tracking-wider transition shadow-sm cursor-pointer"
                 >
-                  Capture This Pipeline In Console →
+                  Unlock Full Industry AEO Analysis →
                 </button>
               </div>
             </div>
@@ -1303,7 +1245,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
         </div>
       </section>
 
-      {/* 7. THE 8-STEP INDUSTRIAL WORKFLOW (EXPLAINED IN DETAIL) */}
+      {/* 6. THE 8-STEP INDUSTRIAL WORKFLOW */}
       <section id="workflow" className="py-20 bg-white border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
           <div className="text-center max-w-3xl mx-auto space-y-3">
@@ -1394,18 +1336,18 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
         </div>
       </section>
 
-      {/* 8. COMPARISON TABLE: FORGEFLOW VS GENERIC AI VS AGENCIES */}
+      {/* 7. COMPARISON TABLE: BIG IMPACT HEADING */}
       <section className="py-20 bg-slate-50 border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-          <div className="text-center max-w-3xl mx-auto space-y-3">
+          <div className="text-center max-w-4xl mx-auto space-y-4">
             <span className="text-xs font-mono uppercase tracking-wider font-bold text-purple-700 bg-purple-50 px-3 py-1 rounded-full border border-purple-200">
               Why ForgeFlow Wins
             </span>
-            <h2 className="text-3xl font-black text-slate-900 tracking-tight">
-              Engineered for Industrial Reality, Not Generic Marketing
+            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-[1.06]">
+              Engineered for Industrial Reality, <span className="text-sky-600">Not Generic Marketing.</span>
             </h2>
-            <p className="text-sm text-slate-600 leading-relaxed">
-              Compare how ForgeFlow&apos;s deterministic engine outperforms traditional SEO agencies and generic LLM writing tools.
+            <p className="text-sm sm:text-base text-slate-600 leading-relaxed max-w-2xl mx-auto">
+              Compare how ForgeFlow&apos;s deterministic engine outperforms traditional SEO agencies and generic LLM writing tools on real engineering specs.
             </p>
           </div>
 
@@ -1452,7 +1394,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                 </tr>
                 <tr>
                   <td className="p-4 font-bold text-slate-900">Monthly Cost Structure</td>
-                  <td className="p-4 font-semibold text-emerald-700 bg-sky-50/30">$199 – $799/mo flat</td>
+                  <td className="p-4 font-semibold text-emerald-700 bg-sky-50/30">$159 – $639/mo flat</td>
                   <td className="p-4 text-slate-600">$20 – $100/mo (No workflow)</td>
                   <td className="p-4 text-red-600">$8,000 – $25,000/mo retainer</td>
                 </tr>
@@ -1462,110 +1404,61 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
         </div>
       </section>
 
-      {/* 9. CUSTOMER TESTIMONIALS (OXMAINT-STYLE AUTHENTIC CASE STUDIES) */}
-      <section className="py-20 bg-white border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-          <div className="text-center max-w-3xl mx-auto space-y-3">
-            <span className="text-xs font-mono uppercase tracking-wider font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
-              Customer Impact
-            </span>
-            <h2 className="text-3xl font-black text-slate-900 tracking-tight">
-              Trusted by Industrial Marketing &amp; Engineering Teams
-            </h2>
-            <p className="text-sm text-slate-600 leading-relaxed">
-              See how manufacturers are converting low-volume technical search into multimillion-dollar B2B pipelines.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="p-6 rounded-2xl border border-slate-200 bg-slate-50/60 shadow-xs space-y-4 flex flex-col justify-between">
-              <div className="space-y-3">
-                <div className="flex items-center gap-1 text-amber-500 text-sm">★★★★★</div>
-                <p className="text-xs text-slate-700 leading-relaxed italic">
-                  &ldquo;Standard SEO agencies told us our keywords had &lsquo;zero volume&rsquo;. ForgeFlow generated 45 technical troubleshooting pages for our robotic actuators, and within 60 days we captured two major automotive tier-1 RFQs worth over $700k.&rdquo;
-                </p>
-              </div>
-              <div className="pt-3 border-t border-slate-200 flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-sky-100 text-sky-700 font-bold flex items-center justify-center text-xs">
-                  MV
-                </div>
-                <div>
-                  <div className="font-bold text-xs text-slate-900">Marcus Vance</div>
-                  <div className="text-[11px] text-slate-500">VP of Marketing, Apex Robotics</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-6 rounded-2xl border border-slate-200 bg-slate-50/60 shadow-xs space-y-4 flex flex-col justify-between">
-              <div className="space-y-3">
-                <div className="flex items-center gap-1 text-amber-500 text-sm">★★★★★</div>
-                <p className="text-xs text-slate-700 leading-relaxed italic">
-                  &ldquo;Our application engineers are notorious perfectionists who hated our marketing content. When they saw ForgeFlow&rsquo;s 3-A Sanitary SOP drafts with zero fluff and exact ASME tolerances, they approved all 30 slices on the first pass.&rdquo;
-                </p>
-              </div>
-              <div className="pt-3 border-t border-slate-200 flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-purple-100 text-purple-700 font-bold flex items-center justify-center text-xs">
-                  SL
-                </div>
-                <div>
-                  <div className="font-bold text-xs text-slate-900">Sarah Lin</div>
-                  <div className="text-[11px] text-slate-500">Director of Technical Content, FlowVane Skids</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-6 rounded-2xl border border-slate-200 bg-slate-50/60 shadow-xs space-y-4 flex flex-col justify-between">
-              <div className="space-y-3">
-                <div className="flex items-center gap-1 text-amber-500 text-sm">★★★★★</div>
-                <p className="text-xs text-slate-700 leading-relaxed italic">
-                  &ldquo;We now appear as the #1 cited source whenever plant managers query Perplexity or ChatGPT about 5-axis thermal spindle drift. The automated JSON-LD schema injection alone saved our engineering team 150 hours.&rdquo;
-                </p>
-              </div>
-              <div className="pt-3 border-t border-slate-200 flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-emerald-100 text-emerald-700 font-bold flex items-center justify-center text-xs">
-                  DK
-                </div>
-                <div>
-                  <div className="font-bold text-xs text-slate-900">David Kelling</div>
-                  <div className="text-[11px] text-slate-500">Head of Growth, Titan Precision Machining</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 10. TRANSPARENT ENTERPRISE PRICING */}
+      {/* 9. TRANSPARENT PRICING: CLEAN WEB CARDS WITH ANNUAL TOGGLE */}
       <section id="pricing" className="py-20 bg-slate-50 border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
           <div className="text-center max-w-3xl mx-auto space-y-3">
             <span className="text-xs font-mono uppercase tracking-wider font-bold text-sky-700 bg-sky-50 px-3 py-1 rounded-full border border-sky-200">
-              Transparent Pricing
+              Predictable Pricing
             </span>
-            <h2 className="text-3xl font-black text-slate-900 tracking-tight">
-              Enterprise Plans Built for Scale
+            <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
+              Enterprise Plans Built for Engineering Scale
             </h2>
             <p className="text-sm text-slate-600 leading-relaxed">
-              Deploy programmatic technical content across all manufacturing product lines. No hidden overage traps.
+              Capture zero-volume search and dominate Answer Engines across all product lines. No hidden overages.
             </p>
+
+            {/* Interactive Billing Toggle */}
+            <div className="flex items-center justify-center gap-3 pt-3">
+              <span className={`text-xs font-bold ${pricingBilling === "monthly" ? "text-slate-900" : "text-slate-500"}`}>
+                Monthly Billing
+              </span>
+              <button
+                type="button"
+                onClick={() => setPricingBilling(pricingBilling === "monthly" ? "annual" : "monthly")}
+                className="w-12 h-6 rounded-full bg-slate-900 p-0.5 transition cursor-pointer relative"
+                aria-label="Toggle annual or monthly pricing"
+              >
+                <div className={`w-5 h-5 rounded-full bg-white transition-transform duration-200 ${pricingBilling === "annual" ? "translate-x-6" : "translate-x-0"}`} />
+              </button>
+              <span className={`text-xs font-bold flex items-center gap-1.5 ${pricingBilling === "annual" ? "text-slate-900" : "text-slate-500"}`}>
+                <span>Annual Billing</span>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                  SAVE 20%
+                </span>
+              </span>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Pilot */}
+            {/* Pilot Tier */}
             <div className="p-7 rounded-2xl border border-slate-200 bg-white shadow-xs flex flex-col justify-between">
               <div>
-                <div className="text-xs font-mono font-bold uppercase text-slate-500 mb-2">Pilot Tier</div>
+                <div className="text-xs font-mono font-bold uppercase text-slate-500 mb-2">Starter Pilot</div>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-4xl font-extrabold text-slate-900">$199</span>
+                  <span className="text-4xl font-extrabold text-slate-900">
+                    {pricingBilling === "annual" ? "$159" : "$199"}
+                  </span>
                   <span className="text-xs text-slate-500">/ month</span>
                 </div>
-                <p className="text-xs text-slate-500 mt-2">For single-facility manufacturers testing programmatic SEO.</p>
+                <p className="text-xs text-slate-500 mt-2">For mid-size equipment makers testing programmatic AEO.</p>
                 <div className="mt-6 space-y-2.5 text-xs border-t border-slate-100 pt-5 text-slate-700">
-                  <div>✔ 50 Technical Pages / month</div>
-                  <div>✔ 1 Verified Corporate Domain</div>
-                  <div>✔ 2 Vertical Taxonomies</div>
-                  <div>✔ Closed-Loop QA Studio</div>
-                  <div>✔ 3 Team Member Seats</div>
+                  <div className="flex items-center gap-2">✔ <span>50 Spec-Verified Technical Slices / mo</span></div>
+                  <div className="flex items-center gap-2">✔ <span>1 Verified Corporate Domain</span></div>
+                  <div className="flex items-center gap-2">✔ <span>2 Pre-Built Vertical Taxonomies</span></div>
+                  <div className="flex items-center gap-2">✔ <span>Closed-Loop QA &amp; Anti-Fluff Stripper</span></div>
+                  <div className="flex items-center gap-2">✔ <span>Native TechArticle JSON-LD Schema</span></div>
+                  <div className="flex items-center gap-2">✔ <span>3 Application Engineering Seats</span></div>
                 </div>
               </div>
               <button
@@ -1573,29 +1466,32 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                 onClick={() => openAuth("register")}
                 className="mt-8 w-full py-2.5 rounded-xl border border-slate-300 bg-slate-50 text-xs font-bold text-slate-700 hover:bg-slate-100 transition cursor-pointer"
               >
-                Start Pilot Plan
+                Start Free 14-Day Pilot →
               </button>
             </div>
 
-            {/* Growth (Recommended) */}
+            {/* Growth Tier (Recommended) */}
             <div className="p-7 rounded-2xl border-2 border-sky-600 bg-white shadow-lg shadow-sky-600/10 flex flex-col justify-between relative">
-              <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-sky-600 text-white font-mono text-[10px] font-bold uppercase">
-                Most Popular
+              <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-sky-600 text-white font-mono text-[10px] font-bold uppercase tracking-wider">
+                Most Popular · Recommended for OEMs
               </span>
               <div>
-                <div className="text-xs font-mono font-bold uppercase text-sky-700 mb-2">Growth Tier</div>
+                <div className="text-xs font-mono font-bold uppercase text-sky-700 mb-2">Growth Engine</div>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-4xl font-extrabold text-slate-900">$399</span>
+                  <span className="text-4xl font-extrabold text-slate-900">
+                    {pricingBilling === "annual" ? "$319" : "$399"}
+                  </span>
                   <span className="text-xs text-slate-500">/ month</span>
                 </div>
                 <p className="text-xs text-slate-500 mt-2">For scaling equipment brands dominating multiple product lines.</p>
                 <div className="mt-6 space-y-2.5 text-xs border-t border-slate-100 pt-5 text-slate-700">
-                  <div>✔ 150 Technical Pages / month</div>
-                  <div>✔ 3 Verified Connected Domains</div>
-                  <div>✔ All 7 Pre-Built Vertical Taxonomies</div>
-                  <div>✔ Full Multi-Schema (TechArticle + HowTo)</div>
-                  <div>✔ Direct Webflow &amp; WordPress CMS API</div>
-                  <div>✔ 7 Team Seats + Role-Based Access</div>
+                  <div className="flex items-center gap-2">✔ <span>150 Spec-Verified Technical Slices / mo</span></div>
+                  <div className="flex items-center gap-2">✔ <span>3 Connected Corporate Domains</span></div>
+                  <div className="flex items-center gap-2">✔ <span>All 7 Pre-Built Industrial Taxonomies</span></div>
+                  <div className="flex items-center gap-2">✔ <span>Full Multi-Schema (TechArticle + HowTo + FAQ)</span></div>
+                  <div className="flex items-center gap-2">✔ <span>Google AI Overviews &amp; Perplexity Syndication</span></div>
+                  <div className="flex items-center gap-2">✔ <span>Direct Webflow &amp; WordPress CMS API Sync</span></div>
+                  <div className="flex items-center gap-2">✔ <span>7 Engineering Seats + Role-Based Access</span></div>
                 </div>
               </div>
               <button
@@ -1603,25 +1499,28 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                 onClick={() => openAuth("register")}
                 className="mt-8 w-full py-2.5 rounded-xl bg-sky-600 text-xs font-bold text-white shadow-sm hover:bg-sky-500 transition cursor-pointer"
               >
-                Launch Growth Plan
+                Launch Growth Engine →
               </button>
             </div>
 
-            {/* Fleet / Agency */}
+            {/* Fleet / Enterprise Tier */}
             <div className="p-7 rounded-2xl border border-slate-200 bg-white shadow-xs flex flex-col justify-between">
               <div>
-                <div className="text-xs font-mono font-bold uppercase text-purple-700 mb-2">Fleet Tier (Agency)</div>
+                <div className="text-xs font-mono font-bold uppercase text-purple-700 mb-2">Fleet Tier · Multi-Plant</div>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-4xl font-extrabold text-slate-900">$799</span>
+                  <span className="text-4xl font-extrabold text-slate-900">
+                    {pricingBilling === "annual" ? "$639" : "$799"}
+                  </span>
                   <span className="text-xs text-slate-500">/ month</span>
                 </div>
-                <p className="text-xs text-slate-500 mt-2">For specialized industrial B2B agencies and multi-brand OEM conglomerates.</p>
+                <p className="text-xs text-slate-500 mt-2">For multi-brand conglomerates &amp; industrial B2B agencies.</p>
                 <div className="mt-6 space-y-2.5 text-xs border-t border-slate-100 pt-5 text-slate-700">
-                  <div>✔ 400 Pages included</div>
-                  <div>✔ Unlimited Client Tenants</div>
-                  <div>✔ White-Label Client Portal &amp; CNAME</div>
-                  <div>✔ 15 Team &amp; Client Review Seats</div>
-                  <div>✔ Dedicated Taxonomy Engineer</div>
+                  <div className="flex items-center gap-2">✔ <span>400+ Technical Slices included</span></div>
+                  <div className="flex items-center gap-2">✔ <span>Unlimited Client Tenants &amp; Domains</span></div>
+                  <div className="flex items-center gap-2">✔ <span>Custom CAD &amp; Equipment Specs Ingestion</span></div>
+                  <div className="flex items-center gap-2">✔ <span>White-Label Client Portal &amp; CNAME</span></div>
+                  <div className="flex items-center gap-2">✔ <span>Zero-Hallucination SLA Guarantee</span></div>
+                  <div className="flex items-center gap-2">✔ <span>Dedicated Taxonomy Solutions Architect</span></div>
                 </div>
               </div>
               <button
@@ -1629,14 +1528,14 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                 onClick={() => openAuth("register")}
                 className="mt-8 w-full py-2.5 rounded-xl border border-slate-300 bg-slate-50 text-xs font-bold text-slate-700 hover:bg-slate-100 transition cursor-pointer"
               >
-                Deploy Fleet Tier
+                Deploy Fleet Tier →
               </button>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 11. FAQ ACCORDION SECTION */}
+      {/* 10. FAQ ACCORDION SECTION */}
       <section id="faq" className="py-20 bg-white border-b border-slate-200">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
           <div className="text-center space-y-2">
@@ -1694,138 +1593,124 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
         </div>
       </section>
 
-      {/* 12. BOTTOM CALL TO ACTION BANNER (WITH DUAL FLOATING LIVE STATUS CARDS) */}
-      <section className="py-20 lg:py-24 bg-gradient-to-b from-slate-50 via-white to-slate-100/90 border-t border-slate-200 overflow-hidden relative">
+      {/* 11. BOTTOM CALL TO ACTION BANNER (MATCHES USER INSPIRATION IMAGE 1) */}
+      <section className="py-20 lg:py-24 bg-[#F4F5FA] border-t border-slate-200/80 overflow-hidden relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
             {/* Left Column: Heading, Subtext, and Action Buttons */}
             <div className="lg:col-span-7 space-y-6">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-50 border border-sky-200/90 text-sky-800 text-xs font-mono font-semibold shadow-2xs">
-                <span className="w-2 h-2 rounded-full bg-sky-500 animate-pulse"></span>
-                <span>Deterministic AEO &amp; Industrial SEO Platform</span>
-              </div>
-
-              <h2 className="text-3xl sm:text-4xl lg:text-[42px] font-black text-slate-900 tracking-tight leading-[1.15]">
-                Ready to Dominate Industrial Search &amp; AI Answer Engines?
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#2E335B] tracking-tight leading-[1.12]">
+                Ready to Transform Your Manufacturing Operations?
               </h2>
-              <p className="text-base sm:text-lg text-slate-600 leading-relaxed font-normal max-w-2xl">
-                Join 1,000+ equipment manufacturers and industrial B2B brands using ForgeFlow to capture high-value zero-volume search, eliminate technical hallucinations, and command #1 rankings across Google AI Overviews and Perplexity with deterministic AEO schema.
+              <p className="text-base sm:text-lg text-slate-600 leading-relaxed font-normal max-w-xl">
+                Join 1000+ factories using ForgeFlow to solve critical production challenges, optimize operations, and unlock hidden insights with AI-powered predictive analytics, real-time monitoring, and intelligent factory intelligence monitoring.
               </p>
               <div className="flex flex-wrap items-center gap-4 pt-2">
                 <button
                   type="button"
-                  onClick={() => openAuth("register")}
-                  className="px-8 py-3.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-sm font-bold shadow-md shadow-sky-600/25 transition cursor-pointer flex items-center gap-2"
+                  onClick={() => { setDemoSubmitted(false); setDemoModalOpen(true); }}
+                  className="px-7 py-3.5 rounded-lg bg-[#5C56B6] hover:bg-[#4E48A2] text-white text-sm font-bold shadow-md shadow-indigo-500/20 transition cursor-pointer flex items-center gap-2"
                 >
-                  <span>Launch Workspace &amp; Pilot</span>
-                  <span className="text-sky-200 text-base">→</span>
+                  <span>Book a Demo</span>
                 </button>
                 <button
                   type="button"
-                  onClick={() => openAuth("login")}
-                  className="px-8 py-3.5 rounded-xl border-2 border-slate-300 text-slate-700 bg-white hover:bg-slate-50 hover:border-slate-400 text-sm font-semibold transition cursor-pointer shadow-xs"
+                  onClick={() => openAuth("register")}
+                  className="px-7 py-3.5 rounded-lg border-2 border-[#5C56B6] text-[#5C56B6] bg-white hover:bg-indigo-50/50 text-sm font-semibold transition cursor-pointer shadow-xs"
                 >
-                  Sign In to Console
+                  Contact Support
                 </button>
               </div>
             </div>
 
-            {/* Right Column: Two Floating Live Cards (AEO Search Monitor & Deterministic QA Predictions) */}
+            {/* Right Column: Two Floating Live Cards (Styled 1:1 like Inspiration Image) */}
             <div className="lg:col-span-5 flex items-start justify-center lg:justify-end gap-4 sm:gap-6 pt-4 lg:pt-0">
-              {/* Card 1: AEO Search Monitor */}
-              <div className="w-[210px] sm:w-[230px] rounded-2xl bg-white shadow-xl shadow-slate-300/40 border border-slate-200/90 overflow-hidden shrink-0">
-                {/* Sky Header Banner */}
-                <div className="bg-sky-600 px-4 py-3 text-white text-xs font-bold tracking-tight flex items-center justify-between">
-                  <span>AEO Search Monitor</span>
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              {/* Card 1: Production Monitor */}
+              <div className="w-[210px] sm:w-[230px] rounded-2xl bg-white shadow-xl shadow-slate-300/40 border border-slate-200/80 overflow-hidden shrink-0">
+                <div className="bg-[#5C56B6] px-4 py-3 text-white text-xs font-bold tracking-tight text-center sm:text-left">
+                  <span>Production Monitor</span>
                 </div>
 
-                {/* Card Body */}
                 <div className="p-4 space-y-3.5">
                   <div className="flex items-center justify-between pb-1">
-                    <span className="text-xs font-medium text-slate-600">Taxonomies Live</span>
-                    <span className="px-2 py-0.5 rounded-full bg-emerald-600 text-white text-[11px] font-bold font-mono">
-                      7/7
+                    <span className="text-xs font-medium text-slate-600">Lines Running</span>
+                    <span className="px-2 py-0.5 rounded-full bg-[#00B884] text-white text-[11px] font-bold font-mono">
+                      4/4
                     </span>
                   </div>
 
                   <div className="flex items-start gap-2.5">
-                    <span className="mt-0.5 w-4 h-4 rounded-full border border-emerald-500 text-emerald-600 flex items-center justify-center text-[9px] shrink-0 font-bold">
+                    <span className="mt-0.5 w-4 h-4 rounded-full border border-[#00B884] text-[#00B884] flex items-center justify-center text-[9px] shrink-0 font-bold">
                       ✓
                     </span>
                     <div>
-                      <div className="text-xs font-semibold text-slate-800">HVAC RTU Systems</div>
-                      <div className="text-[11px] text-emerald-700 font-mono mt-0.5 font-medium">AEO Rank: #1 (98% Spec)</div>
+                      <div className="text-xs font-semibold text-slate-800">Line A - Assembly</div>
+                      <div className="text-[11px] text-slate-500 font-mono mt-0.5 font-medium">OEE: 92%</div>
                     </div>
                   </div>
 
                   <div className="border-t border-slate-100" />
 
                   <div className="flex items-start gap-2.5">
-                    <span className="mt-0.5 w-4 h-4 rounded-full border border-emerald-500 text-emerald-600 flex items-center justify-center text-[9px] shrink-0 font-bold">
+                    <span className="mt-0.5 w-4 h-4 rounded-full border border-[#00B884] text-[#00B884] flex items-center justify-center text-[9px] shrink-0 font-bold">
                       ✓
                     </span>
                     <div>
-                      <div className="text-xs font-semibold text-slate-800">Sanitary CIP Skids</div>
-                      <div className="text-[11px] text-emerald-700 font-mono mt-0.5 font-medium">AEO Rank: #1 (100% Schema)</div>
+                      <div className="text-xs font-semibold text-slate-800">Line B - Welding</div>
+                      <div className="text-[11px] text-slate-500 font-mono mt-0.5 font-medium">OEE: 87%</div>
                     </div>
                   </div>
 
                   <div className="border-t border-slate-100" />
 
                   <div className="flex items-start gap-2.5">
-                    <span className="mt-0.5 w-4 h-4 rounded-full border border-emerald-500 text-emerald-600 flex items-center justify-center text-[9px] shrink-0 font-bold">
+                    <span className="mt-0.5 w-4 h-4 rounded-full border border-[#00B884] text-[#00B884] flex items-center justify-center text-[9px] shrink-0 font-bold">
                       ✓
                     </span>
                     <div>
-                      <div className="text-xs font-semibold text-slate-800">5-Axis Milling Cells</div>
-                      <div className="text-[11px] text-emerald-700 font-mono mt-0.5 font-medium">AEO Rank: #1 (Zero Fluff)</div>
+                      <div className="text-xs font-semibold text-slate-800">Line C - Packaging</div>
+                      <div className="text-[11px] text-slate-500 font-mono mt-0.5 font-medium">OEE: 94%</div>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Card 2: Deterministic QA Engine (Layered & Staggered Downward) */}
-              <div className="w-[210px] sm:w-[230px] rounded-2xl bg-white shadow-xl shadow-slate-300/40 border border-slate-200/90 overflow-hidden shrink-0 translate-y-6 sm:translate-y-8">
-                {/* Dark Slate Header Banner */}
-                <div className="bg-slate-900 px-4 py-3 text-white text-xs font-bold tracking-tight flex items-center justify-between">
-                  <span>Deterministic QA</span>
-                  <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold uppercase bg-purple-900 text-purple-300 border border-purple-700">
-                    AEO Ready
-                  </span>
+              {/* Card 2: AI Predictions */}
+              <div className="w-[210px] sm:w-[230px] rounded-2xl bg-white shadow-xl shadow-slate-300/40 border border-slate-200/80 overflow-hidden shrink-0">
+                <div className="bg-[#5C56B6] px-4 py-3 text-white text-xs font-bold tracking-tight text-center sm:text-left">
+                  <span>AI Predictions</span>
                 </div>
 
-                {/* Card Body */}
                 <div className="p-4 space-y-3.5">
                   <div className="flex items-center justify-between pb-1">
-                    <span className="text-xs font-medium text-slate-600">Pipeline Slices</span>
-                    <span className="px-2 py-0.5 rounded-full bg-amber-50 text-amber-600 text-[11px] font-bold font-mono border border-amber-200">
-                      3 Active
+                    <span className="text-xs font-medium text-slate-600">Alerts This Week</span>
+                    <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[11px] font-bold font-mono">
+                      3
                     </span>
                   </div>
 
                   <div>
-                    <div className="text-xs font-semibold text-slate-800">RTU Compressor Failure</div>
-                    <div className="text-[11px] text-emerald-700 font-mono font-bold mt-0.5">
-                      Pipeline: $95k – $380k
+                    <div className="text-xs font-semibold text-slate-800">Motor Bearing #7</div>
+                    <div className="text-[11px] text-[#E84E4E] font-medium mt-0.5">
+                      Replace in 72 hours
                     </div>
                   </div>
 
                   <div className="border-t border-slate-100" />
 
                   <div>
-                    <div className="text-xs font-semibold text-slate-800">Rotary Lobe CIP Washdown</div>
-                    <div className="text-[11px] text-sky-700 font-mono font-semibold mt-0.5">
-                      3-A SOP · Spec Risk: 1.1%
+                    <div className="text-xs font-semibold text-slate-800">Conveyor Belt A</div>
+                    <div className="text-[11px] text-[#F59E0B] font-medium mt-0.5">
+                      Tension adjust needed
                     </div>
                   </div>
 
                   <div className="border-t border-slate-100" />
 
                   <div>
-                    <div className="text-xs font-semibold text-slate-800">5-Axis Spindle Thermal Drift</div>
-                    <div className="text-[11px] text-purple-700 font-mono font-semibold mt-0.5">
-                      TechArticle &amp; HowTo Schema
+                    <div className="text-xs font-semibold text-slate-800">Pump Seal Unit 3</div>
+                    <div className="text-[11px] text-[#00B884] font-medium mt-0.5">
+                      PM scheduled
                     </div>
                   </div>
                 </div>
@@ -1835,7 +1720,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
         </div>
       </section>
 
-      {/* 13. ENTERPRISE FOOTER */}
+      {/* 12. ENTERPRISE FOOTER */}
       <footer className="bg-slate-950 text-slate-400 border-t border-slate-800 text-xs">
         <div className="border-b border-slate-800/80 bg-slate-900/60 py-8">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -1881,15 +1766,11 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
           </div>
         </div>
 
-        {/* Main 5-Column Sitemap Grid */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-10">
-            {/* Col 1: Brand & Status (4 cols) */}
             <div className="lg:col-span-4 space-y-4">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-600 text-lg font-bold text-white shadow-md shadow-sky-600/20">
-                  FF
-                </div>
+                <div className="p-1 rounded-xl bg-white shadow-xs inline-block shrink-0"><Image src="/logo-icon.png" alt="ForgeFlow Logo" width={36} height={36} className="h-9 w-9 object-contain" /></div>
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="text-lg font-black tracking-tight text-white">ForgeFlow</span>
@@ -1926,7 +1807,6 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
               </div>
             </div>
 
-            {/* Col 2: Platform Features (2 cols) */}
             <div className="lg:col-span-2 space-y-3">
               <div className="text-xs font-mono uppercase tracking-wider font-bold text-white">
                 Platform Engine
@@ -1941,7 +1821,6 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
               </ul>
             </div>
 
-            {/* Col 3: Vertical Taxonomies (2 cols) */}
             <div className="lg:col-span-2 space-y-3">
               <div className="text-xs font-mono uppercase tracking-wider font-bold text-white">
                 Vertical Taxonomies
@@ -1961,7 +1840,6 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
               </ul>
             </div>
 
-            {/* Col 4: Solutions & Integrations (2 cols) */}
             <div className="lg:col-span-2 space-y-3">
               <div className="text-xs font-mono uppercase tracking-wider font-bold text-white">
                 Integrations
@@ -1976,7 +1854,6 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
               </ul>
             </div>
 
-            {/* Col 5: Governance & Security (2 cols) */}
             <div className="lg:col-span-2 space-y-3">
               <div className="text-xs font-mono uppercase tracking-wider font-bold text-white">
                 Trust &amp; Governance
@@ -2012,7 +1889,6 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
           </div>
         </div>
 
-        {/* Bottom Copyright & Compliance Strip */}
         <div className="border-t border-slate-800 py-6 bg-black/40">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
             <div>
@@ -2028,7 +1904,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
         </div>
       </footer>
 
-      {/* 14. BOOK A DEMO MODAL (OXMAINT-INSPIRED TECHNICAL WALKTHROUGH) */}
+      {/* 13. BOOK A DEMO MODAL */}
       {demoModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
           <div className="bg-white rounded-2xl border border-slate-200/90 p-8 shadow-2xl max-w-lg w-full relative">
@@ -2042,9 +1918,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
             </button>
 
             <div className="mb-6 flex items-center gap-3 border-b border-slate-100 pb-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-600 text-lg font-bold text-white shadow-md shadow-sky-600/20">
-                FF
-              </div>
+              <Image src="/logo-icon.png" alt="ForgeFlow Logo" width={44} height={44} className="h-11 w-11 object-contain shrink-0" />
               <div>
                 <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-sky-700">1-on-1 Walkthrough</p>
                 <h3 className="text-lg font-extrabold text-slate-900 tracking-tight">Schedule an Industrial AEO Demo</h3>
@@ -2148,7 +2022,95 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
         </div>
       )}
 
-      {/* 15. LEGAL MODALS (PRIVACY, TERMS, SECURITY, SLA) */}
+      {/* 14. AUTOMATED TIMED REPETITIVE SIGNUP POPUP (EVERY 3.5 MINUTES) */}
+      {timedSignupOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in zoom-in-95 duration-200">
+          <div className="bg-white rounded-3xl border border-sky-100 p-7 sm:p-8 shadow-2xl max-w-md w-full relative">
+            <button
+              type="button"
+              onClick={() => setTimedSignupOpen(false)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-sm font-bold cursor-pointer transition"
+              aria-label="Dismiss signup popup"
+            >
+              ✕
+            </button>
+
+            <div className="flex items-center gap-3 mb-3">
+              <Image src="/logo-icon.png" alt="ForgeFlow" width={32} height={32} className="h-8 w-8 object-contain shrink-0" />
+              <div className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-sky-50 border border-sky-200 text-sky-800 text-[10px] font-mono font-bold">
+                <span className="w-1.5 h-1.5 rounded-full bg-sky-500 animate-pulse"></span>
+                <span>SPECIAL 14-DAY PILOT INVITATION</span>
+              </div>
+            </div>
+
+            <h3 className="text-xl font-black text-slate-900 tracking-tight leading-tight">
+              Dominate Industrial AI Answer Engines in 2026
+            </h3>
+            <p className="mt-1.5 text-xs text-slate-600 leading-relaxed">
+              Capture high-intent zero-volume queries before competitors. Deploy certified technical pages with 100% deterministic schema.
+            </p>
+
+            <form
+              className="mt-5 space-y-3"
+              onSubmit={async (e) => {
+                e.preventDefault();
+                setTimedSignupOpen(false);
+                openAuth("register");
+              }}
+            >
+              <div>
+                <label className="block text-[10px] font-mono uppercase font-bold text-slate-600 mb-1">
+                  Company / Manufacturing Plant
+                </label>
+                <input
+                  required
+                  placeholder="e.g. AccuDrive Reliability Systems"
+                  value={companyName}
+                  onChange={(e) => setCompanyName(e.target.value)}
+                  className="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-xs text-slate-900 outline-none focus:border-sky-600 focus:bg-white"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-mono uppercase font-bold text-slate-600 mb-1">
+                  Corporate Work Email
+                </label>
+                <input
+                  required
+                  type="email"
+                  placeholder="engineer@company.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-xs text-slate-900 outline-none focus:border-sky-600 focus:bg-white"
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="w-full py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold uppercase tracking-wider shadow-md shadow-sky-600/25 transition cursor-pointer"
+              >
+                Claim Free 14-Day Pilot Access →
+              </button>
+            </form>
+
+            <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+              <span>No credit card required.</span>
+              <button
+                type="button"
+                onClick={() => {
+                  setTimedSignupOpen(false);
+                  openAuth("login");
+                }}
+                className="font-bold text-sky-600 hover:underline cursor-pointer"
+              >
+                Sign In
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 15. LEGAL MODALS */}
       {legalModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
           <div className="bg-white rounded-2xl border border-slate-200/90 p-8 shadow-2xl max-w-2xl w-full max-h-[85vh] overflow-y-auto relative text-slate-700">
@@ -2267,12 +2229,12 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
             </button>
 
             <div className="mb-6 flex items-center gap-3 border-b border-slate-100 pb-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-600 text-lg font-bold text-white shadow-md shadow-sky-600/20">
-                FF
-              </div>
+              <Image src="/logo-icon.png" alt="ForgeFlow Logo" width={44} height={44} className="h-11 w-11 object-contain shrink-0" />
               <div>
                 <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-sky-700">Enterprise Tenant</p>
-                <h3 className="text-lg font-extrabold text-slate-900 tracking-tight">ForgeFlow Console</h3>
+                <h3 className="text-lg font-extrabold text-slate-900 tracking-tight">
+                  Forge<span className="text-sky-600">Flow</span> Console
+                </h3>
               </div>
             </div>
 
@@ -2431,14 +2393,16 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
         </div>
       )}
 
-      {/* 17. FLOATING SCROLL TO TOP BUTTON */}
+      {/* 17. FLOATING SCROLL TO TOP BUTTON (MATCHES IMAGE 1 BOTTOM RIGHT) */}
       <button
         type="button"
         onClick={scrollToTop}
-        className="fixed bottom-6 right-6 z-40 w-11 h-11 rounded-full border border-slate-300 bg-white/95 shadow-lg flex items-center justify-center text-slate-700 hover:text-sky-600 hover:bg-sky-50/70 hover:border-sky-500 transition cursor-pointer"
+        className="fixed bottom-6 right-6 z-40 w-11 h-11 rounded-full border-2 border-[#5C56B6] bg-white text-[#5C56B6] hover:bg-[#5C56B6] hover:text-white shadow-lg transition flex items-center justify-center cursor-pointer"
         aria-label="Back to top"
       >
-        <span className="text-base leading-none font-bold">↑</span>
+        <svg className="w-5 h-5 stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
+        </svg>
       </button>
     </div>
   );

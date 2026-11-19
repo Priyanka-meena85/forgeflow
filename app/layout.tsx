@@ -4,7 +4,11 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "ForgeFlow | Enterprise Industrial SEO & AEO Content Engine",
   description:
-    "Pre-built industrial taxonomies, closed-loop structural QA validation, and native AEO/GEO schema for manufacturing and industrial B2B companies.",
+    "Plan • Generate • Optimize • Grow. Pre-built industrial taxonomies, closed-loop structural QA validation, and native AEO/GEO schema for manufacturing and industrial B2B companies.",
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/logo-icon.png",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
