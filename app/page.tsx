@@ -3,6 +3,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { AuthProvider, useAuth } from "@/components/AuthProvider";
+import { OemRagManager, type OemDoc } from "@/components/OemRagManager";
+import { InteractiveDiagnosticStudio } from "@/components/InteractiveDiagnosticStudio";
+import { AeoCitationMonitor, type AeoQuery } from "@/components/AeoCitationMonitor";
+import { CmsPublishingManager, type CmsIntegration } from "@/components/CmsPublishingManager";
+import { EnterpriseInvoicingManager, type InvoiceItem } from "@/components/EnterpriseInvoicingManager";
 
 type TabKey =
   | "Mission Control"
@@ -64,6 +69,7 @@ type Draft = {
   vertical?: string;
   equipment?: string;
   standard?: string;
+  publishedUrl?: string | null;
 };
 
 const navItems: Array<{ label: TabKey; badge?: string; icon: string }> = [
@@ -827,6 +833,92 @@ function ForgeFlowWorkspace() {
     }
   };
 
+  // ---------------------------------------------------------------------------
+  // Part 3 High-Value Enterprise State & Callbacks
+  // ---------------------------------------------------------------------------
+  const [oemDocuments, setOemDocuments] = useState<OemDoc[]>([]);
+  const [cmsIntegrations, setCmsIntegrations] = useState<CmsIntegration[]>([]);
+  const [isPublishingCms, setIsPublishingCms] = useState(false);
+  const [selectedCmsId, setSelectedCmsId] = useState("");
+  const [aeoSummary, setAeoSummary] = useState<{
+    totalMonitored: number;
+    googleCited: number;
+    perplexityCited: number;
+    chatGptIndexed: number;
+    citationRate: number;
+  } | null>(null);
+  const [aeoQueries, setAeoQueries] = useState<AeoQuery[]>([]);
+  const [invoiceRequests, setInvoiceRequests] = useState<InvoiceItem[]>([]);
+
+  const refreshOemDocuments = useCallback(async () => {
+    try {
+      const res = await fetch("/api/documents");
+      if (res.ok) {
+        const data = await res.json();
+        if (data.documents) setOemDocuments(data.documents);
+      }
+    } catch {}
+  }, []);
+
+  const refreshCmsIntegrations = useCallback(async () => {
+    try {
+      const res = await fetch("/api/cms/integrations");
+      if (res.ok) {
+        const data = await res.json();
+        if (data.integrations) {
+          setCmsIntegrations(data.integrations);
+          if (data.integrations.length > 0 && !selectedCmsId) {
+            setSelectedCmsId(data.integrations[0].id);
+          }
+        }
+      }
+    } catch {}
+  }, [selectedCmsId]);
+
+  const refreshAeoTracker = useCallback(async () => {
+    try {
+      const res = await fetch("/api/aeo/tracked-queries");
+      if (res.ok) {
+        const data = await res.json();
+        if (data.summary) setAeoSummary(data.summary);
+        if (data.queries) setAeoQueries(data.queries);
+      }
+    } catch {}
+  }, []);
+
+  const refreshInvoices = useCallback(async () => {
+    try {
+      const res = await fetch("/api/billing/enterprise-invoice");
+      if (res.ok) {
+        const data = await res.json();
+        if (data.invoices) setInvoiceRequests(data.invoices);
+      }
+    } catch {}
+  }, []);
+
+  const handlePublishDraftToCms = async (draftId: string | number, cmsId?: string) => {
+    setIsPublishingCms(true);
+    setActionMessage("");
+    try {
+      const res = await fetch(`/api/drafts/${encodeURIComponent(String(draftId))}/publish`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ integrationId: cmsId || selectedCmsId }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "CMS Publishing failed.");
+      setReviewDrafts((current) =>
+        current.map((d) => (String(d.id) === String(draftId) ? { ...d, stage: "Published" as const, publishedUrl: data.publishedUrl } : d)),
+      );
+      setActionMessage(`🎉 Published to CMS: ${data.publishedUrl || "Connected Domain"}`);
+      void refreshAuditLogs();
+    } catch (e: unknown) {
+      setActionMessage(e instanceof Error ? e.message : "CMS Publishing failed.");
+    } finally {
+      setIsPublishingCms(false);
+    }
+  };
+
   useEffect(() => {
     let ignore = false;
     if (activeTab === "Workspace & Rules") {
@@ -841,11 +933,18 @@ function ForgeFlowWorkspace() {
         .catch((e) => console.warn("Failed to load workspace team members:", e));
     } else if (activeTab === "Billing & Quotas") {
       void refreshBillingUsage();
+      void refreshInvoices();
+    } else if (activeTab === "Taxonomy Matrix" || activeTab === "Mission Control") {
+      void refreshOemDocuments();
+    } else if (activeTab === "Publishing Pipeline") {
+      void refreshCmsIntegrations();
+    } else if (activeTab === "AEO Schema Hub" || activeTab === "Industrial Analytics") {
+      void refreshAeoTracker();
     }
     return () => {
       ignore = true;
     };
-  }, [activeTab, refreshAuditLogs, refreshBillingUsage]);
+  }, [activeTab, refreshAuditLogs, refreshBillingUsage, refreshInvoices, refreshOemDocuments, refreshCmsIntegrations, refreshAeoTracker]);
 
   const handleFileRead = (file: File) => {
     setUploadedFileName(`${file.name} (${Math.round(file.size / 1024)} KB)`);
@@ -2696,6 +2795,13 @@ function ForgeFlowWorkspace() {
                 ) : null}
               </div>
             )}
+
+            {/* Grounding OEM Datasheets & Spec Documents (RAG Engine) */}
+            <OemRagManager
+              documents={oemDocuments}
+              onRefresh={refreshOemDocuments}
+              onActionMessage={setActionMessage}
+            />
           </div>
         )}
 
@@ -3536,6 +3642,9 @@ function ForgeFlowWorkspace() {
                         ))}
                       </div>
 
+                      {/* Interactive Diagnostic Calculator Widget */}
+                      <InteractiveDiagnosticStudio onActionMessage={setActionMessage} />
+
                       {/* FAQs */}
                       <div className="border-t border-slate-100 pt-5 space-y-3">
                         <h3 className="text-sm font-mono font-bold uppercase text-slate-700">
@@ -4209,6 +4318,14 @@ function ForgeFlowWorkspace() {
                 </div>
               </div>
             </div>
+
+            {/* Live AEO Citation Rank Tracker */}
+            <AeoCitationMonitor
+              summary={aeoSummary}
+              queries={aeoQueries}
+              onRefresh={refreshAeoTracker}
+              onActionMessage={setActionMessage}
+            />
           </div>
         )}
 
@@ -4227,40 +4344,12 @@ function ForgeFlowWorkspace() {
               </span>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="p-5 rounded-2xl border border-slate-200 bg-white shadow-xs space-y-3">
-                <div className="text-xs font-mono font-bold uppercase text-sky-700">Webflow CMS Sync</div>
-                <div className="text-sm font-bold text-slate-900">Acme Engineering Portal</div>
-                <p className="text-xs text-slate-500">Connected via Webflow REST API v2. Custom fields mapped.</p>
-                <div className="pt-2">
-                  <span className="px-2.5 py-0.5 rounded text-xs font-mono font-bold bg-emerald-100 text-emerald-800">
-                    CONNECTED
-                  </span>
-                </div>
-              </div>
-
-              <div className="p-5 rounded-2xl border border-slate-200 bg-white shadow-xs space-y-3">
-                <div className="text-xs font-mono font-bold uppercase text-sky-700">WordPress REST API</div>
-                <div className="text-sm font-bold text-slate-900">Plant Knowledge Hub</div>
-                <p className="text-xs text-slate-500">Custom Post Type: `industrial-specs`. Auto JSON-LD enabled.</p>
-                <div className="pt-2">
-                  <span className="px-2.5 py-0.5 rounded text-xs font-mono font-bold bg-emerald-100 text-emerald-800">
-                    CONNECTED
-                  </span>
-                </div>
-              </div>
-
-              <div className="p-5 rounded-2xl border border-slate-200 bg-white shadow-xs space-y-3">
-                <div className="text-xs font-mono font-bold uppercase text-purple-700">Bulk XML Sitemap</div>
-                <div className="text-sm font-bold text-slate-900">sitemap-industrial-pSEO.xml</div>
-                <p className="text-xs text-slate-500">Autonomous priority indexing submitted to Google Search Console.</p>
-                <div className="pt-2">
-                  <span className="px-2.5 py-0.5 rounded text-xs font-mono font-bold bg-purple-100 text-purple-800">
-                    AUTO-UPDATED
-                  </span>
-                </div>
-              </div>
-            </div>
+            {/* Dynamic CMS Integrations Manager */}
+            <CmsPublishingManager
+              integrations={cmsIntegrations}
+              onRefresh={refreshCmsIntegrations}
+              onActionMessage={setActionMessage}
+            />
 
             {/* Live Webhook & CMS Dispatch History */}
             <div className="p-5 rounded-2xl border border-slate-200 bg-white shadow-xs space-y-3">
@@ -4343,9 +4432,33 @@ function ForgeFlowWorkspace() {
                         </span>
                       )}
 
-                      <span className="px-3 py-1 rounded text-xs font-mono font-bold bg-slate-200 text-slate-700">
-                        {d.stage === "Published" ? "LIVE ON DOMAIN" : "QUEUED FOR DRIP"}
-                      </span>
+                      {d.pageReview?.status === "APPROVED" && d.stage !== "Published" && (
+                        <button
+                          type="button"
+                          disabled={isPublishingCms}
+                          onClick={() => void handlePublishDraftToCms(d.id, selectedCmsId)}
+                          className="px-3 py-1 rounded bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-xs flex items-center gap-1 cursor-pointer transition disabled:opacity-50"
+                        >
+                          <span>🚀</span>
+                          <span>1-Click Publish to CMS</span>
+                        </button>
+                      )}
+
+                      {d.stage === "Published" && d.publishedUrl ? (
+                        <a
+                          href={d.publishedUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-2.5 py-1 rounded text-xs font-mono font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 hover:bg-emerald-200 flex items-center gap-1"
+                        >
+                          <span>🔗</span>
+                          <span>Live URL</span>
+                        </a>
+                      ) : (
+                        <span className="px-3 py-1 rounded text-xs font-mono font-bold bg-slate-200 text-slate-700">
+                          {d.stage === "Published" ? "LIVE ON DOMAIN" : "QUEUED FOR DRIP"}
+                        </span>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -5327,6 +5440,13 @@ function ForgeFlowWorkspace() {
                 </div>
               </div>
             </div>
+
+            {/* Enterprise Procurement & Net-30 Invoicing */}
+            <EnterpriseInvoicingManager
+              invoices={invoiceRequests}
+              onRefresh={refreshInvoices}
+              onActionMessage={setActionMessage}
+            />
           </div>
         )}
 
