@@ -1547,7 +1547,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
               <thead>
                 <tr className="border-b border-slate-200 bg-slate-100/70 text-slate-700 text-left">
                   <th className="p-4 font-bold text-slate-900">Capability / Standard</th>
-                  <th className="p-4 font-bold text-sky-700 bg-sky-50/70">ForgeFlow Industrial Engine</th>
+                  <th className="p-4 font-bold text-indigo-700 bg-indigo-50/70">ForgeFlow Industrial Engine</th>
                   <th className="p-4 font-bold text-slate-600">Generic AI (ChatGPT / Jasper)</th>
                   <th className="p-4 font-bold text-slate-600">Traditional SEO Agency</th>
                 </tr>
@@ -1555,37 +1555,37 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
               <tbody className="divide-y divide-slate-100">
                 <tr>
                   <td className="p-4 font-bold text-slate-900">Engineering Spec Accuracy</td>
-                  <td className="p-4 font-semibold text-emerald-700 bg-sky-50/30">Closed-loop verification against OEM limits &amp; standards</td>
+                  <td className="p-4 font-semibold text-indigo-900 bg-indigo-50/40">Closed-loop verification against OEM limits &amp; standards</td>
                   <td className="p-4 text-slate-600">Probabilistic text with risk of spec hallucination</td>
                   <td className="p-4 text-slate-600">Varies widely by freelance writer engineering background</td>
                 </tr>
                 <tr>
                   <td className="p-4 font-bold text-slate-900">Answer Engine Optimization (AEO)</td>
-                  <td className="p-4 font-semibold text-emerald-700 bg-sky-50/30">Pre-validated TechArticle, HowTo &amp; FAQPage JSON-LD</td>
+                  <td className="p-4 font-semibold text-indigo-900 bg-indigo-50/40">Pre-validated TechArticle, HowTo &amp; FAQPage JSON-LD</td>
                   <td className="p-4 text-slate-600">Unstructured text output only; requires manual developer setup</td>
                   <td className="p-4 text-slate-600">Basic Article or WebPage schema only</td>
                 </tr>
                 <tr>
                   <td className="p-4 font-bold text-slate-900">Zero-Volume Keyword Targeting</td>
-                  <td className="p-4 font-semibold text-emerald-700 bg-sky-50/30">Pre-built failure-mode matrices across 7 industrial sectors</td>
+                  <td className="p-4 font-semibold text-indigo-900 bg-indigo-50/40">Pre-built failure-mode matrices across 7 industrial sectors</td>
                   <td className="p-4 text-slate-600">Requires manual prompt engineering and deep research</td>
                   <td className="p-4 text-slate-600">Frequently de-prioritized due to broad keyword volume bias</td>
                 </tr>
                 <tr>
                   <td className="p-4 font-bold text-slate-900">Closed-Loop Quality Gating</td>
-                  <td className="p-4 font-semibold text-emerald-700 bg-sky-50/30">8 automated QA checks + mandatory human engineer sign-off</td>
+                  <td className="p-4 font-semibold text-indigo-900 bg-indigo-50/40">8 automated QA checks + mandatory human engineer sign-off</td>
                   <td className="p-4 text-slate-600">No automated QA or engineering validation gates</td>
                   <td className="p-4 text-slate-600">Subjective human editing without structured rules engine</td>
                 </tr>
                 <tr>
                   <td className="p-4 font-bold text-slate-900">Turnaround Speed</td>
-                  <td className="p-4 font-semibold text-emerald-700 bg-sky-50/30">Minutes to draft; published only upon engineer review</td>
+                  <td className="p-4 font-semibold text-indigo-900 bg-indigo-50/40">Minutes to draft; published only upon engineer review</td>
                   <td className="p-4 text-slate-600">Fast text generation; heavy technical review &amp; correction required</td>
                   <td className="p-4 text-slate-600">2 to 6 weeks per technical article</td>
                 </tr>
                 <tr>
                   <td className="p-4 font-bold text-slate-900">Monthly Cost Structure</td>
-                  <td className="p-4 font-semibold text-emerald-700 bg-sky-50/30">$199 Pilot, $399 Growth, $799 Fleet / month</td>
+                  <td className="p-4 font-semibold text-indigo-900 bg-indigo-50/40">$199 Pilot, $399 Growth, $799 Fleet / month</td>
                   <td className="p-4 text-slate-600">$20 – $100/mo (raw tool without domain taxonomy or QA)</td>
                   <td className="p-4 text-slate-600">$5,000 – $15,000/mo agency retainer</td>
                 </tr>
