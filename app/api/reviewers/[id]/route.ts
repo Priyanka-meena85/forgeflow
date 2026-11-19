@@ -26,7 +26,9 @@ export async function PUT(
     } = body as Record<string, unknown>;
 
     const existing = await db.expertReviewer.findUnique({ where: { id } });
-    if (!existing) return errorResponse("Reviewer not found.", 404);
+    if (!existing || (existing.organizationId !== user.organizationId && existing.organizationId !== "global")) {
+      return errorResponse("Reviewer not found.", 404);
+    }
 
     const updated = await db.expertReviewer.update({
       where: { id },
@@ -57,6 +59,13 @@ export async function DELETE(
     if (!user) return errorResponse("Sign in to manage reviewers.", 401);
 
     const { id } = await params;
+    const existing = await db.expertReviewer.findUnique({ where: { id } });
+    if (!existing || existing.organizationId !== user.organizationId) {
+      if (existing?.organizationId === "global") {
+        return errorResponse("Default system certified reviewers cannot be deleted.", 403);
+      }
+      return errorResponse("Reviewer not found.", 404);
+    }
     const deleted = await db.expertReviewer.delete({ where: { id } });
     if (!deleted) return errorResponse("Reviewer not found.", 404);
 

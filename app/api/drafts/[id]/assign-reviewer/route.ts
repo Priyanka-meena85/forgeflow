@@ -30,7 +30,9 @@ export async function POST(
     const reviewer = await db.expertReviewer.findUnique({
       where: { id: reviewerId },
     });
-    if (!reviewer) return errorResponse("Selected reviewer not found.", 404);
+    if (!reviewer || (reviewer.organizationId !== user.organizationId && reviewer.organizationId !== "global")) {
+      return errorResponse("Selected reviewer not found.", 404);
+    }
 
     const pageReview = await db.pageReview.upsert({
       where: { draftId: draft.id },

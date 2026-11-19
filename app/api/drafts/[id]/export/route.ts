@@ -42,92 +42,6 @@ export async function GET(
       ? `$${draft.pipelineValueMin.toLocaleString()} - $${draft.pipelineValueMax.toLocaleString()}`
       : "$50,000 - $250,000";
 
-  // 1. MARKDOWN EXPORT (.md)
-  if (format === "markdown" || format === "md") {
-    const md = `# ${draft.title}
-
-> **Target Vertical**: ${draft.vertical || "Industrial OEM"}  
-> **Target Query**: ${draft.keyword}  
-> **Estimated Pipeline Impact**: ${pipelineValueStr}  
-> **Status**: ${draft.status}  
-
-## Executive Summary
-${draft.summary}
-
-${sections.map((s) => `## ${s.heading}\n\n${s.body}\n`).join("\n")}
-## Frequently Asked Questions
-
-${faqs.map((f) => `### ${f.q}\n\n${f.a}\n`).join("\n")}
----
-
-## AEO Structured Schema (JSON-LD)
-\`\`\`json
-${safeJson(draft.schemaJson || "{}")}
-\`\`\`
-`;
-    return new Response(md, {
-      headers: {
-        "Content-Type": "text/markdown; charset=utf-8",
-        "Content-Disposition": `attachment; filename="${baseFilename}.md"`,
-        "Cache-Control": "private, no-store",
-      },
-    });
-  }
-
-  // 2. WEBFLOW / CMS CSV EXPORT (.csv)
-  if (format === "webflow" || format === "csv" || format === "webflow-csv") {
-    const headers = ["Title", "Slug", "Summary", "Vertical", "Target Query", "Body Content", "Schema JSON-LD", "Status"];
-    const bodyContent = sections.map((s) => `## ${s.heading}\n${s.body}`).join("\n\n");
-    const row = [
-      draft.title,
-      baseFilename,
-      draft.summary,
-      draft.vertical || "Industrial OEM",
-      draft.keyword,
-      bodyContent,
-      draft.schemaJson || "{}",
-      draft.status,
-    ].map(escapeCsvField).join(",");
-
-    const csv = `${headers.join(",")}\n${row}\n`;
-    return new Response(csv, {
-      headers: {
-        "Content-Type": "text/csv; charset=utf-8",
-        "Content-Disposition": `attachment; filename="${baseFilename}-webflow.csv"`,
-        "Cache-Control": "private, no-store",
-      },
-    });
-  }
-
-  // 3. JSON EXPORT (.json)
-  if (format === "json") {
-    const data = {
-      id: draft.id,
-      title: draft.title,
-      slug: baseFilename,
-      vertical: draft.vertical,
-      targetQuery: draft.keyword,
-      pipelineValue: pipelineValueStr,
-      summary: draft.summary,
-      sections,
-      faqs,
-      schema: JSON.parse(draft.schemaJson || "{}"),
-      status: draft.status,
-      createdAt: draft.createdAt,
-      updatedAt: draft.updatedAt,
-    };
-    return new Response(JSON.stringify(data, null, 2), {
-      headers: {
-        "Content-Type": "application/json; charset=utf-8",
-        "Content-Disposition": `attachment; filename="${baseFilename}.json"`,
-        "Cache-Control": "private, no-store",
-      },
-    });
-  }
-
-  // 4. DEFAULT: FULL HTML5 STANDALONE PAGE (.html)
-  const description = escapeHtml(draft.summary);
-
   const pageReview = await db.pageReview.findUnique({
     where: { draftId: draft.id },
     include: { reviewer: true },
@@ -156,6 +70,125 @@ ${safeJson(draft.schemaJson || "{}")}
     }
   }
 
+  const enrichedSchema = injectExpertReviewSchema(draft.schemaJson || "{}", reviewerData, reviewDate);
+
+  // 1. MARKDOWN EXPORT (.md)
+  if (format === "markdown" || format === "md") {
+    const md = `# ${draft.title}
+
+> **Target Vertical**: ${draft.vertical || "Industrial OEM"}  
+> **Target Query**: ${draft.keyword}  
+> **Estimated Pipeline Impact**: ${pipelineValueStr}  
+> **Status**: ${draft.status}  
+> **Expert Review**: ${pageReview ? `${pageReview.status} by ${reviewerData.name} (${reviewerData.credentials})` : "Not expert reviewed"}
+
+## Executive Summary
+${draft.summary}
+
+${sections.map((s) => `## ${s.heading}\n\n${s.body}\n`).join("\n")}
+## Expert Engineering Review & Sign-Off
+- **Reviewer**: ${reviewerData.name} (${reviewerData.jobTitle})
+- **Credentials**: ${reviewerData.credentials}
+- **Date**: ${reviewDate instanceof Date ? reviewDate.toISOString().split("T")[0] : String(reviewDate).split("T")[0]}
+- **Verification Note**: "${reviewerNotes}"
+- **Checklist**:
+${verificationItems.map((item) => `  - [x] ${item}`).join("\n")}
+
+## Frequently Asked Questions
+
+${faqs.map((f) => `### ${f.q}\n\n${f.a}\n`).join("\n")}
+---
+
+## AEO Structured Schema (JSON-LD)
+\`\`\`json
+${safeJson(JSON.stringify(enrichedSchema, null, 2))}
+\`\`\`
+`;
+    return new Response(md, {
+      headers: {
+        "Content-Type": "text/markdown; charset=utf-8",
+        "Content-Disposition": `attachment; filename="${baseFilename}.md"`,
+        "Cache-Control": "private, no-store",
+      },
+    });
+  }
+
+  // 2. WEBFLOW / CMS CSV EXPORT (.csv)
+  if (format === "webflow" || format === "csv" || format === "webflow-csv") {
+    const headers = ["Title", "Slug", "Summary", "Vertical", "Target Query", "Body Content", "Schema JSON-LD", "Review Status", "Reviewed By", "Status"];
+    const bodyContent = sections.map((s) => `## ${s.heading}\n${s.body}`).join("\n\n");
+    const row = [
+      draft.title,
+      baseFilename,
+      draft.summary,
+      draft.vertical || "Industrial OEM",
+      draft.keyword,
+      bodyContent,
+      JSON.stringify(enrichedSchema),
+      pageReview ? pageReview.status : "NOT_REVIEWED",
+      reviewerData.name,
+      draft.status,
+    ].map(escapeCsvField).join(",");
+
+    const csv = `${headers.join(",")}\n${row}\n`;
+    return new Response(csv, {
+      headers: {
+        "Content-Type": "text/csv; charset=utf-8",
+        "Content-Disposition": `attachment; filename="${baseFilename}-webflow.csv"`,
+        "Cache-Control": "private, no-store",
+      },
+    });
+  }
+
+  // 3. JSON EXPORT (.json)
+  if (format === "json") {
+    const data = {
+      id: draft.id,
+      title: draft.title,
+      slug: baseFilename,
+      vertical: draft.vertical,
+      targetQuery: draft.keyword,
+      pipelineValue: pipelineValueStr,
+      summary: draft.summary,
+      sections,
+      faqs,
+      schema: enrichedSchema,
+      pageReview: pageReview
+        ? {
+            id: pageReview.id,
+            reviewerId: pageReview.reviewerId,
+            status: pageReview.status,
+            reviewDate: (pageReview.reviewDate instanceof Date ? pageReview.reviewDate : new Date(pageReview.reviewDate)).toISOString(),
+            reviewerNotes: pageReview.reviewerNotes,
+            verificationItems,
+            reviewer: {
+              id: reviewerData.id,
+              name: reviewerData.name,
+              jobTitle: reviewerData.jobTitle,
+              credentials: reviewerData.credentials,
+              yearsOfExperience: reviewerData.yearsOfExperience,
+              linkedInUrl: reviewerData.linkedInUrl,
+              photoUrl: reviewerData.photoUrl,
+              bio: reviewerData.bio,
+            },
+          }
+        : null,
+      status: draft.status,
+      createdAt: draft.createdAt,
+      updatedAt: draft.updatedAt,
+    };
+    return new Response(JSON.stringify(data, null, 2), {
+      headers: {
+        "Content-Type": "application/json; charset=utf-8",
+        "Content-Disposition": `attachment; filename="${baseFilename}.json"`,
+        "Cache-Control": "private, no-store",
+      },
+    });
+  }
+
+  // 4. DEFAULT: FULL HTML5 STANDALONE PAGE (.html)
+  const description = escapeHtml(draft.summary);
+
   const expertReviewHtml = generateExpertReviewHtml({
     draftId: draft.id,
     reviewer: reviewerData,
@@ -163,8 +196,6 @@ ${safeJson(draft.schemaJson || "{}")}
     reviewerNotes,
     verificationItems,
   });
-
-  const enrichedSchema = injectExpertReviewSchema(draft.schemaJson || "{}", reviewerData, reviewDate);
 
   const html = `<!doctype html>
 <html lang="en">

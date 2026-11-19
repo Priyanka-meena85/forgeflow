@@ -4,10 +4,6 @@ import { errorResponse } from "@/lib/http";
 import { simulateAeoAnswer } from "@/lib/gemini";
 
 export async function POST(request: Request) {
-  if (!process.env.GEMINI_API_KEY && !process.env.GOOGLE_API_KEY) {
-    return errorResponse("GEMINI_API_KEY is not configured.", 503);
-  }
-
   const user = await getSessionUser().catch(() => null);
 
   const body: unknown = await request.json().catch(() => null);

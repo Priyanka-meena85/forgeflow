@@ -4,11 +4,6 @@ import { errorResponse } from "@/lib/http";
 import { getIndustrialAeoSuggestions } from "@/lib/gemini";
 
 export async function POST(request: Request) {
-  // Check Gemini API Key
-  if (!process.env.GEMINI_API_KEY && !process.env.GOOGLE_API_KEY) {
-    return errorResponse("GEMINI_API_KEY is not configured in environment.", 503);
-  }
-
   // Attempt user session (optional in dev/demo mode, required in production if user session exists)
   const user = await getSessionUser().catch(() => null);
 

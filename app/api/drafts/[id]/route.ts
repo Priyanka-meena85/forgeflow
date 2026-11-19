@@ -18,12 +18,40 @@ export async function GET(
     });
     if (!draft) return errorResponse("Draft not found.", 404);
 
+    const review = await db.pageReview.findUnique({
+      where: { draftId: draft.id },
+      include: { reviewer: true },
+    });
+
+    const serializedReview = review
+      ? {
+          id: review.id,
+          reviewerId: review.reviewerId,
+          status: review.status as "PENDING" | "APPROVED" | "CHANGES_REQUESTED",
+          reviewDate: review.reviewDate.toISOString(),
+          reviewerNotes: review.reviewerNotes,
+          verificationItems: review.verificationItemsJson ? JSON.parse(review.verificationItemsJson) : [],
+          reviewer: review.reviewer
+            ? {
+                id: review.reviewer.id,
+                name: review.reviewer.name,
+                jobTitle: review.reviewer.jobTitle,
+                credentials: review.reviewer.credentials,
+                yearsOfExperience: review.reviewer.yearsOfExperience,
+                linkedInUrl: review.reviewer.linkedInUrl,
+                photoUrl: review.reviewer.photoUrl,
+                bio: review.reviewer.bio,
+              }
+            : null,
+        }
+      : null;
+
     const revisions = await db.contentRevision.findMany({
       where: { draftId: draft.id },
     });
 
     return NextResponse.json({
-      draft: serializeDraft(draft),
+      draft: serializeDraft(draft, serializedReview),
       revisions: revisions.map((r) => ({
         id: r.id,
         revisionNumber: r.revisionNumber,

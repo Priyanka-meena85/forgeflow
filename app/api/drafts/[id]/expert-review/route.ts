@@ -37,7 +37,10 @@ export async function POST(
     // Resolve reviewer
     let activeReviewer = null;
     if (typeof reviewerId === "string" && reviewerId.trim()) {
-      activeReviewer = await db.expertReviewer.findUnique({ where: { id: reviewerId.trim() } });
+      const candidate = await db.expertReviewer.findUnique({ where: { id: reviewerId.trim() } });
+      if (candidate && (candidate.organizationId === user.organizationId || candidate.organizationId === "global")) {
+        activeReviewer = candidate;
+      }
     }
     if (!activeReviewer) {
       // Check if page already has an assigned reviewer
@@ -50,7 +53,12 @@ export async function POST(
       } else {
         // Fallback to first available reviewer
         const reviewers = await db.expertReviewer.findMany({
-          where: { organizationId: user.organizationId },
+          where: {
+            OR: [
+              { organizationId: user.organizationId },
+              { organizationId: "global" },
+            ],
+          },
         });
         activeReviewer = reviewers[0] || null;
       }

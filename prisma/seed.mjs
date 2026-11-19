@@ -1,4 +1,4 @@
-import { PrismaClient, UserRole, DraftStatus } from "@prisma/client";
+import { PrismaClient, UserRole, DraftStatus, ReviewStatus } from "@prisma/client";
 import { randomBytes, scrypt as nodeScrypt } from "node:crypto";
 import { promisify } from "node:util";
 
@@ -112,7 +112,7 @@ async function main() {
     riskScore: "Low",
   };
 
-  await prisma.draft.upsert({
+  const draft = await prisma.draft.upsert({
     where: { id: "seed-draft-automotive" },
     update: {},
     create: {
@@ -135,6 +135,81 @@ async function main() {
       searchVolume: "20-40/mo",
       specRiskScore: 1.7,
       reviewComment: "Verified compliant with IATF 16949 SOP and AEO readiness gates.",
+    },
+  });
+
+  // 4. Create Expert Reviewers
+  const reviewer1 = await prisma.expertReviewer.upsert({
+    where: { id: "rev_marcus_vance" },
+    update: { organizationId: org.id },
+    create: {
+      id: "rev_marcus_vance",
+      organizationId: org.id,
+      name: "Dr. Marcus Vance, PE",
+      jobTitle: "Lead Thermal & Mechanical Applications Engineer",
+      credentials: "PE, ASHRAE Fellow, MS Mechanical Engineering",
+      yearsOfExperience: 18,
+      linkedInUrl: "https://www.linkedin.com/in/marcus-vance-pe-industrial",
+      photoUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80",
+      bio: "18+ years specializing in commercial HVAC rooftop unit failure mode diagnostics, ASHRAE 90.1/189.1 compliance, and industrial refrigeration compressor reliability.",
+    },
+  });
+
+  await prisma.expertReviewer.upsert({
+    where: { id: "rev_elena_rostova" },
+    update: { organizationId: org.id },
+    create: {
+      id: "rev_elena_rostova",
+      organizationId: org.id,
+      name: "Elena Rostova",
+      jobTitle: "Principal Industrial Systems & Reliability Lead",
+      credentials: "Six Sigma Black Belt, IATF 16949 Lead Auditor",
+      yearsOfExperience: 14,
+      linkedInUrl: "https://www.linkedin.com/in/elena-rostova-industrial-qa",
+      photoUrl: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=200&auto=format&fit=crop&q=80",
+      bio: "14 years conducting root-cause failure analysis for automotive stamping presses, sanitary rotary pumps, and polymer extrusion machinery under ISO 9001 and 3-A standards.",
+    },
+  });
+
+  await prisma.expertReviewer.upsert({
+    where: { id: "rev_david_chen" },
+    update: { organizationId: org.id },
+    create: {
+      id: "rev_david_chen",
+      organizationId: org.id,
+      name: "David Chen, CMRP",
+      jobTitle: "Senior Fluid Power & Hydraulics Specialist",
+      credentials: "CMRP, CFPS (Fluid Power Specialist)",
+      yearsOfExperience: 12,
+      linkedInUrl: "https://www.linkedin.com/in/david-chen-fluid-power",
+      photoUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&auto=format&fit=crop&q=80",
+      bio: "Certified fluid power specialist focusing on high-pressure hydraulic piston pump cavitation, ISO 4406 cleanliness standards, and industrial automation safety protocols.",
+    },
+  });
+
+  // 5. Create Approved Page Review for Seed Draft
+  const verificationChecklist = [
+    "Spec Accuracy: Verified 180-240 bar descaler pressure envelope against OEM manual.",
+    "Standards Referenced: Cross-referenced with active regulatory codes (ISO/ASME/ASHRAE/3-A).",
+    "Operating Tolerances: Confirmed pressure, thermal differential, and fatigue thresholds.",
+    "AEO Schema Validity: Validated multi-entity JSON-LD graphs with reviewedBy Person entity.",
+  ];
+
+  await prisma.pageReview.upsert({
+    where: { draftId: draft.id },
+    update: {
+      reviewerId: reviewer1.id,
+      status: ReviewStatus.APPROVED,
+      reviewerNotes: "Verified compliant with IATF 16949 SOP, AISE Technical Report No. 9, and AEO structured data standards.",
+      verificationItemsJson: JSON.stringify(verificationChecklist),
+    },
+    create: {
+      draftId: draft.id,
+      reviewerId: reviewer1.id,
+      status: ReviewStatus.APPROVED,
+      reviewDate: new Date(),
+      reviewerNotes: "Verified compliant with IATF 16949 SOP, AISE Technical Report No. 9, and AEO structured data standards.",
+      verificationItemsJson: JSON.stringify(verificationChecklist),
     },
   });
 

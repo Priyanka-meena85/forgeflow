@@ -9,7 +9,12 @@ export async function GET() {
     if (!user) return errorResponse("Sign in to access reviewers.", 401);
 
     const reviewers = await db.expertReviewer.findMany({
-      where: { organizationId: user.organizationId },
+      where: {
+        OR: [
+          { organizationId: user.organizationId },
+          { organizationId: "global" },
+        ],
+      },
     });
 
     return NextResponse.json({ reviewers });
