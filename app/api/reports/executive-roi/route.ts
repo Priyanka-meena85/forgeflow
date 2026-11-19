@@ -142,7 +142,7 @@ function generatePrintableExecutiveReportHtml(data: {
 <body>
   <div class="no-print" style="margin-bottom: 20px; text-align: right;">
     <button onclick="window.print()" style="background: #0284c7; color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer;">
-      🖨️ Print / Save as Executive PDF
+      Print / Save as Executive PDF
     </button>
   </div>
 
@@ -203,7 +203,7 @@ function generatePrintableExecutiveReportHtml(data: {
           <td><strong>${t.title}</strong></td>
           <td>${t.equipment}</td>
           <td>${t.standard}</td>
-          <td><span style="color: #15803d; font-weight: bold;">✔ ${t.citations}</span></td>
+          <td><span style="color: #15803d; font-weight: bold;">CITED: ${t.citations}</span></td>
           <td style="text-align: right; font-family: monospace; font-weight: bold; color: #0f172a;">${t.attributedValue}</td>
         </tr>
       `).join("")}

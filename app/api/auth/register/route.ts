@@ -15,6 +15,7 @@ type RegisterTx = {
     create: (args: {
       data: {
         email: string;
+        name?: string | null;
         passwordHash: string;
         organizationId: string;
         role: UserRole;
@@ -23,6 +24,7 @@ type RegisterTx = {
     }) => Promise<{
       id: string;
       email: string;
+      name?: string | null;
       role: UserRole;
       emailVerified: Date | null;
       organizationId: string;
@@ -66,6 +68,7 @@ export async function POST(request: Request) {
       return tx.user.create({
         data: {
           email: normalizedEmail,
+          name: companyName.trim(),
           passwordHash,
           organizationId: organization.id,
           role: UserRole.OWNER,
@@ -99,12 +102,18 @@ export async function POST(request: Request) {
       user: {
         id: user.id,
         email: user.email,
+        name: user.name ?? companyName.trim(),
         role: user.role,
-        emailVerified: user.emailVerified,
+        emailVerified: user.emailVerified ? (typeof user.emailVerified === "string" ? user.emailVerified : (user.emailVerified as Date).toISOString()) : null,
         organization: {
           id: user.organization?.id ?? user.organizationId,
           name: user.organization?.name ?? companyName.trim(),
           plan: user.organization?.plan ?? "free",
+          industry: (user.organization as { industry?: string | null })?.industry ?? null,
+          website: (user.organization as { website?: string | null })?.website ?? null,
+          monthlyPagesLimit: 5,
+          monthlyPagesUsed: 0,
+          subscriptionStatus: "trialing",
         },
       },
       verification: {

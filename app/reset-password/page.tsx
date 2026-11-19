@@ -102,8 +102,8 @@ function ResetPasswordContent() {
 
           {success ? (
             <div className="space-y-4 text-center">
-              <div className="w-12 h-12 mx-auto rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-2xl">
-                ✓
+              <div className="w-12 h-12 mx-auto rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
+                <span className="css-icon-check scale-150"></span>
               </div>
               <h3 className="text-base font-bold text-slate-900">Password Updated Successfully</h3>
               <p className="text-xs text-slate-600 leading-relaxed">

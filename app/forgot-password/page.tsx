@@ -65,8 +65,9 @@ export default function ForgotPasswordPage() {
 
           {successMessage ? (
             <div className="space-y-4">
-              <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-800 leading-relaxed font-medium">
-                ✓ {successMessage}
+              <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-800 leading-relaxed font-medium flex items-center gap-2">
+                <span className="css-icon-check text-emerald-700 shrink-0"></span>
+                <span>{successMessage}</span>
               </div>
 
               {previewUrl && (

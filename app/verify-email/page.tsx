@@ -128,8 +128,8 @@ function VerifyEmailContent() {
 
             {state === "success" && (
               <div className="flex flex-col items-center">
-                <div className="w-12 h-12 rounded-full bg-emerald-100 border border-emerald-200 flex items-center justify-center text-emerald-700 text-2xl font-bold mb-4">
-                  ✓
+                <div className="w-12 h-12 rounded-full bg-emerald-100 border border-emerald-200 flex items-center justify-center text-emerald-700 font-bold mb-4">
+                  <span className="css-icon-check scale-150"></span>
                 </div>
                 <h2 className="text-lg font-bold text-slate-900">Email Verified</h2>
                 <p className="text-xs text-slate-600 mt-2 leading-relaxed">{message}</p>

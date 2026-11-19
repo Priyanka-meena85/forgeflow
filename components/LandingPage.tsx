@@ -258,6 +258,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
       if (!response.ok || !data.user) {
         throw new Error(data.error ?? "Authentication failed. Please verify your details.");
       }
+      setAuthModalOpen(false);
       onAuthenticated(data.user);
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : "Could not authenticate.");
@@ -2675,6 +2676,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                     });
                     const data = await response.json();
                     if (!response.ok || !data.user) throw new Error(data.error || "Login failed");
+                    setAuthModalOpen(false);
                     onAuthenticated(data.user);
                   } catch (err: unknown) {
                     setError(err instanceof Error ? err.message : "Test drive sign-in failed");
@@ -2702,6 +2704,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                       });
                       const data = await response.json();
                       if (!response.ok || !data.user) throw new Error(data.error || "Login failed");
+                      setAuthModalOpen(false);
                       onAuthenticated(data.user);
                     } catch (err: unknown) {
                       setError(err instanceof Error ? err.message : "Test drive sign-in failed");
@@ -2728,6 +2731,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                       });
                       const data = await response.json();
                       if (!response.ok || !data.user) throw new Error(data.error || "Login failed");
+                      setAuthModalOpen(false);
                       onAuthenticated(data.user);
                     } catch (err: unknown) {
                       setError(err instanceof Error ? err.message : "Test drive sign-in failed");
@@ -2816,7 +2820,8 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                 </div>
                 {authMode === "register" ? (
                   <div className="mt-1 flex items-center justify-between text-[11px]">
-                    <span className={password.length >= 8 ? "text-emerald-700 font-medium" : "text-slate-500"}>
+                    <span className={password.length >= 8 ? "text-emerald-700 font-medium flex items-center gap-1" : "text-slate-500"}>
+                      {password.length >= 8 && <span className="css-icon-check text-emerald-700"></span>}
                       {password.length >= 8 ? "Minimum 8 characters met" : "Requires minimum 8 characters"}
                     </span>
                     <span className="font-mono text-slate-400">{password.length}/8+</span>
@@ -2843,8 +2848,20 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
               ) : null}
 
               {error ? (
-                <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-2.5 text-xs text-red-700 font-medium">
-                  {error}
+                <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-2.5 text-xs text-red-700 font-medium space-y-1.5">
+                  <p>{error}</p>
+                  {authMode === "register" && error.toLowerCase().includes("already exists") && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAuthMode("login");
+                        setError("");
+                      }}
+                      className="text-sky-700 font-bold underline hover:text-sky-900 cursor-pointer block text-[11px]"
+                    >
+                      Sign In to this workspace &rarr;
+                    </button>
+                  )}
                 </div>
               ) : null}
 

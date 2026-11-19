@@ -559,14 +559,14 @@ interface ComplianceAuditResult {
 
 function ForgeFlowWorkspace() {
   const { user, signOut } = useAuth();
-  const organizationName = user?.organization.name ?? "";
-  const organizationPlan = user?.organization.plan ?? "free";
+  const organizationName = user?.organization?.name ?? "Enterprise Tenant";
+  const organizationPlan = user?.organization?.plan ?? "free";
   const userEmail = user?.email ?? "";
 
   const [activeTab, setActiveTab] = useState<TabKey>("Mission Control");
   const [selectedVertical, setSelectedVertical] = useState<string>("Food & beverage manufacturing");
   const [form, setForm] = useState(() => {
-    if (typeof window === "undefined" || !user?.organization.id) return defaultForm;
+    if (typeof window === "undefined" || !user?.organization?.id) return defaultForm;
     try {
       const saved = window.localStorage.getItem(`forgeflow.preferences.${user.organization.id}`);
       if (!saved) return defaultForm;
@@ -4592,49 +4592,33 @@ function ForgeFlowWorkspace() {
                 </div>
               </div>
 
-              <div className="h-44 w-full relative pt-2">
-                <svg className="w-full h-full overflow-visible" viewBox="0 0 600 140" preserveAspectRatio="none">
-                  <defs>
-                    <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#0284c7" stopOpacity="0.2" />
-                      <stop offset="100%" stopColor="#0284c7" stopOpacity="0.0" />
-                    </linearGradient>
-                  </defs>
-                  {/* Grid Lines */}
-                  <line x1="0" y1="35" x2="600" y2="35" stroke="#f1f5f9" strokeDasharray="4 4" />
-                  <line x1="0" y1="70" x2="600" y2="70" stroke="#f1f5f9" strokeDasharray="4 4" />
-                  <line x1="0" y1="105" x2="600" y2="105" stroke="#f1f5f9" strokeDasharray="4 4" />
+              <div className="h-44 w-full relative pt-2 flex flex-col justify-end">
+                {/* Background grid lines */}
+                <div className="absolute inset-0 flex flex-col justify-between py-2 pointer-events-none opacity-40">
+                  <div className="border-b border-dashed border-slate-200 w-full"></div>
+                  <div className="border-b border-dashed border-slate-200 w-full"></div>
+                  <div className="border-b border-dashed border-slate-200 w-full"></div>
+                </div>
 
-                  {/* Generic flat SEO line */}
-                  <path
-                    d="M 0,120 Q 150,115 300,110 T 600,105"
-                    fill="none"
-                    stroke="#cbd5e1"
-                    strokeWidth="2"
-                    strokeDasharray="4 4"
-                  />
-
-                  {/* Gradient Area under ForgeFlow line */}
-                  <path
-                    d="M 0,125 C 100,120 180,105 260,80 C 340,55 420,30 500,18 L 600,8 L 600,140 L 0,140 Z"
-                    fill="url(#areaGradient)"
-                  />
-
-                  {/* ForgeFlow compounding trajectory line with draw animation */}
-                  <path
-                    d="M 0,125 C 100,120 180,105 260,80 C 340,55 420,30 500,18 L 600,8"
-                    fill="none"
-                    stroke="#0284c7"
-                    strokeWidth="3"
-                    strokeLinecap="round"
-                    className="animate-draw-line"
-                  />
-
-                  {/* Pulsing data markers */}
-                  <circle cx="260" cy="80" r="4" fill="#0284c7" />
-                  <circle cx="500" cy="18" r="4" fill="#0284c7" />
-                  <circle cx="600" cy="8" r="5" fill="#059669" className="animate-pulse" />
-                </svg>
+                {/* Pure CSS Trajectory Bars & Progress Steppers */}
+                <div className="relative z-10 grid grid-cols-4 gap-4 h-36 items-end px-2">
+                  <div className="flex flex-col items-center gap-1.5 h-full justify-end">
+                    <span className="text-[10px] font-mono text-slate-400">120/mo</span>
+                    <div className="w-full bg-slate-100 rounded-t-lg h-8 border-t-2 border-slate-300"></div>
+                  </div>
+                  <div className="flex flex-col items-center gap-1.5 h-full justify-end">
+                    <span className="text-[10px] font-mono text-sky-600 font-bold">480/mo</span>
+                    <div className="w-full bg-sky-100 rounded-t-lg h-16 border-t-2 border-sky-400"></div>
+                  </div>
+                  <div className="flex flex-col items-center gap-1.5 h-full justify-end">
+                    <span className="text-[10px] font-mono text-sky-600 font-bold">1,420/mo</span>
+                    <div className="w-full bg-sky-200 rounded-t-lg h-24 border-t-2 border-sky-500"></div>
+                  </div>
+                  <div className="flex flex-col items-center gap-1.5 h-full justify-end">
+                    <span className="text-[10px] font-mono text-emerald-700 font-bold animate-pulse">3,240/mo</span>
+                    <div className="w-full bg-gradient-to-t from-sky-400 to-emerald-500 rounded-t-lg h-32 border-t-2 border-emerald-400 shadow-sm shadow-emerald-500/20"></div>
+                  </div>
+                </div>
               </div>
 
               <div className="flex justify-between text-xs font-mono text-slate-500 pt-2 border-t border-slate-100">

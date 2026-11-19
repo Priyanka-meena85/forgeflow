@@ -1,4 +1,5 @@
 import { PrismaClient, UserRole, DraftStatus, InvitationStatus, ReviewStatus } from "@prisma/client";
+import net from "net";
 
 // Ensure process.env.DATABASE_URL is populated for PostgreSQL
 function resolveDatabaseUrl(): string {
@@ -284,10 +285,98 @@ export interface FallbackStore {
   invoiceRequests: Map<string, FallbackInvoiceRequest>;
 }
 
-const globalStore = globalThis as unknown as {
+interface ForgeFlowGlobalStore {
   __forgeflow_store__?: FallbackStore;
   prisma?: PrismaClient;
-};
+  __forgeflow_pg_available__?: boolean;
+  __forgeflow_last_pg_check__?: number;
+  __forgeflow_pg_probing__?: boolean;
+}
+
+const globalStore = globalThis as unknown as ForgeFlowGlobalStore;
+
+function parseDbHostPort(rawUrl: string): { host: string; port: number } {
+  try {
+    const url = new URL(rawUrl);
+    return {
+      host: url.hostname || "localhost",
+      port: parseInt(url.port || "5432", 10),
+    };
+  } catch {
+    return { host: "localhost", port: 5432 };
+  }
+}
+
+function probeSocket(host: string, port: number, timeoutMs = 80): Promise<boolean> {
+  return new Promise((resolve) => {
+    const socket = new net.Socket();
+    let resolved = false;
+
+    socket.setTimeout(timeoutMs);
+
+    socket.on("connect", () => {
+      resolved = true;
+      socket.destroy();
+      resolve(true);
+    });
+
+    socket.on("timeout", () => {
+      if (!resolved) {
+        resolved = true;
+        socket.destroy();
+        resolve(false);
+      }
+    });
+
+    socket.on("error", () => {
+      if (!resolved) {
+        resolved = true;
+        socket.destroy();
+        resolve(false);
+      }
+    });
+
+    try {
+      socket.connect(port, host);
+    } catch {
+      resolve(false);
+    }
+  });
+}
+
+async function checkPostgresAvailability(force = false): Promise<boolean> {
+  const now = Date.now();
+  const lastCheck = globalStore.__forgeflow_last_pg_check__ ?? 0;
+  if (!force && now - lastCheck < 60000 && typeof globalStore.__forgeflow_pg_available__ === "boolean") {
+    return globalStore.__forgeflow_pg_available__;
+  }
+
+  if (globalStore.__forgeflow_pg_probing__) {
+    return globalStore.__forgeflow_pg_available__ ?? false;
+  }
+
+  globalStore.__forgeflow_pg_probing__ = true;
+  try {
+    const { host, port } = parseDbHostPort(resolveDatabaseUrl());
+    const isUp = await probeSocket(host, port, 80);
+    globalStore.__forgeflow_pg_available__ = isUp;
+    globalStore.__forgeflow_last_pg_check__ = Date.now();
+    return isUp;
+  } catch {
+    globalStore.__forgeflow_pg_available__ = false;
+    globalStore.__forgeflow_last_pg_check__ = Date.now();
+    return false;
+  } finally {
+    globalStore.__forgeflow_pg_probing__ = false;
+  }
+}
+
+// Default to false synchronously to guarantee zero-latency execution; probe asynchronously
+if (typeof globalStore.__forgeflow_pg_available__ === "undefined") {
+  globalStore.__forgeflow_pg_available__ = false;
+  globalStore.__forgeflow_last_pg_check__ = 0;
+  void checkPostgresAvailability(true);
+}
 
 const store: FallbackStore = globalStore.__forgeflow_store__ ?? {
   organizations: new Map(),
@@ -783,10 +872,19 @@ const fallbackOrg = {
 };
 
 const fallbackUser = {
-  async create(args: { data: Partial<FallbackUser> & { email: string; passwordHash: string; organizationId: string } }): Promise<FallbackUser> {
+  async create(args: { data: Partial<FallbackUser> & { email: string; passwordHash: string; organizationId: string; name?: string | null } }): Promise<FallbackUser> {
+    const emailNorm = args.data.email.trim().toLowerCase();
+    for (const existing of store.users.values()) {
+      if (existing.email.toLowerCase() === emailNorm) {
+        const p2002 = new Error("Unique constraint failed on the fields: (`email`)") as Error & { code?: string; meta?: unknown };
+        p2002.code = "P2002";
+        p2002.meta = { target: ["email"] };
+        throw p2002;
+      }
+    }
     const user: FallbackUser = {
       id: generateId("usr_"),
-      email: args.data.email,
+      email: emailNorm,
       name: args.data.name ?? null,
       passwordHash: args.data.passwordHash,
       role: args.data.role ?? UserRole.OWNER,
@@ -1545,13 +1643,13 @@ const fallbackPageReview = {
   },
 };
 
-let postgresAvailable = true;
-let lastPostgresCheck = 0;
-const POSTGRES_RETRY_INTERVAL_MS = 30000;
-
 function getActivePrisma(): PrismaClient | null {
   if (!realPrisma) return null;
-  if (!postgresAvailable && Date.now() - lastPostgresCheck <= POSTGRES_RETRY_INTERVAL_MS) {
+  if (!globalStore.__forgeflow_pg_available__) {
+    const now = Date.now();
+    if (now - (globalStore.__forgeflow_last_pg_check__ ?? 0) > 60000 && !globalStore.__forgeflow_pg_probing__) {
+      void checkPostgresAvailability(true);
+    }
     return null;
   }
   return realPrisma;
@@ -1567,8 +1665,8 @@ function handlePostgresError(e: unknown, op: string) {
     throw new Error(`Production database failure: Unable to execute ${op}. Managed PostgreSQL connection required.`);
   }
 
-  postgresAvailable = false;
-  lastPostgresCheck = Date.now();
+  globalStore.__forgeflow_pg_available__ = false;
+  globalStore.__forgeflow_last_pg_check__ = Date.now();
   console.warn(`[DB Proxy] Database unavailable for ${op} (${err.code ?? err.message ?? "connection error"}). Active in-memory fallback store will be used.`);
 }
 
@@ -1588,7 +1686,7 @@ function createModelProxy<T extends object>(modelName: string, fallback: T): T {
           if (prismaModel && typeof prismaModel[prop] === "function") {
             try {
               const res = await prismaModel[prop](...args);
-              postgresAvailable = true;
+              globalStore.__forgeflow_pg_available__ = true;
               return res;
             } catch (e) {
               handlePostgresError(e, `${modelName}.${prop}`);
@@ -1651,7 +1749,7 @@ export const fallbackDb: FallbackDbInterface = {
       if (client) {
         try {
           const res = await (client as unknown as { $transaction: (f: unknown) => Promise<T> }).$transaction(fnOrArray);
-          postgresAvailable = true;
+          globalStore.__forgeflow_pg_available__ = true;
           return res;
         } catch (e) {
           handlePostgresError(e, "$transaction");

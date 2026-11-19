@@ -17,14 +17,13 @@ export async function POST(req: NextRequest) {
     const eq = equipment || "Servo Stamping Press";
 
     const payload = {
-      text: `🚨 *Engineering Review Alert* (${eventType || "DRAFT_PENDING_SIGN_OFF"})`,
+      text: `[ALERT] *Engineering Review Alert* (${eventType || "DRAFT_PENDING_SIGN_OFF"})`,
       blocks: [
         {
           type: "header",
           text: {
             type: "plain_text",
-            text: "🚨 New Industrial Slice Awaiting Application Sign-Off",
-            emoji: true,
+            text: "Industrial Slice Awaiting Application Sign-Off",
           },
         },
         {
@@ -41,13 +40,13 @@ export async function POST(req: NextRequest) {
           elements: [
             {
               type: "button",
-              text: { type: "plain_text", text: "✓ Approve Tolerances" },
+              text: { type: "plain_text", text: "Approve Tolerances" },
               style: "primary",
               url: `http://localhost:8080/?tab=qa&status=approved`,
             },
             {
               type: "button",
-              text: { type: "plain_text", text: "✎ Request Edits" },
+              text: { type: "plain_text", text: "Request Edits" },
               style: "danger",
               url: `http://localhost:8080/?tab=qa&status=revisions`,
             },
