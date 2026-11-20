@@ -89,23 +89,181 @@ export default function IndustriesIndexPage() {
                     key={cat}
                     type="button"
                     onClick={() => setSelectedCategory(cat)}
-                    className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${
-                      selectedCategory === cat
-                        ? "bg-slate-900 text-white shadow-xs"
-                        : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-100"
-                    }`}
+                    className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${selectedCategory === cat
+                      ? "bg-slate-900 text-white shadow-xs"
+                      : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-100"
+                      }`}
                   >
                     <span>{cat}</span>
                     <span
-                      className={`text-[10px] font-mono px-1.5 py-0.2 rounded-full ${
-                        selectedCategory === cat ? "bg-slate-700 text-slate-200" : "bg-slate-100 text-slate-500"
-                      }`}
+                      className={`text-[10px] font-mono px-1.5 py-0.2 rounded-full ${selectedCategory === cat ? "bg-slate-700 text-slate-200" : "bg-slate-100 text-slate-500"
+                        }`}
                     >
                       {count}
                     </span>
                   </button>
                 );
               })}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 4-COLUMN INDUSTRIAL ARCHITECTURE SHOWCASE (Matches iFactory AI & Features layout) */}
+      <section className="py-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-xs space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-3">
+            <div>
+              <span className="text-[10px] font-mono font-bold uppercase text-slate-400 tracking-wider block">
+                Manufacturing Vertical Taxonomy Architecture
+              </span>
+              <h2 className="text-xl font-black text-slate-900 font-humanist">
+                Pre-Built Engineering Knowledge Bases
+              </h2>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-mono font-bold bg-emerald-50 text-emerald-800 px-2.5 py-1 rounded-full border border-emerald-200">
+                7 Pre-Built Taxonomies
+              </span>
+              <span className="text-[10px] font-mono font-bold bg-sky-50 text-sky-800 px-2.5 py-1 rounded-full border border-sky-200">
+                100% Deterministic
+              </span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Column 1: Heavy Machinery & Thermal */}
+            <div className="space-y-3">
+              <div className="font-mono text-[10.5px] font-bold uppercase text-slate-400 tracking-wider pb-1 border-b border-slate-100">
+                Heavy Machinery &amp; Thermal
+              </div>
+              <Link
+                href="/industries/hvac-commercial-refrigeration"
+                className="block p-3 rounded-2xl bg-slate-50 hover:bg-sky-50/60 border border-slate-200 transition group"
+              >
+                <div className="font-bold text-slate-900 group-hover:text-sky-600 text-xs flex items-center justify-between">
+                  <span>HVAC &amp; Commercial Chillers</span>
+                  <span className="text-[9.5px] font-mono text-sky-700 bg-sky-100 px-1.5 py-0.5 rounded font-bold">ASHRAE</span>
+                </div>
+                <p className="text-[11px] text-slate-500 mt-1">
+                  Compressor floodback, oil foaming &amp; low delta-T loop mitigation.
+                </p>
+              </Link>
+              <Link
+                href="/industries/heavy-mining-materials"
+                className="block p-3 rounded-2xl bg-slate-50 hover:bg-sky-50/60 border border-slate-200 transition group"
+              >
+                <div className="font-bold text-slate-900 group-hover:text-sky-600 text-xs flex items-center justify-between">
+                  <span>Heavy Mining &amp; Excavation</span>
+                  <span className="text-[9.5px] font-mono text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded font-bold">MSHA</span>
+                </div>
+                <p className="text-[11px] text-slate-500 mt-1">
+                  Planetary slewing drives, trunnion bearing galling &amp; crushing circuits.
+                </p>
+              </Link>
+            </div>
+
+            {/* Column 2: Process & Sanitary Fluids */}
+            <div className="space-y-3">
+              <div className="font-mono text-[10.5px] font-bold uppercase text-slate-400 tracking-wider pb-1 border-b border-slate-100">
+                Process &amp; Sanitary Fluids
+              </div>
+              <Link
+                href="/industries/food-beverage-manufacturing"
+                className="block p-3 rounded-2xl bg-slate-50 hover:bg-sky-50/60 border border-slate-200 transition group"
+              >
+                <div className="font-bold text-slate-900 group-hover:text-sky-600 text-xs flex items-center justify-between">
+                  <span>Food &amp; Beverage Processing</span>
+                  <span className="text-[9.5px] font-mono text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded font-bold">3-A Sanitary</span>
+                </div>
+                <p className="text-[11px] text-slate-500 mt-1">
+                  CIP caustic seal degradation, rotary lobe pump elastomer swelling.
+                </p>
+              </Link>
+              <Link
+                href="/industries/industrial-hydraulics-fluid"
+                className="block p-3 rounded-2xl bg-slate-50 hover:bg-sky-50/60 border border-slate-200 transition group"
+              >
+                <div className="font-bold text-slate-900 group-hover:text-sky-600 text-xs flex items-center justify-between">
+                  <span>Hydraulics &amp; Fluid Power</span>
+                  <span className="text-[9.5px] font-mono text-sky-700 bg-sky-100 px-1.5 py-0.5 rounded font-bold">ISO 4406</span>
+                </div>
+                <p className="text-[11px] text-slate-500 mt-1">
+                  High-pressure piston pump cavitation, varnishing &amp; micron contamination.
+                </p>
+              </Link>
+            </div>
+
+            {/* Column 3: Precision Metalworking & Plastics */}
+            <div className="space-y-3">
+              <div className="font-mono text-[10.5px] font-bold uppercase text-slate-400 tracking-wider pb-1 border-b border-slate-100">
+                Precision Metal &amp; Polymer
+              </div>
+              <Link
+                href="/industries/automotive-tier1-stamping"
+                className="block p-3 rounded-2xl bg-slate-50 hover:bg-sky-50/60 border border-slate-200 transition group"
+              >
+                <div className="font-bold text-slate-900 group-hover:text-sky-600 text-xs flex items-center justify-between">
+                  <span>Automotive Tier-1 Stamping</span>
+                  <span className="text-[9.5px] font-mono text-purple-700 bg-purple-100 px-1.5 py-0.5 rounded font-bold">IATF 16949</span>
+                </div>
+                <p className="text-[11px] text-slate-500 mt-1">
+                  Die galling, punch thermal deformation &amp; press ram deflection.
+                </p>
+              </Link>
+              <Link
+                href="/industries/precision-cnc-tooling"
+                className="block p-3 rounded-2xl bg-slate-50 hover:bg-sky-50/60 border border-slate-200 transition group"
+              >
+                <div className="font-bold text-slate-900 group-hover:text-sky-600 text-xs flex items-center justify-between">
+                  <span>Precision CNC &amp; Tooling</span>
+                  <span className="text-[9.5px] font-mono text-sky-700 bg-sky-100 px-1.5 py-0.5 rounded font-bold">ISO 230-3</span>
+                </div>
+                <p className="text-[11px] text-slate-500 mt-1">
+                  Spindle thermal growth, ballscrew backlash &amp; harmonic chatter.
+                </p>
+              </Link>
+            </div>
+
+            {/* Column 4: Standards Governance Card */}
+            <div className="bg-slate-900 rounded-2xl p-5 text-white flex flex-col justify-between border border-slate-800 shadow-md">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+                  <span className="text-[10px] font-mono uppercase font-bold text-slate-400 tracking-wider">
+                    Standards Governance
+                  </span>
+                  <span className="text-[9px] font-mono bg-emerald-950 text-emerald-400 px-2 py-0.5 rounded border border-emerald-800">
+                    Zero Risk
+                  </span>
+                </div>
+                <ul className="space-y-2 text-xs text-slate-300">
+                  <li className="flex items-center gap-2">
+                    <span className="css-icon-check text-emerald-400"></span>
+                    <span>ASHRAE 90.1 &amp; Standard 15</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="css-icon-check text-emerald-400"></span>
+                    <span>3-A Sanitary Standard 02-12</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="css-icon-check text-emerald-400"></span>
+                    <span>IATF 16949 / ISO 9001</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="css-icon-check text-emerald-400"></span>
+                    <span>ISO 230-3 Spindle Thermal</span>
+                  </li>
+                </ul>
+              </div>
+
+              <div className="pt-4 border-t border-slate-800">
+                <Link
+                  href="/features#standards-crosswalk"
+                  className="block w-full py-2.5 px-3 text-center bg-sky-600 hover:bg-sky-500 text-white rounded-xl text-xs font-bold transition shadow-xs cursor-pointer"
+                >
+                  View Global Crosswalk &rarr;
+                </Link>
+              </div>
             </div>
           </div>
         </div>
