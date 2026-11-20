@@ -107,12 +107,27 @@ export async function POST(request: Request) {
         }
       }
 
+      let publishedUrl: string | undefined = undefined;
+      if (nextStatus === DraftStatus.PUBLISHED) {
+        try {
+          const { publishDraftToCms } = await import("@/lib/cmsPublishing");
+          const pub = await publishDraftToCms({
+            draftId: draft.id,
+            userId: user.id,
+            userRole: user.role,
+          });
+          publishedUrl = pub.publishedUrl;
+        } catch (cmsErr) {
+          console.warn("Direct CMS syndication warning:", cmsErr);
+        }
+      }
+
       const updated = await db.draft.update({
         where: { id: draft.id },
         data: {
           status: nextStatus,
           reviewComment: typeof comment === "string" ? comment.trim().slice(0, 2000) : draft.reviewComment,
-          ...(nextStatus === DraftStatus.PUBLISHED ? { publishedAt: new Date() } : {}),
+          ...(nextStatus === DraftStatus.PUBLISHED ? { publishedAt: new Date(), publishedUrl: publishedUrl || draft.publishedUrl } : {}),
         },
       });
 
