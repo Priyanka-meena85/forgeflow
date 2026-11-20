@@ -12,6 +12,11 @@ import { TeamManager } from "@/components/TeamManager";
 import { ExecutiveRoiModal } from "@/components/ExecutiveRoiModal";
 import { RfqLeadManager } from "@/components/RfqLeadManager";
 import { SlackReviewBotConfig } from "@/components/SlackReviewBotConfig";
+import { CompetitorAeoDisplacer } from "@/components/CompetitorAeoDisplacer";
+import { GoogleSearchConsoleSync } from "@/components/GoogleSearchConsoleSync";
+import { UnitStandardConverter } from "@/components/UnitStandardConverter";
+import { EnterpriseSsoConfig } from "@/components/EnterpriseSsoConfig";
+import { CadExplodedViewStudio } from "@/components/CadExplodedViewStudio";
 
 type TabKey =
   | "Mission Control"
@@ -20,6 +25,11 @@ type TabKey =
   | "Risk & Compliance"
   | "AEO Schema Hub"
   | "Publishing Pipeline"
+  | "Competitor Displacer"
+  | "GSC Performance"
+  | "Global Standardizer"
+  | "3D CAD Inspector"
+  | "Enterprise SSO"
   | "Industrial Analytics"
   | "Workspace & Rules"
   | "Billing & Quotas";
@@ -83,6 +93,11 @@ const navItems: Array<{ label: TabKey; badge?: string; iconClass: string }> = [
   { label: "Risk & Compliance", iconClass: "css-icon-alert", badge: "Low Risk" },
   { label: "AEO Schema Hub", iconClass: "css-icon-gear", badge: "JSON-LD" },
   { label: "Publishing Pipeline", iconClass: "css-icon-launch" },
+  { label: "Competitor Displacer", iconClass: "css-icon-bolt", badge: "Steal Matrix" },
+  { label: "GSC Performance", iconClass: "css-icon-chart", badge: "Live Sync" },
+  { label: "Global Standardizer", iconClass: "css-icon-gear", badge: "ISO / DIN" },
+  { label: "3D CAD Inspector", iconClass: "css-icon-box", badge: "Exploded View" },
+  { label: "Enterprise SSO", iconClass: "css-icon-shield", badge: "SAML 2.0" },
   { label: "Industrial Analytics", iconClass: "css-icon-chart", badge: "Charts" },
   { label: "Workspace & Rules", iconClass: "css-icon-gear" },
   { label: "Billing & Quotas", iconClass: "css-icon-card" },
@@ -4484,6 +4499,46 @@ function ForgeFlowWorkspace() {
                 </div>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* TAB 6B: COMPETITOR AEO STEAL MATRIX */}
+        {activeTab === "Competitor Displacer" && (
+          <div className="p-6 space-y-6 max-w-7xl animate-fade-in">
+            <CompetitorAeoDisplacer
+              onGenerateCounterDraft={(slug) => {
+                setActionMessage(`Initiating Counter-Spec Engineering Draft: ${slug}`);
+                setActiveTab("QA Review Studio");
+              }}
+            />
+          </div>
+        )}
+
+        {/* TAB 6C: GOOGLE SEARCH CONSOLE PERFORMANCE & SCHEMA DRIFT */}
+        {activeTab === "GSC Performance" && (
+          <div className="p-6 space-y-6 max-w-7xl animate-fade-in">
+            <GoogleSearchConsoleSync />
+          </div>
+        )}
+
+        {/* TAB 6D: GLOBAL STANDARDIZER & METRIC CONVERTER */}
+        {activeTab === "Global Standardizer" && (
+          <div className="p-6 space-y-6 max-w-7xl animate-fade-in">
+            <UnitStandardConverter />
+          </div>
+        )}
+
+        {/* TAB 6E: INTERACTIVE 3D CAD COMPONENT INSPECTOR */}
+        {activeTab === "3D CAD Inspector" && (
+          <div className="p-6 space-y-6 max-w-7xl animate-fade-in">
+            <CadExplodedViewStudio />
+          </div>
+        )}
+
+        {/* TAB 6F: ENTERPRISE SAML 2.0 & SSO */}
+        {activeTab === "Enterprise SSO" && (
+          <div className="p-6 space-y-6 max-w-7xl animate-fade-in">
+            <EnterpriseSsoConfig />
           </div>
         )}
 

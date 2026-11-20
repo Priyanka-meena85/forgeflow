@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { recordAuditLog } from "@/lib/audit";
+import { encryptSecret, maskSecret } from "@/lib/crypto";
 
 export async function GET(req: NextRequest) {
   try {
@@ -23,6 +24,7 @@ export async function GET(req: NextRequest) {
         provider: i.provider,
         name: i.name,
         endpointUrl: i.endpointUrl,
+        maskedApiKey: maskSecret(i.apiKey || ""),
         targetCollectionId: i.targetCollectionId,
         status: i.status,
         autoPublishApproved: i.autoPublishApproved,
@@ -51,13 +53,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Provider, name, and endpointUrl are required." }, { status: 400 });
     }
 
+    // Encrypt CMS API Key at Rest with AES-256-GCM
+    const encryptedApiKey = apiKey ? encryptSecret(apiKey) : null;
+
     const created = await db.cmsIntegration.create({
       data: {
         organizationId: orgId,
         provider: provider.toUpperCase(),
         name,
         endpointUrl,
-        apiKey: apiKey || null,
+        apiKey: encryptedApiKey,
         targetCollectionId: targetCollectionId || null,
         autoPublishApproved: Boolean(autoPublishApproved),
         status: "ACTIVE",

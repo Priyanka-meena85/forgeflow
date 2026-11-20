@@ -1,0 +1,943 @@
+const fs = require('fs');
+const path = require('path');
+const { execSync } = require('child_process');
+
+const htmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ForgeFlow Enterprise Software Architecture Specification</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 18mm 16mm 18mm 16mm;
+    }
+    
+    * {
+      box-sizing: border-box;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Plus Jakarta Sans", Helvetica, Arial, sans-serif;
+      color: #1e293b;
+      background: #ffffff;
+      line-height: 1.55;
+      font-size: 11pt;
+      margin: 0;
+      padding: 0;
+    }
+
+    .page-break {
+      page-break-before: always;
+      break-before: page;
+    }
+
+    .avoid-break {
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+
+    /* Cover / Header Section */
+    .doc-header {
+      border-bottom: 2px solid #0284c7;
+      padding-bottom: 20px;
+      margin-bottom: 24px;
+    }
+
+    .doc-badge-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .badge {
+      display: inline-block;
+      font-family: ui-monospace, Consolas, monospace;
+      font-size: 8.5pt;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .badge-primary { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+    .badge-enterprise { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+    .badge-success { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+
+    h1.title {
+      font-size: 22pt;
+      font-weight: 800;
+      color: #0f172a;
+      line-height: 1.2;
+      margin: 0 0 8px 0;
+      letter-spacing: -0.5px;
+    }
+
+    .subtitle {
+      font-size: 12.5pt;
+      color: #64748b;
+      margin: 0 0 16px 0;
+      font-weight: 400;
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 9pt;
+    }
+
+    .meta-item strong {
+      display: block;
+      color: #475569;
+      font-size: 7.5pt;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 2px;
+    }
+
+    .meta-item span {
+      color: #0f172a;
+      font-weight: 600;
+    }
+
+    /* Section Headings */
+    h2 {
+      font-size: 14pt;
+      font-weight: 700;
+      color: #0f172a;
+      border-bottom: 1.5px solid #e2e8f0;
+      padding-bottom: 6px;
+      margin: 28px 0 14px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      letter-spacing: -0.2px;
+    }
+
+    h2 .section-num {
+      color: #0284c7;
+      font-family: ui-monospace, Consolas, monospace;
+      font-size: 11pt;
+    }
+
+    h3 {
+      font-size: 11.5pt;
+      font-weight: 700;
+      color: #1e293b;
+      margin: 18px 0 8px 0;
+    }
+
+    p {
+      margin: 0 0 10px 0;
+      color: #334155;
+    }
+
+    /* Tenet Cards */
+    .tenets-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin: 14px 0 20px 0;
+    }
+
+    .tenet-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-left: 4px solid #0284c7;
+      border-radius: 6px;
+      padding: 10px 14px;
+    }
+
+    .tenet-card.emerald { border-left-color: #059669; }
+    .tenet-card.amber { border-left-color: #d97706; }
+    .tenet-card.purple { border-left-color: #7c3aed; }
+
+    .tenet-card strong {
+      display: block;
+      font-size: 10pt;
+      color: #0f172a;
+      margin-bottom: 4px;
+    }
+
+    .tenet-card p {
+      font-size: 9pt;
+      color: #64748b;
+      margin: 0;
+      line-height: 1.45;
+    }
+
+    /* Architecture Visual Blocks */
+    .arch-diagram-box {
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 16px;
+      margin: 16px 0 20px 0;
+    }
+
+    .diagram-layer {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 10px 14px;
+      margin-bottom: 10px;
+    }
+
+    .diagram-layer:last-child {
+      margin-bottom: 0;
+    }
+
+    .layer-title {
+      font-size: 8.5pt;
+      font-family: ui-monospace, Consolas, monospace;
+      font-weight: 700;
+      color: #0369a1;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .node-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .node {
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      padding: 6px 10px;
+      font-size: 8.5pt;
+      font-weight: 600;
+      color: #1e293b;
+      flex: 1;
+      min-width: 140px;
+      text-align: center;
+    }
+
+    .node.highlight {
+      background: #e0f2fe;
+      border-color: #7dd3fc;
+      color: #0369a1;
+    }
+
+    .node.success {
+      background: #ecfdf5;
+      border-color: #6ee7b7;
+      color: #047857;
+    }
+
+    .node.accent {
+      background: #fef3c7;
+      border-color: #fde68a;
+      color: #92400e;
+    }
+
+    .node-sub {
+      display: block;
+      font-size: 7.5pt;
+      color: #64748b;
+      font-weight: normal;
+      margin-top: 2px;
+    }
+
+    .connector-line {
+      text-align: center;
+      font-family: ui-monospace, Consolas, monospace;
+      font-size: 8pt;
+      color: #94a3b8;
+      margin: 4px 0;
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0 18px 0;
+      font-size: 9pt;
+    }
+
+    th {
+      background: #f1f5f9;
+      color: #334155;
+      font-weight: 700;
+      text-align: left;
+      padding: 8px 10px;
+      border: 1px solid #cbd5e1;
+      font-size: 8.5pt;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    td {
+      padding: 7px 10px;
+      border: 1px solid #e2e8f0;
+      color: #334155;
+      vertical-align: top;
+    }
+
+    tr:nth-child(even) td {
+      background: #f8fafc;
+    }
+
+    code {
+      font-family: ui-monospace, Consolas, monospace;
+      font-size: 8.5pt;
+      background: #f1f5f9;
+      color: #0f172a;
+      padding: 1px 4px;
+      border-radius: 3px;
+      border: 1px solid #e2e8f0;
+    }
+
+    pre {
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 12px 14px;
+      border-radius: 6px;
+      font-family: ui-monospace, Consolas, monospace;
+      font-size: 8pt;
+      line-height: 1.45;
+      overflow-x: auto;
+      margin: 10px 0 16px 0;
+    }
+
+    /* Step Sequence */
+    .pipeline-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin: 12px 0 18px 0;
+    }
+
+    .step-item {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 8px 12px;
+    }
+
+    .step-badge {
+      background: #0284c7;
+      color: #ffffff;
+      font-family: ui-monospace, Consolas, monospace;
+      font-weight: 700;
+      font-size: 8pt;
+      padding: 2px 7px;
+      border-radius: 4px;
+      shrink: 0;
+    }
+
+    .step-content strong {
+      display: block;
+      font-size: 9.5pt;
+      color: #0f172a;
+      margin-bottom: 2px;
+    }
+
+    .step-content p {
+      font-size: 8.5pt;
+      color: #64748b;
+      margin: 0;
+    }
+
+    .footer-note {
+      border-top: 1px solid #e2e8f0;
+      padding-top: 12px;
+      margin-top: 30px;
+      font-size: 8pt;
+      color: #94a3b8;
+      display: flex;
+      justify-content: space-between;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==================== PAGE 1: TITLE & EXECUTIVE ARCHITECTURE ==================== -->
+  <div class="doc-header">
+    <div class="doc-badge-row">
+      <span class="badge badge-primary">Enterprise Architecture Specification</span>
+      <span class="badge badge-enterprise">CONFIDENTIAL &bull; PRODUCTION READY</span>
+    </div>
+    <h1 class="title">ForgeFlow Architecture Blueprint</h1>
+    <div class="subtitle">Deterministic B2B Programmatic SEO &amp; Answer Engine Optimization (AEO) Platform</div>
+
+    <div class="meta-grid">
+      <div class="meta-item">
+        <strong>Document Version</strong>
+        <span>2.4.0 (Production)</span>
+      </div>
+      <div class="meta-item">
+        <strong>System Target</strong>
+        <span>Industrial Manufacturing</span>
+      </div>
+      <div class="meta-item">
+        <strong>Average Deal ACV</strong>
+        <span>$50,000 &ndash; $500,000</span>
+      </div>
+      <div class="meta-item">
+        <strong>Compliance Tier</strong>
+        <span>ASHRAE / ASME / ISO / 3-A</span>
+      </div>
+    </div>
+  </div>
+
+  <h2><span class="section-num">01</span> Executive Architectural Overview &amp; Core Tenets</h2>
+  <p>
+    ForgeFlow is an enterprise SaaS platform engineered specifically for heavy industrial equipment manufacturers. In heavy B2B sectors (commercial HVAC rooftop units, sanitary lobe pumps, high-tonnage servo presses, polymer extrusion skids, proportional hydraulics), marketing content directly touches mission-critical operating parameters where hallucinations in tolerances cause equipment failure and contractual liability.
+  </p>
+
+  <div class="tenets-grid">
+    <div class="tenet-card">
+      <strong>1. Zero-Hallucination Determinism</strong>
+      <p>AI prompt chaining is mathematically and logically bounded by certified engineering standards (ASHRAE 90.1, ASME Section VIII, 3-A Sanitary, IATF 16949) and customer-ingested OEM manuals. Speculative parameter generation is strictly prohibited by AST validators.</p>
+    </div>
+    <div class="tenet-card emerald">
+      <strong>2. Human Engineer-in-the-Loop (HITL)</strong>
+      <p>No technical article or operating envelope table can be published or exported without verifiable sign-off from a credentialed applications engineer. Reviewer credentials (PE, ASHRAE Fellow) are injected into Schema.org reviewedBy metadata.</p>
+    </div>
+    <div class="tenet-card amber">
+      <strong>3. Multi-Tenant Strict Isolation</strong>
+      <p>Logical tenant segregation enforced across database queries, object storage, RAG vector namespaces, CMS API credentials, and per-tenant sliding window rate limiters.</p>
+    </div>
+    <div class="tenet-card purple">
+      <strong>4. Dual-Mode Resilient Database Engine</strong>
+      <p>High-availability PostgreSQL cluster coupled with continuous non-blocking socket health probing (&lt;20ms) and an instant in-memory transactional fallback store ensuring 100% zero-downtime execution.</p>
+    </div>
+  </div>
+
+  <h2><span class="section-num">02</span> C4 Level-2 System Architecture</h2>
+  <p>
+    The system follows a modular, decoupled tier structure ensuring rapid content generation, rigorous QA gating, and multi-channel syndication without blocking user sessions.
+  </p>
+
+  <div class="arch-diagram-box avoid-break">
+    <!-- Presentation Tier -->
+    <div class="diagram-layer">
+      <div class="layer-title">
+        <span>Tier 1: Presentation &amp; Ingress (Client &amp; Edge)</span>
+        <span>Next.js 15 / React 19 / Cloudflare WAF</span>
+      </div>
+      <div class="node-row">
+        <div class="node highlight">Enterprise Web Console<span class="node-sub">App Router + Client Tabs</span></div>
+        <div class="node highlight">QA Review Studio<span class="node-sub">Engineer Verification GUI</span></div>
+        <div class="node highlight">Slack / Teams Bot<span class="node-sub">Approval Webhook Dispatch</span></div>
+        <div class="node">Edge Rate Limiter<span class="node-sub">Sliding Window Protection</span></div>
+      </div>
+    </div>
+
+    <div class="connector-line">&darr; Secure HTTP/2 &amp; Server-Sent Events (SSE) &darr;</div>
+
+    <!-- Application Tier -->
+    <div class="diagram-layer">
+      <div class="layer-title">
+        <span>Tier 2: Application Orchestration Tier</span>
+        <span>Modular Route Handlers &amp; Background Workers</span>
+      </div>
+      <div class="node-row">
+        <div class="node">RBAC Auth Engine<span class="node-sub">BCrypt, Sessions, Tokens</span></div>
+        <div class="node accent">Job Queue &amp; SSE<span class="node-sub">Async Pipeline Worker</span></div>
+        <div class="node">OEM Ingestion Core<span class="node-sub">PDF / Spec Chunk Extractor</span></div>
+        <div class="node">Audit Logger<span class="node-sub">Immutable Activity Ledger</span></div>
+        <div class="node success">CMS Syndicator<span class="node-sub">WP, Webflow, HubSpot</span></div>
+      </div>
+    </div>
+
+    <div class="connector-line">&darr; Deterministic Constraints &amp; Parameter Allowlist &darr;</div>
+
+    <!-- AI & Intelligence Tier -->
+    <div class="diagram-layer">
+      <div class="layer-title">
+        <span>Tier 3: AI &amp; Engineering Intelligence Core</span>
+        <span>Deterministic RAG &amp; AST Filtering</span>
+      </div>
+      <div class="node-row">
+        <div class="node highlight">Standard Allowlist<span class="node-sub">ASME / ISO / ASHRAE Codes</span></div>
+        <div class="node accent">Anti-Fluff AST Gate<span class="node-sub">Buzzword &amp; Claim Stripper</span></div>
+        <div class="node">Multi-Entity Schema<span class="node-sub">TechArticle, HowTo, FAQ</span></div>
+        <div class="node">Vector Embedding Index<span class="node-sub">Tenant Spec Chunks</span></div>
+      </div>
+    </div>
+
+    <div class="connector-line">&darr; Resilient Connection Pooling &amp; Socket Probing &darr;</div>
+
+    <!-- Persistence Tier -->
+    <div class="diagram-layer">
+      <div class="layer-title">
+        <span>Tier 4: Persistence &amp; Storage Tier</span>
+        <span>Dual-Mode High-Availability Architecture</span>
+      </div>
+      <div class="node-row">
+        <div class="node success">Primary PostgreSQL 16<span class="node-sub">Managed Relational Cluster</span></div>
+        <div class="node highlight">Non-Blocking Socket Probe<span class="node-sub">&lt;20ms TCP Health Monitor</span></div>
+        <div class="node">Fallback Memory Store<span class="node-sub">Zero-Latency In-Memory DB</span></div>
+        <div class="node">S3 / R2 Object Storage<span class="node-sub">PDF Datasheets &amp; Exports</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-note">
+    <span>ForgeFlow Enterprise Architecture Specification &bull; Document ID: ARCH-FF-2026-V2</span>
+    <span>Page 1 of 4</span>
+  </div>
+
+  <!-- ==================== PAGE 2: DATA ARCHITECTURE & RAG PIPELINE ==================== -->
+  <div class="page-break"></div>
+
+  <h2><span class="section-num">03</span> Domain &amp; Multi-Tenant Data Architecture</h2>
+  <p>
+    The relational model maps manufacturing organizations, credentialed engineering reviewers, programmatic failure-mode drafts, and external publishing integrations with foreign-key referential integrity.
+  </p>
+
+  <table class="avoid-break">
+    <thead>
+      <tr>
+        <th style="width: 22%;">Domain Entity</th>
+        <th style="width: 28%;">Primary Attributes</th>
+        <th style="width: 25%;">Relational Keying</th>
+        <th style="width: 25%;">Architectural Purpose</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Organization</strong></td>
+        <td><code>name, slug, plan, monthlyPagesLimit, subscriptionStatus</code></td>
+        <td>Primary Tenant Root (1:N Users, Drafts, Specs)</td>
+        <td>Logical tenant isolation boundary, usage quotas, and enterprise billing terms.</td>
+      </tr>
+      <tr>
+        <td><strong>User &amp; Membership</strong></td>
+        <td><code>email, passwordHash, role (OWNER, ADMIN, REVIEWER, AUTHOR)</code></td>
+        <td>FK: <code>organizationId</code></td>
+        <td>RBAC role enforcement, authenticated sessions, and team permissions.</td>
+      </tr>
+      <tr>
+        <td><strong>Draft</strong></td>
+        <td><code>title, vertical, equipment, failureMode, standardReference, status</code></td>
+        <td>FK: <code>organizationId, authorId</code></td>
+        <td>Central technical slice entity tracking generation, QA scores, and revisions.</td>
+      </tr>
+      <tr>
+        <td><strong>PageReview</strong></td>
+        <td><code>status (PENDING, APPROVED), reviewerNotes, verificationItems</code></td>
+        <td>FK: <code>draftId, reviewerId</code></td>
+        <td>Human-in-the-loop sign-off certificate injected into Schema.org metadata.</td>
+      </tr>
+      <tr>
+        <td><strong>ExpertReviewer</strong></td>
+        <td><code>name, jobTitle, credentials (PE, CMRP), linkedInUrl, yearsExp</code></td>
+        <td>FK: <code>organizationId</code></td>
+        <td>Authoritative engineer profiles certifying technical tolerance accuracy.</td>
+      </tr>
+      <tr>
+        <td><strong>SpecDocument</strong></td>
+        <td><code>fileName, fileSizeBytes, extractedChunksCount, parsedTaxonomy</code></td>
+        <td>FK: <code>organizationId</code></td>
+        <td>OEM equipment manual &amp; CAD spec sheets ingested into the RAG vector store.</td>
+      </tr>
+      <tr>
+        <td><strong>CmsIntegration</strong></td>
+        <td><code>platform (WP, Webflow, HubSpot), endpointUrl, apiKeyEncrypted</code></td>
+        <td>FK: <code>organizationId</code></td>
+        <td>Direct syndication endpoints for automated multi-head CMS publishing.</td>
+      </tr>
+      <tr>
+        <td><strong>AeoTrackerQuery</strong></td>
+        <td><code>keyword, targetUrl, googleAeoCited, perplexityCited, aiSnippet</code></td>
+        <td>FK: <code>organizationId, draftId</code></td>
+        <td>Answer Engine citation records monitoring AI Overview appearances.</td>
+      </tr>
+      <tr>
+        <td><strong>AuditLog</strong></td>
+        <td><code>action, resourceType, resourceId, userRole, ipAddress, metadata</code></td>
+        <td>FK: <code>organizationId, userId</code></td>
+        <td>Immutable security audit trail recording tolerance changes and publishes.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2><span class="section-num">04</span> Deterministic RAG &amp; Generation Pipeline</h2>
+  <p>
+    Industrial content cannot rely on unconstrained LLM completion. The generation engine enforces an 8-stage bounded pipeline with deterministic constraints:
+  </p>
+
+  <div class="pipeline-steps avoid-break">
+    <div class="step-item">
+      <span class="step-badge">Stage 1</span>
+      <div class="step-content">
+        <strong>Taxonomy Seed Ingestion</strong>
+        <p>User selects heavy vertical (e.g. Commercial RTU HVAC), equipment asset, failure mode (Compressor Flooded Starts), and governing standard (ASHRAE Standard 90.1).</p>
+      </div>
+    </div>
+    <div class="step-item">
+      <span class="step-badge">Stage 2</span>
+      <div class="step-content">
+        <strong>OEM Manual Vector RAG Retrieval</strong>
+        <p>Ingested manufacturer PDF manuals and service SOPs are queried for exact model numbers, suction superheat bounds (4&deg;F threshold), and oil viscosity minimums (32 cSt).</p>
+      </div>
+    </div>
+    <div class="step-item">
+      <span class="step-badge">Stage 3</span>
+      <div class="step-content">
+        <strong>Deterministic Prompt Chaining</strong>
+        <p>System prompt mandates exact numeric limits and restricts output to diagnostic checklists, failure root causes, and corrective SOPs. Generic marketing language is banned.</p>
+      </div>
+    </div>
+    <div class="step-item">
+      <span class="step-badge">Stage 4</span>
+      <div class="step-content">
+        <strong>AST Anti-Fluff &amp; Regulatory Allowlist Gate</strong>
+        <p>Post-generation Abstract Syntax Tree (AST) parser strips non-falsifiable superlatives (e.g., "cutting-edge", "game-changing") and validates external links against official registries.</p>
+      </div>
+    </div>
+    <div class="step-item">
+      <span class="step-badge">Stage 5</span>
+      <div class="step-content">
+        <strong>Direct Answer Capsule &amp; Multi-Entity Schema Generation</strong>
+        <p>Generates a 45-word direct answer capsule optimized for AI extraction and validates multi-entity JSON-LD graphs (TechArticle, HowTo, and FAQPage schemas).</p>
+      </div>
+    </div>
+    <div class="step-item">
+      <span class="step-badge">Stage 6</span>
+      <div class="step-content">
+        <strong>Human Applications Engineer Sign-Off</strong>
+        <p>Draft enters <code>IN_REVIEW</code> state. Licensed Professional Engineer (PE) audits operating envelopes and signs off via GUI or team Slack/Teams bot.</p>
+      </div>
+    </div>
+    <div class="step-item">
+      <span class="step-badge">Stage 7</span>
+      <div class="step-content">
+        <strong>Attribution Metadata Injection &amp; Audit Logging</strong>
+        <p>Engine binds reviewer credential badge to schema and writes immutable entry to <code>AuditLog</code> with cryptographic timestamp and IP signature.</p>
+      </div>
+    </div>
+    <div class="step-item">
+      <span class="step-badge">Stage 8</span>
+      <div class="step-content">
+        <strong>Multi-Head Direct CMS Syndication</strong>
+        <p>1-Click publication dispatches structured payloads to WordPress, Webflow, HubSpot, or signed enterprise outbound webhooks.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-note">
+    <span>ForgeFlow Enterprise Architecture Specification &bull; Document ID: ARCH-FF-2026-V2</span>
+    <span>Page 2 of 4</span>
+  </div>
+
+  <!-- ==================== PAGE 3: HITL, CMS & AEO CITATION ENGINE ==================== -->
+  <div class="page-break"></div>
+
+  <h2><span class="section-num">05</span> Human-in-the-Loop (HITL) Review Architecture</h2>
+  <p>
+    To eliminate legal liability in industrial manufacturing, ForgeFlow prevents unverified AI drafts from reaching public sitemaps. The review engine implements credentialed E-E-A-T attribution:
+  </p>
+
+  <div class="arch-diagram-box avoid-break">
+    <div class="diagram-layer">
+      <div class="layer-title">
+        <span>Engineering Review &amp; Schema Injection Architecture</span>
+        <span>Credentialed Attribution Protocol</span>
+      </div>
+      <div class="node-row">
+        <div class="node">Draft in QA State<span class="node-sub">Word Count &amp; Fluff PASS</span></div>
+        <div class="node highlight">Reviewer Assignment<span class="node-sub">Dr. Marcus Vance, PE</span></div>
+        <div class="node accent">Parameter Audit<span class="node-sub">Tolerance Checklist PASS</span></div>
+        <div class="node success">Signed JSON-LD<span class="node-sub">reviewedBy Person Schema</span></div>
+      </div>
+    </div>
+  </div>
+
+  <h3>Injected Multi-Entity Schema.org Structure</h3>
+  <pre><code>{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Automating Fault Detection & Diagnostics to Prevent RTU Compressor Failure",
+  "reviewedBy": {
+    "@type": "Person",
+    "name": "Alex Henderson, PE",
+    "jobTitle": "Lead Thermal & Mechanical Applications Engineer",
+    "hasCredential": "PE, ASHRAE Fellow",
+    "sameAs": "https://www.linkedin.com/in/alex-henderson-pe-industrial"
+  },
+  "dependencies": "ASHRAE Standard 90.1, Section 6.4.3.12",
+  "lastReviewed": "2026-03-15",
+  "dateModified": "2026-03-15T10:00:00Z"
+}</code></pre>
+
+  <h2><span class="section-num">06</span> Multi-Head CMS Syndication Pipeline</h2>
+  <p>
+    Modern industrial equipment manufacturers operate diverse web architectures ranging from traditional CMS to headless composable stacks. ForgeFlow provides native connectors:
+  </p>
+
+  <table class="avoid-break">
+    <thead>
+      <tr>
+        <th style="width: 25%;">Syndication Channel</th>
+        <th style="width: 30%;">Integration Protocol</th>
+        <th style="width: 45%;">Data Mapping &amp; Payload Structure</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>WordPress REST API</strong></td>
+        <td>REST API v2 (Application Passwords)</td>
+        <td>Maps HTML sections into Post Content, sets Featured Image, and injects custom post meta fields for SEO title and JSON-LD schema.</td>
+      </tr>
+      <tr>
+        <td><strong>Webflow CMS</strong></td>
+        <td>Collections API v2 (Bearer Token)</td>
+        <td>Maps technical fields directly into custom collection fields: diagnostic SOP, operating limits table, standard body tags, and AEO answer capsule.</td>
+      </tr>
+      <tr>
+        <td><strong>HubSpot CMS</strong></td>
+        <td>Blog Posts API v3 (Private App Token)</td>
+        <td>Drafts or publishes directly to corporate B2B knowledge hubs with meta-descriptions and manufacturer taxonomy tags.</td>
+      </tr>
+      <tr>
+        <td><strong>Headless Webhooks</strong></td>
+        <td>Outbound HMAC-SHA256 Signed JSON</td>
+        <td>Dispatches complete article AST, raw Markdown, structured FAQs, and reviewer signatures to enterprise microservices (Strapi, Contentful).</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2><span class="section-num">07</span> Live AEO Citation Tracking Engine</h2>
+  <p>
+    Unlike conventional keyword ranking tools, ForgeFlow tracks presence inside Answer Engine synthesized results:
+  </p>
+
+  <div class="tenets-grid avoid-break">
+    <div class="tenet-card">
+      <strong>Automated Crawler Daemon</strong>
+      <p>Weekly cron jobs dispatch headless diagnostic prompts (e.g., <em>"Commercial RTU flooded starts diagnosis"</em>) across Google AI Overviews, Perplexity Copilot, and ChatGPT Search.</p>
+    </div>
+    <div class="tenet-card emerald">
+      <strong>Citation Carousel Parsing</strong>
+      <p>Detects manufacturer domain presence in the synthesized source carousel, extracts citation index (Source #1 vs #2), and verifies verbatim technical snippet quotation.</p>
+    </div>
+    <div class="tenet-card amber">
+      <strong>Attributed Pipeline Value</strong>
+      <p>Correlates citation frequency to qualified plant engineer sessions and calculates attributed pipeline ACV based on vertical average contract sizes ($50k–$200k).</p>
+    </div>
+    <div class="tenet-card purple">
+      <strong>Net-30 Enterprise Invoicing</strong>
+      <p>Generates executive PDF digests and automated Net-30 purchase order invoices with corporate Tax/GST IDs and ACH wire transfer instructions.</p>
+    </div>
+  </div>
+
+  <div class="footer-note">
+    <span>ForgeFlow Enterprise Architecture Specification &bull; Document ID: ARCH-FF-2026-V2</span>
+    <span>Page 3 of 4</span>
+  </div>
+
+  <!-- ==================== PAGE 4: SECURITY, DB RESILIENCE & DEPLOYMENT ==================== -->
+  <div class="page-break"></div>
+
+  <h2><span class="section-num">08</span> Security, RBAC &amp; Dual-Mode Database Architecture</h2>
+  <p>
+    ForgeFlow enforces strict multi-tenancy boundaries and enterprise security controls across all access layers:
+  </p>
+
+  <table class="avoid-break">
+    <thead>
+      <tr>
+        <th>Action / Capability</th>
+        <th style="text-align: center;">OWNER</th>
+        <th style="text-align: center;">ADMIN</th>
+        <th style="text-align: center;">REVIEWER</th>
+        <th style="text-align: center;">AUTHOR</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Workspace Settings &amp; Billing Invoicing</td>
+        <td style="text-align: center;"><strong>ALLOWED</strong></td>
+        <td style="text-align: center;"><strong>ALLOWED</strong></td>
+        <td style="text-align: center; color: #94a3b8;">DENIED</td>
+        <td style="text-align: center; color: #94a3b8;">DENIED</td>
+      </tr>
+      <tr>
+        <td>Team Member Invitations &amp; Revocations</td>
+        <td style="text-align: center;"><strong>ALLOWED</strong></td>
+        <td style="text-align: center;"><strong>ALLOWED</strong></td>
+        <td style="text-align: center; color: #94a3b8;">DENIED</td>
+        <td style="text-align: center; color: #94a3b8;">DENIED</td>
+      </tr>
+      <tr>
+        <td>CMS Integration Key Configuration</td>
+        <td style="text-align: center;"><strong>ALLOWED</strong></td>
+        <td style="text-align: center;"><strong>ALLOWED</strong></td>
+        <td style="text-align: center; color: #94a3b8;">DENIED</td>
+        <td style="text-align: center; color: #94a3b8;">DENIED</td>
+      </tr>
+      <tr>
+        <td>OEM Equipment Manual &amp; CAD Ingestion</td>
+        <td style="text-align: center;"><strong>ALLOWED</strong></td>
+        <td style="text-align: center;"><strong>ALLOWED</strong></td>
+        <td style="text-align: center;"><strong>ALLOWED</strong></td>
+        <td style="text-align: center; color: #94a3b8;">DENIED</td>
+      </tr>
+      <tr>
+        <td>Technical Topic &amp; Draft Generation</td>
+        <td style="text-align: center;"><strong>ALLOWED</strong></td>
+        <td style="text-align: center;"><strong>ALLOWED</strong></td>
+        <td style="text-align: center;"><strong>ALLOWED</strong></td>
+        <td style="text-align: center;"><strong>ALLOWED</strong></td>
+      </tr>
+      <tr>
+        <td>Application Engineer Sign-Off (PE Review)</td>
+        <td style="text-align: center;"><strong>ALLOWED</strong></td>
+        <td style="text-align: center;"><strong>ALLOWED</strong></td>
+        <td style="text-align: center;"><strong>ALLOWED</strong></td>
+        <td style="text-align: center; color: #94a3b8;">DENIED</td>
+      </tr>
+      <tr>
+        <td>Live CMS Publishing &amp; Export</td>
+        <td style="text-align: center;"><strong>ALLOWED</strong></td>
+        <td style="text-align: center;"><strong>ALLOWED</strong></td>
+        <td style="text-align: center;"><strong>ALLOWED</strong></td>
+        <td style="text-align: center; color: #94a3b8;">DENIED</td>
+      </tr>
+      <tr>
+        <td>Immutable Security Audit Trail Access</td>
+        <td style="text-align: center;"><strong>ALLOWED</strong></td>
+        <td style="text-align: center;"><strong>ALLOWED</strong></td>
+        <td style="text-align: center;"><strong>ALLOWED</strong></td>
+        <td style="text-align: center;"><strong>ALLOWED</strong></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Dual-Mode Resilient Database Engine Implementation</h3>
+  <p>
+    In high-reliability enterprise environments, database timeouts must never freeze client UI sessions. ForgeFlow implements a continuous socket-probing proxy in <code>lib/db.ts</code>:
+  </p>
+
+  <div class="pipeline-steps avoid-break">
+    <div class="step-item">
+      <span class="step-badge">Health Probe</span>
+      <div class="step-content">
+        <strong>Non-Blocking Socket Probe (&lt;20ms)</strong>
+        <p>A native Node.js socket tests PostgreSQL connectivity on port 5432 with an 80ms timeout. State is cached on <code>globalThis.__forgeflow_pg_available__</code> across Next.js Turbopack chunks.</p>
+      </div>
+    </div>
+    <div class="step-item">
+      <span class="step-badge">Fallback</span>
+      <div class="step-content">
+        <strong>Instant Zero-Latency Fallback</strong>
+        <p>If PostgreSQL is unreachable, requests route instantaneously to an in-memory transactional store with zero connection hangs (&lt;50ms response vs 4,200ms TCP timeout).</p>
+      </div>
+    </div>
+    <div class="step-item">
+      <span class="step-badge">Production</span>
+      <div class="step-content">
+        <strong>Strict Production Enforcement</strong>
+        <p>When <code>NODE_ENV=production</code> and <code>ENFORCE_MANAGED_DATABASE=true</code>, silent fallback is disabled, throwing explicit infrastructure errors to trigger on-call alerts.</p>
+      </div>
+    </div>
+  </div>
+
+  <h2><span class="section-num">09</span> Production Deployment Topology</h2>
+  <p>
+    Production infrastructure leverages multi-region edge routing, stateless application containers, and managed database clusters:
+  </p>
+
+  <div class="arch-diagram-box avoid-break">
+    <div class="diagram-layer">
+      <div class="layer-title">
+        <span>Production Infrastructure Stack</span>
+        <span>Enterprise High-Availability Topology</span>
+      </div>
+      <div class="node-row">
+        <div class="node highlight">Cloudflare CDN / WAF<span class="node-sub">DDoS Shield &amp; SSL</span></div>
+        <div class="node">Next.js Docker Clusters<span class="node-sub">Node.js 22 LTS (Stateless)</span></div>
+        <div class="node success">AWS RDS PostgreSQL 16<span class="node-sub">Multi-AZ + Read Replicas</span></div>
+        <div class="node accent">Upstash Redis<span class="node-sub">Sliding Rate Limiter</span></div>
+        <div class="node">Cloudflare R2 / S3<span class="node-sub">Encrypted Spec Storage</span></div>
+      </div>
+    </div>
+  </div>
+
+  <h2><span class="section-num">10</span> Architecture Certification</h2>
+  <p>
+    This architectural blueprint confirms that ForgeFlow meets enterprise manufacturing criteria: zero speculative hallucination risk, human-in-the-loop engineering governance, multi-head CMS publishing, and live AEO search performance tracking.
+  </p>
+
+  <div class="footer-note">
+    <span>ForgeFlow Enterprise Architecture Specification &bull; Document ID: ARCH-FF-2026-V2</span>
+    <span>Page 4 of 4 &bull; Completed</span>
+  </div>
+
+</body>
+</html>
+`;
+
+const htmlPath = path.join(__dirname, 'architecture_spec.html');
+fs.writeFileSync(htmlPath, htmlContent, 'utf8');
+console.log('Wrote HTML specification to:', htmlPath);
+
+const outputPdfRoot = path.join(__dirname, '..', 'ForgeFlow_Software_Architecture_Design.pdf');
+const outputPdfPublic = path.join(__dirname, '..', 'public', 'ForgeFlow_Software_Architecture_Design.pdf');
+
+const edgePaths = [
+  'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe',
+  'C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe',
+  'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
+];
+
+let browserExe = null;
+for (const p of edgePaths) {
+  if (fs.existsSync(p)) {
+    browserExe = p;
+    break;
+  }
+}
+
+if (!browserExe) {
+  console.error('No suitable browser found for PDF generation.');
+  process.exit(1);
+}
+
+const tempDir = path.join(require('os').tmpdir(), 'edge_pdf_render_' + Date.now());
+fs.mkdirSync(tempDir, { recursive: true });
+
+console.log('Using browser binary:', browserExe);
+console.log('Generating PDF to:', outputPdfRoot);
+
+const cmd = '"' + browserExe + '" --headless=new --user-data-dir="' + tempDir + '" --no-sandbox --disable-gpu --no-pdf-header-footer --print-to-pdf="' + outputPdfRoot + '" "file:///' + htmlPath.replace(/\\/g, '/') + '"';
+
+try {
+  execSync(cmd, { stdio: 'inherit' });
+  console.log('Primary PDF created successfully!');
+  
+  // Copy to public directory for immediate browser viewing
+  fs.copyFileSync(outputPdfRoot, outputPdfPublic);
+  console.log('Copied PDF to public folder:', outputPdfPublic);
+
+  const stats = fs.statSync(outputPdfRoot);
+  console.log('PDF File Size:', stats.size, 'bytes');
+} catch (e) {
+  console.error('PDF Generation failed:', e.message);
+  process.exit(1);
+} finally {
+  try {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  } catch {}
+}

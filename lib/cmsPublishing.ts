@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { recordAuditLog } from "@/lib/audit";
 import { createHmac } from "node:crypto";
+import { decryptSecret } from "@/lib/crypto";
 
 export interface PublishResult {
   success: boolean;
@@ -91,7 +92,8 @@ export async function publishDraftToCms(args: {
         sectionsJson: draft.sectionsJson,
         timestamp: new Date().toISOString(),
       });
-      const signature = createHmac("sha256", targetCms.apiKey || "forgeflow-secret")
+      const rawApiKey = decryptSecret(targetCms.apiKey || "");
+      const signature = createHmac("sha256", rawApiKey || "forgeflow-secret")
         .update(payload)
         .digest("hex");
       publishedUrl = `https://cdn.accudrive.example.com/protocols/${slug}`;
