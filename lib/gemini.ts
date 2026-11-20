@@ -307,7 +307,7 @@ Target Keywords: ${keywords}
 }
 
 export interface SimulatedAeoResponse {
-  engine: "Perplexity Copilot" | "Google AI Overview";
+  engine: "Perplexity Copilot" | "Google AI Overview" | "ChatGPT Search";
   query: string;
   confidenceScore: number;
   directAnswer: string;
@@ -329,7 +329,7 @@ export async function simulateAeoAnswer({
   standard,
   vertical,
   summary,
-  engine = "Perplexity Copilot",
+  engine = "Google AI Overview",
   company = "ForgeFlow OEM Client",
   domain = "industrial-portal.com",
 }: {
@@ -339,7 +339,7 @@ export async function simulateAeoAnswer({
   standard?: string;
   vertical?: string;
   summary?: string;
-  engine?: "Perplexity Copilot" | "Google AI Overview";
+  engine?: "Perplexity Copilot" | "Google AI Overview" | "ChatGPT Search";
   company?: string;
   domain?: string;
 }): Promise<SimulatedAeoResponse> {

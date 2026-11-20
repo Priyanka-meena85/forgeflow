@@ -24,7 +24,11 @@ export async function POST(request: Request) {
       standard: typeof standard === "string" ? standard.trim() : undefined,
       vertical: typeof vertical === "string" ? vertical.trim() : undefined,
       summary: typeof summary === "string" ? summary.trim() : undefined,
-      engine: engine === "Google AI Overview" ? "Google AI Overview" : "Perplexity Copilot",
+      engine: engine === "Google AI Overview"
+        ? "Google AI Overview"
+        : engine === "ChatGPT Search"
+        ? "ChatGPT Search"
+        : "Perplexity Copilot",
       company: user?.organization?.name ?? "ForgeFlow OEM Portal",
       domain: user?.organization?.website ? user.organization.website.replace(/^https?:\/\//, "").replace(/\/.*$/, "") : "industrial-oem.com",
     });

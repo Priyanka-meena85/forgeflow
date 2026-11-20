@@ -29,6 +29,7 @@ import { IndustrialLocalizationStudio } from "@/components/IndustrialLocalizatio
 import { CrmPipelineAttribution } from "@/components/CrmPipelineAttribution";
 import { MdfCoOpBilling } from "@/components/MdfCoOpBilling";
 import { GeoShareOfVoiceTracker } from "@/components/GeoShareOfVoiceTracker";
+import { LiveAiAnswerEngineSimulator } from "@/components/LiveAiAnswerEngineSimulator";
 
 type TabKey =
   | "Mission Control"
@@ -3626,7 +3627,7 @@ function ForgeFlowWorkspace() {
               <div className="lg:col-span-9 space-y-4">
                 {/* View Mode Toggle */}
                 <div className="flex justify-between items-center bg-white border border-slate-200 rounded-xl p-1.5 text-xs font-mono shadow-xs">
-                  <div className="flex gap-1">
+                  <div className="flex gap-1 flex-wrap">
                     <button
                       onClick={() => setPreviewTab("HumanView")}
                       className={`px-3 py-1.5 rounded-lg transition ${previewTab === "HumanView"
@@ -3635,6 +3636,17 @@ function ForgeFlowWorkspace() {
                         }`}
                     >
                       Rendered Layout & Capsule
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPreviewTab("AeoPreview")}
+                      className={`px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 cursor-pointer ${previewTab === "AeoPreview"
+                        ? "bg-purple-50 text-purple-700 font-bold border border-purple-200 shadow-2xs"
+                        : "text-slate-600 hover:text-slate-900"
+                        }`}
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full bg-purple-600 animate-pulse"></span>
+                      <span>Live AI SERP Simulator</span>
                     </button>
                     <button
                       onClick={() => setPreviewTab("StructuredNodes")}
@@ -3865,172 +3877,17 @@ function ForgeFlowWorkspace() {
                     </div>
                   )}
 
-                  {/* TAB 4 IN SPLIT VIEW: AEO ANSWER ENGINE SIMULATOR */}
+                  {/* TAB 4 IN SPLIT VIEW: LIVE AI ANSWER ENGINE SIMULATOR */}
                   {previewTab === "AeoPreview" && (
                     <div className="space-y-5 animate-fade-in text-xs">
-                      <div className="p-4 rounded-xl border border-purple-200 bg-purple-50/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                        <div className="space-y-0.5">
-                          <div className="flex items-center gap-2">
-                            <span className="w-2 h-2 rounded-full bg-purple-600 animate-pulse-live"></span>
-                            <span className="font-mono font-bold uppercase text-purple-900 tracking-wider">
-                              AI Answer Engine Simulation
-                            </span>
-                          </div>
-                          <p className="text-slate-600 text-xs">
-                            Simulates how generative engines synthesize answers and cite OEM source authority.
-                          </p>
-                        </div>
-
-                        {/* Engine Switcher */}
-                        <div className="flex items-center gap-1.5 bg-white p-1 rounded-xl border border-purple-200 shadow-2xs">
-                          {(["Perplexity Copilot", "Google AI Overview"] as const).map((eng) => (
-                            <button
-                              key={eng}
-                              type="button"
-                              onClick={() => {
-                                setAeoSimEngine(eng);
-                                runAeoSimulation(eng);
-                              }}
-                              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
-                                aeoSimEngine === eng
-                                  ? "bg-purple-600 text-white shadow-2xs"
-                                  : "text-slate-600 hover:text-slate-900"
-                              }`}
-                            >
-                              {eng === "Perplexity Copilot" ? "Perplexity" : "Google SGE"}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-
-                      {aeoSimLoading ? (
-                        <div className="py-16 text-center space-y-3">
-                          <div className="w-8 h-8 border-3 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
-                          <div className="text-xs font-mono font-bold text-purple-900 uppercase tracking-wider">
-                            Simulating {aeoSimEngine} Grounding Matrix...
-                          </div>
-                          <p className="text-xs text-slate-500">Querying Gemini 3.5 with industrial entity parameters</p>
-                        </div>
-                      ) : aeoSimData ? (
-                        <div className="space-y-4">
-                          {/* Search Query Pill */}
-                          <div className="p-3 rounded-xl bg-slate-900 text-white font-mono text-xs flex items-center justify-between gap-3 shadow-xs">
-                            <div className="flex items-center gap-2 truncate">
-                              <span className="text-purple-400 font-bold shrink-0">QUERY &gt;</span>
-                              <span className="text-slate-200 truncate">{aeoSimData.query}</span>
-                            </div>
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shrink-0">
-                              {aeoSimData.confidenceScore}% Grounding Confidence
-                            </span>
-                          </div>
-
-                          {/* Direct AI Answer Box */}
-                          <div className="p-5 rounded-2xl border border-slate-200 bg-white shadow-xs space-y-3">
-                            <div className="flex items-center justify-between text-xs font-mono text-slate-500 border-b border-slate-100 pb-2">
-                              <span className="font-bold text-slate-800">{aeoSimData.engine} Direct Answer</span>
-                              <span className="text-purple-700 font-bold">Citation [1] Active</span>
-                            </div>
-                            <div className="text-sm text-slate-800 leading-relaxed font-sans">
-                              {aeoSimData.directAnswer}
-                            </div>
-                          </div>
-
-                          {/* Interactive Citations */}
-                          <div className="space-y-2">
-                            <div className="text-xs font-mono font-bold uppercase text-slate-500">
-                              Verified Source Citations ({aeoSimData.sources?.length || 0})
-                            </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                              {aeoSimData.sources?.map((src, idx) => (
-                                <div
-                                  key={idx}
-                                  className={`p-3.5 rounded-xl border transition shadow-2xs space-y-1.5 ${
-                                    src.isUserSite
-                                      ? "bg-purple-50/60 border-purple-300"
-                                      : "bg-slate-50 border-slate-200"
-                                  }`}
-                                >
-                                  <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                      <span className="w-5 h-5 rounded-full bg-purple-600 text-white font-mono font-bold text-2xs flex items-center justify-center">
-                                        {src.citationNumber}
-                                      </span>
-                                      <span className="font-bold text-slate-900 truncate max-w-[180px]">
-                                        {src.title}
-                                      </span>
-                                    </div>
-                                    {src.isUserSite && (
-                                      <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-purple-200 text-purple-900">
-                                        YOUR SITE
-                                      </span>
-                                    )}
-                                  </div>
-                                  <div className="text-2xs font-mono text-slate-500 truncate">{src.domain}</div>
-                                  <p className="text-xs text-slate-700 italic border-l-2 border-purple-400 pl-2 mt-1">
-                                    &ldquo;{src.quote}&rdquo;
-                                  </p>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-
-                          {/* Autonomous AEO Competitive Source Benchmarking Card */}
-                          <div className="p-4 rounded-xl border border-sky-200 bg-sky-50/50 space-y-3 text-xs mt-4 animate-fade-in">
-                            <div className="flex items-center justify-between font-bold text-slate-900">
-                              <div className="flex items-center gap-2">
-                                <span className="css-icon-check text-amber-500"></span>
-                                <span>AEO Competitive Source Citation Algorithm Analysis</span>
-                              </div>
-                              <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-sky-200 text-sky-800">
-                                POSITION #1 CAPTURE
-                              </span>
-                            </div>
-                            <div className="space-y-2">
-                              <div className="p-2.5 rounded-lg bg-white border border-emerald-300 flex items-start justify-between gap-3 shadow-2xs">
-                                <div className="space-y-1">
-                                  <div className="flex items-center gap-2">
-                                    <span className="w-5 h-5 rounded-full bg-emerald-600 text-white font-bold text-[11px] flex items-center justify-center">1</span>
-                                    <span className="font-bold text-slate-900">Your Domain ({userDisplayOrg} OEM Portal)</span>
-                                    <span className="text-[10px] font-mono text-emerald-700 font-bold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">#1 PRIMARY CITATION</span>
-                                  </div>
-                                  <p className="text-[11px] text-slate-600 pl-7">
-                                    Direct Answer Capsule verified. Contains certified {selectedDraft.standard || "3-A / ISO"} tolerances and embedded TechArticle schema.
-                                  </p>
-                                </div>
-                                <span className="text-emerald-600 font-bold shrink-0 text-xs">98.4% Confidence</span>
-                              </div>
-
-                              <div className="p-2.5 rounded-lg bg-white/80 border border-slate-200 flex items-start justify-between gap-3 opacity-75">
-                                <div className="space-y-1">
-                                  <div className="flex items-center gap-2">
-                                    <span className="w-5 h-5 rounded-full bg-slate-400 text-white font-bold text-[11px] flex items-center justify-center">2</span>
-                                    <span className="font-semibold text-slate-700">Competitor OEM PDF Manual</span>
-                                    <span className="text-[10px] font-mono text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">PDF DOCUMENT</span>
-                                  </div>
-                                  <p className="text-[11px] text-slate-500 pl-7">
-                                    Lacks structured FAQPage schema. Deprioritized by Perplexity & Google SGE due to crawl latency.
-                                  </p>
-                                </div>
-                                <span className="text-slate-500 font-medium shrink-0 text-xs">Lagged (-3 Pos)</span>
-                              </div>
-
-                              <div className="p-2.5 rounded-lg bg-white/80 border border-slate-200 flex items-start justify-between gap-3 opacity-60">
-                                <div className="space-y-1">
-                                  <div className="flex items-center gap-2">
-                                    <span className="w-5 h-5 rounded-full bg-slate-300 text-slate-700 font-bold text-[11px] flex items-center justify-center">3</span>
-                                    <span className="font-semibold text-slate-700">Generic Maintenance Forum Thread</span>
-                                    <span className="text-[10px] font-mono text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded">UNVERIFIED FORUM</span>
-                                  </div>
-                                  <p className="text-[11px] text-slate-500 pl-7">
-                                    Filtered out by AI answer models due to subjective user opinions and zero certified manufacturing tolerances.
-                                  </p>
-                                </div>
-                                <span className="text-amber-600 font-medium shrink-0 text-xs">Low Reliability</span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      ) : null}
+                      <LiveAiAnswerEngineSimulator
+                        initialTitle={selectedDraft.title}
+                        initialQuery={selectedDraft.keyword || selectedDraft.title}
+                        initialEquipment={selectedDraft.equipment || activeEquipment}
+                        initialStandard={selectedDraft.standard || activeStandard}
+                        initialVertical={selectedDraft.vertical || selectedVertical}
+                        initialSnippet={selectedDraft.summary}
+                      />
                     </div>
                   )}
                 </div>
@@ -4488,6 +4345,16 @@ function ForgeFlowWorkspace() {
                 </div>
               </div>
             </div>
+
+            {/* Interactive Live AI Answer Engine Simulator (Google AI Overviews + Perplexity + ChatGPT Live Preview) */}
+            <LiveAiAnswerEngineSimulator
+              initialTitle={selectedDraft?.title}
+              initialQuery={selectedDraft?.keyword || selectedDraft?.title}
+              initialEquipment={selectedDraft?.equipment || activeEquipment}
+              initialStandard={selectedDraft?.standard || activeStandard}
+              initialVertical={selectedDraft?.vertical || selectedVertical}
+              initialSnippet={selectedDraft?.summary}
+            />
 
             {/* Live AEO Citation Rank Tracker */}
             <AeoCitationMonitor
