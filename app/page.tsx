@@ -16,6 +16,7 @@ import { CompetitorAeoDisplacer } from "@/components/CompetitorAeoDisplacer";
 import { GoogleSearchConsoleSync } from "@/components/GoogleSearchConsoleSync";
 import { UnitStandardConverter } from "@/components/UnitStandardConverter";
 import { EnterpriseSsoConfig } from "@/components/EnterpriseSsoConfig";
+import { EnterpriseScimProvisioning } from "@/components/EnterpriseScimProvisioning";
 import { CadExplodedViewStudio } from "@/components/CadExplodedViewStudio";
 import { BuyerIntentDiscovery } from "@/components/BuyerIntentDiscovery";
 import { DeveloperApiPortal } from "@/components/DeveloperApiPortal";
@@ -4569,6 +4570,7 @@ function ForgeFlowWorkspace() {
         {activeTab === "Enterprise SSO" && (
           <div className="p-6 space-y-6 max-w-7xl animate-fade-in">
             <EnterpriseSsoConfig />
+            <EnterpriseScimProvisioning />
           </div>
         )}
 

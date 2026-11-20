@@ -4,6 +4,9 @@ import { errorResponse } from "@/lib/http";
 import { getPlanConfig } from "@/lib/billing";
 import { logAuditEvent } from "@/lib/audit";
 
+// Replay defense and idempotency cache
+const processedEventIds = new Set<string>();
+
 export async function POST(request: Request) {
   const secretKey = process.env.STRIPE_SECRET_KEY;
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -21,6 +24,23 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Stripe webhook signature verification failed:", error);
     return errorResponse("Invalid Stripe signature.", 400);
+  }
+
+  // 1. Strict 300-Second Replay Defense Window
+  const nowUnix = Math.floor(Date.now() / 1000);
+  if (Math.abs(nowUnix - event.created) > 300) {
+    console.warn(`[Stripe Webhook] Replay window exceeded. Event timestamp: ${event.created}, current: ${nowUnix}`);
+    return errorResponse("Webhook replay threshold exceeded (300s window).", 400);
+  }
+
+  // 2. Event Deduplication (Idempotency)
+  if (processedEventIds.has(event.id)) {
+    return Response.json({ received: true, deduplicated: true });
+  }
+  processedEventIds.add(event.id);
+  if (processedEventIds.size > 2000) {
+    const first = processedEventIds.values().next().value;
+    if (first) processedEventIds.delete(first);
   }
 
   if (event.type === "checkout.session.completed") {

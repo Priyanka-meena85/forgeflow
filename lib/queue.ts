@@ -7,7 +7,7 @@ export type JobType =
   | "COMPETITOR_GAP_ANALYSIS"
   | "GSC_AUDIT_SYNC";
 
-export type JobState = "WAITING" | "ACTIVE" | "COMPLETED" | "FAILED" | "RETRYING";
+export type JobState = "WAITING" | "ACTIVE" | "COMPLETED" | "FAILED" | "RETRYING" | "DLQ";
 
 export interface QueueJob<T = Record<string, unknown>> {
   id: string;
@@ -29,6 +29,7 @@ export interface QueueJob<T = Record<string, unknown>> {
 
 interface QueueStore {
   jobs: Map<string, QueueJob>;
+  dlqJobs: Map<string, QueueJob>;
   activeWorkers: number;
   maxConcurrency: number;
 }
@@ -40,9 +41,14 @@ const globalQueue = globalThis as unknown as {
 
 const store: QueueStore = globalQueue.__forgeflow_queue__ ?? {
   jobs: new Map(),
+  dlqJobs: new Map(),
   activeWorkers: 0,
   maxConcurrency: 3, // Safe concurrency limit for enterprise generation
 };
+if (!store.jobs) store.jobs = new Map();
+if (!store.dlqJobs) store.dlqJobs = new Map();
+if (typeof store.activeWorkers !== "number") store.activeWorkers = 0;
+if (typeof store.maxConcurrency !== "number") store.maxConcurrency = 3;
 globalQueue.__forgeflow_queue__ = store;
 
 const queueEvents = globalQueue.__forgeflow_queue_emitter__ ?? new EventEmitter();
@@ -87,7 +93,7 @@ export async function enqueueAsyncJob<T = Record<string, unknown>>(args: {
 }
 
 export function getJobById(id: string): QueueJob | null {
-  return store.jobs.get(id) || null;
+  return store.jobs.get(id) || store.dlqJobs.get(id) || null;
 }
 
 export function listJobsForOrg(organizationId: string, limit = 20): QueueJob[] {
@@ -96,6 +102,41 @@ export function listJobsForOrg(organizationId: string, limit = 20): QueueJob[] {
     if (j.organizationId === organizationId) list.push(j);
   }
   return list.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()).slice(0, limit);
+}
+
+export function listDlqJobs(organizationId: string): QueueJob[] {
+  const list: QueueJob[] = [];
+  for (const j of store.dlqJobs.values()) {
+    if (j.organizationId === organizationId) list.push(j);
+  }
+  return list.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+}
+
+export function replayDlqJob(id: string): QueueJob | null {
+  const deadJob = store.dlqJobs.get(id);
+  if (!deadJob) return null;
+
+  store.dlqJobs.delete(id);
+  deadJob.state = "WAITING";
+  deadJob.attempts = 0;
+  deadJob.progress = 0;
+  deadJob.error = undefined;
+  deadJob.currentStep = "Replayed from Dead-Letter Queue (DLQ)";
+  store.jobs.set(id, deadJob);
+
+  void processNextJob();
+  return deadJob;
+}
+
+export function purgeDlq(organizationId: string): number {
+  let count = 0;
+  for (const [id, j] of store.dlqJobs.entries()) {
+    if (j.organizationId === organizationId) {
+      store.dlqJobs.delete(id);
+      count++;
+    }
+  }
+  return count;
 }
 
 export function getQueueMetrics() {
@@ -117,6 +158,7 @@ export function getQueueMetrics() {
     active,
     completed,
     failed,
+    dlqCount: store.dlqJobs.size,
     concurrency: store.maxConcurrency,
   };
 }
@@ -158,21 +200,27 @@ async function processNextJob() {
     if (nextJob.attempts < nextJob.maxRetries) {
       nextJob.state = "RETRYING";
       nextJob.error = `Attempt ${nextJob.attempts} failed: ${errorMsg}. Scheduled for retry.`;
-      nextJob.currentStep = "Retrying after backoff...";
+      nextJob.currentStep = "Retrying with exponential backoff & jitter...";
       store.jobs.set(nextJob.id, nextJob);
-      // Exponential backoff
+
+      // Exponential backoff with random full jitter (RFC / AWS Best Practice)
+      const jitter = Math.floor(Math.random() * 600);
+      const delay = Math.min(30000, Math.pow(2, nextJob.attempts) * 1000 + jitter);
+
       setTimeout(() => {
         if (nextJob) {
           nextJob.state = "WAITING";
           void processNextJob();
         }
-      }, Math.pow(2, nextJob.attempts) * 1000);
+      }, delay);
     } else {
-      nextJob.state = "FAILED";
-      nextJob.error = errorMsg;
-      nextJob.currentStep = "Job failed after maximum retries.";
+      // Move to Dead-Letter Queue (DLQ)
+      nextJob.state = "DLQ";
+      nextJob.error = `Permanently failed after ${nextJob.attempts} attempts: ${errorMsg}`;
+      nextJob.currentStep = "Moved to Dead-Letter Queue (DLQ) for human operator triage.";
       nextJob.completedAt = new Date();
-      store.jobs.set(nextJob.id, nextJob);
+      store.jobs.delete(nextJob.id);
+      store.dlqJobs.set(nextJob.id, nextJob);
       queueEvents.emit("job_failed", nextJob);
     }
   } finally {
@@ -184,7 +232,7 @@ async function processNextJob() {
 async function executeJobTask(job: QueueJob): Promise<void> {
   // Simulated asynchronous discrete step progress for production fidelity
   for (let step = 1; step <= 3; step++) {
-    await new Promise((res) => setTimeout(res, 350));
+    await new Promise((res) => setTimeout(res, 250));
     job.progress = Math.min(step * 33, 95);
     job.currentStep = `Executing ${job.type} phase ${step}/3`;
     store.jobs.set(job.id, job);

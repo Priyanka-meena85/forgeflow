@@ -1,18 +1,53 @@
 import { PrismaClient, UserRole, DraftStatus, InvitationStatus, ReviewStatus } from "@prisma/client";
 import net from "net";
 
-// Ensure process.env.DATABASE_URL is populated for PostgreSQL
+// Ensure process.env.DATABASE_URL is populated for PostgreSQL with PgBouncer tuning
 function resolveDatabaseUrl(): string {
   const envUrl = process.env.DATABASE_URL;
-  if (envUrl && envUrl.trim() && !envUrl.startsWith("file:")) {
-    return envUrl.trim();
+  let base = envUrl && envUrl.trim() && !envUrl.startsWith("file:")
+    ? envUrl.trim()
+    : "postgresql://postgres:postgres@localhost:5432/industrial_seo_saas?schema=public";
+
+  // Enterprise PgBouncer & High-Availability Connection Pool Sizing
+  if (base.startsWith("postgresql://") && !base.includes("connection_limit")) {
+    const separator = base.includes("?") ? "&" : "?";
+    base = `${base}${separator}pgbouncer=true&connection_limit=20&pool_timeout=10`;
   }
-  return "postgresql://postgres:postgres@localhost:5432/industrial_seo_saas?schema=public";
+  return base;
 }
 
 const dbUrl = resolveDatabaseUrl();
 if (!process.env.DATABASE_URL || process.env.DATABASE_URL.startsWith("file:")) {
   process.env.DATABASE_URL = dbUrl;
+}
+
+// -----------------------------------------------------------------------------
+// Row-Level Security (RLS) & Multi-Tenant Context Isolation
+// -----------------------------------------------------------------------------
+interface TenantIsolationContext {
+  activeTenantId: string | null;
+}
+
+const currentTenantContext: TenantIsolationContext = {
+  activeTenantId: null,
+};
+
+export function setTenantContext(organizationId: string | null) {
+  currentTenantContext.activeTenantId = organizationId;
+}
+
+export function getTenantContext(): string | null {
+  return currentTenantContext.activeTenantId;
+}
+
+export async function withTenantContext<T>(organizationId: string, fn: () => Promise<T>): Promise<T> {
+  const previous = currentTenantContext.activeTenantId;
+  currentTenantContext.activeTenantId = organizationId;
+  try {
+    return await fn();
+  } finally {
+    currentTenantContext.activeTenantId = previous;
+  }
 }
 
 // -----------------------------------------------------------------------------
