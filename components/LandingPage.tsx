@@ -2659,42 +2659,78 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
 
       {/* 16. AUTH MODAL (SIGN IN / REGISTER) */}
       {authModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs animate-in fade-in duration-150 font-humanist">
-          <div className="bg-white rounded-2xl border border-slate-200/90 p-8 shadow-2xl max-w-md w-full relative">
-            <button
-              type="button"
-              onClick={() => setAuthModalOpen(false)}
-              className="absolute top-5 right-5 text-slate-400 hover:text-slate-600 text-lg leading-none p-1 cursor-pointer"
-              aria-label="Close"
-            ><span className="css-icon-cross"></span></button>
-
-            <div className="mb-6 flex items-center gap-3 border-b border-slate-100 pb-4">
-              <Image src="/logo-icon.png" alt="ForgeFlow Logo" width={44} height={44} className="h-11 w-11 object-contain shrink-0" />
-              <div>
-                <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-sky-700">Enterprise Tenant</p>
-                <h3 className="text-lg font-extrabold text-slate-900 tracking-tight font-humanist">
-                  Forge<span className="text-sky-600">Flow</span> Console
-                </h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto animate-in fade-in duration-150 font-humanist">
+          <div className="bg-white rounded-2xl border border-slate-200/90 p-5 sm:p-6 shadow-2xl max-w-md w-full relative max-h-[92vh] overflow-y-auto scrollbar-none my-auto">
+            {/* Header with Logo and Close Button */}
+            <div className="mb-4 flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-3">
+                <Image src="/logo-icon.png" alt="ForgeFlow Logo" width={38} height={38} className="h-9 w-9 object-contain shrink-0" />
+                <div>
+                  <h3 className="text-base font-extrabold text-slate-900 tracking-tight leading-tight font-humanist">
+                    Forge<span className="text-sky-600">Flow</span> Console
+                  </h3>
+                  <p className="text-[10px] font-mono text-slate-400">Enterprise AI Search Platform</p>
+                </div>
               </div>
+              <button
+                type="button"
+                onClick={() => setAuthModalOpen(false)}
+                className="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 flex items-center justify-center transition cursor-pointer text-xs"
+                aria-label="Close"
+              >
+                <span className="css-icon-cross"></span>
+              </button>
             </div>
 
-            <h4 className="text-base font-bold text-slate-900 font-humanist">
-              {authMode === "register" ? "Create Enterprise Workspace" : "Sign In to Industrial Console"}
-            </h4>
-            <p className="mt-1 text-xs text-slate-500 leading-relaxed">
+            {/* Segmented Top Mode Switcher (Sign In vs Create Workspace) */}
+            <div className="grid grid-cols-2 p-1 bg-slate-100/90 rounded-xl mb-3.5 border border-slate-200/80 text-xs font-semibold shadow-2xs">
+              <button
+                type="button"
+                onClick={() => {
+                  setAuthMode("login");
+                  setError("");
+                }}
+                className={`py-2 rounded-lg transition-all cursor-pointer text-center font-bold ${
+                  authMode === "login"
+                    ? "bg-white text-slate-900 shadow-xs border border-slate-200"
+                    : "text-slate-500 hover:text-slate-800"
+                }`}
+              >
+                Sign In
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setAuthMode("register");
+                  setError("");
+                }}
+                className={`py-2 rounded-lg transition-all cursor-pointer text-center font-bold ${
+                  authMode === "register"
+                    ? "bg-white text-slate-900 shadow-xs border border-slate-200"
+                    : "text-slate-500 hover:text-slate-800"
+                }`}
+              >
+                Create Workspace
+              </button>
+            </div>
+
+            {/* Form Description */}
+            <p className="text-xs text-slate-500 leading-relaxed mb-3">
               {authMode === "register"
                 ? "Configure your dedicated workspace with pre-built vertical taxonomies, QA validation, and AEO schema."
                 : "Enter your corporate credentials to access your programmatic drafts and analytics."}
             </p>
 
             {/* Quick 1-Click Demo Console Access */}
-            <div className="mt-4 p-3 rounded-xl bg-slate-900 text-white space-y-2 font-humanist">
+            <div className="p-3.5 rounded-xl bg-slate-900 text-white space-y-2.5 font-humanist border border-slate-800 shadow-xs">
               <div className="flex items-center justify-between text-[11px] font-mono">
                 <span className="text-slate-300 font-bold flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                  Instant Evaluator Test Drive
+                  Instant Live Demo Console
                 </span>
-                <span className="text-sky-400 text-[10px]">Zero Typing Required</span>
+                <span className="text-emerald-400 font-bold text-[10px] bg-emerald-950/60 px-1.5 py-0.5 rounded border border-emerald-800/60">
+                  Zero Setup
+                </span>
               </div>
               <button
                 type="button"
@@ -2706,14 +2742,14 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                     const response = await fetch("/api/auth/login", {
                       method: "POST",
                       headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({ email: "priyankameena4656@gmail.com", password: "232RhEGqurSi8jM" }),
+                      body: JSON.stringify({ email: "admin@accudrive.io", password: "ForgeFlow2026!" }),
                     });
                     const data = await response.json();
                     if (!response.ok || !data.user) {
                       const fallback = await fetch("/api/auth/login", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ email: "admin@accudrive.io", password: "ForgeFlow2026!" }),
+                        body: JSON.stringify({ email: "priyankameena4656@gmail.com", password: "232RhEGqurSi8jM" }),
                       });
                       const fbData = await fallback.json();
                       if (!fallback.ok || !fbData.user) throw new Error(fbData.error || "Login failed");
@@ -2729,13 +2765,14 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                     setBusy(false);
                   }
                 }}
-                className="w-full py-2.5 px-3 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer shadow-sm disabled:opacity-50 font-humanist"
+                className="w-full py-2.5 px-3 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs flex items-center justify-center gap-2 transition cursor-pointer shadow-xs disabled:opacity-50"
               >
-                <span className="flex items-center gap-1.5"><span className="css-icon-bolt"></span> 1-Click Launch Live Demo Console (Owner / Admin)</span>
+                <span className="css-icon-bolt"></span>
+                <span>1-Click Launch Live Demo (Admin)</span>
               </button>
-              <div className="flex items-center justify-between pt-1 text-[10px] text-slate-400">
+              <div className="flex items-center justify-between pt-0.5 text-[10.5px] text-slate-400">
                 <div className="flex items-center gap-2">
-                  <span>Roles:</span>
+                  <span className="text-slate-500">Roles:</span>
                   <button
                     type="button"
                     disabled={busy}
@@ -2758,7 +2795,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                         setBusy(false);
                       }
                     }}
-                    className="text-sky-300 hover:underline cursor-pointer"
+                    className="text-sky-300 hover:text-white underline cursor-pointer"
                   >
                     Engineer Reviewer
                   </button>
@@ -2785,7 +2822,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                         setBusy(false);
                       }
                     }}
-                    className="text-sky-300 hover:underline cursor-pointer"
+                    className="text-sky-300 hover:text-white underline cursor-pointer"
                   >
                     Content Author
                   </button>
@@ -2812,22 +2849,22 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                       setBusy(false);
                     }
                   }}
-                  className="text-emerald-400 hover:underline cursor-pointer font-bold"
+                  className="text-emerald-400 hover:text-emerald-300 cursor-pointer font-bold"
                 >
                   AccuDrive Demo
                 </button>
               </div>
             </div>
 
-            <div className="relative my-4 flex items-center">
+            <div className="relative my-3.5 flex items-center">
               <div className="flex-grow border-t border-slate-200"></div>
-              <span className="flex-shrink mx-3 text-[10px] font-mono uppercase text-slate-400">
-                Or enter corporate credentials
+              <span className="flex-shrink mx-3 text-[10px] font-mono uppercase text-slate-400 font-semibold">
+                Or {authMode === "register" ? "register new organization" : "sign in with credentials"}
               </span>
               <div className="flex-grow border-t border-slate-200"></div>
             </div>
 
-            <form className="mt-5 space-y-3.5" onSubmit={handleAuthSubmit}>
+            <form className="mt-3.5 space-y-3" onSubmit={handleAuthSubmit}>
               {authMode === "register" ? (
                 <div>
                   <label className="block text-[11px] font-semibold uppercase tracking-wider text-slate-700 mb-1">
@@ -2941,7 +2978,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
               <button
                 type="submit"
                 disabled={busy}
-                className="w-full rounded-xl bg-sky-600 py-2.5 text-xs font-bold uppercase tracking-wider text-white shadow-md shadow-sky-600/20 transition hover:bg-sky-500 disabled:opacity-60 cursor-pointer font-humanist"
+                className="w-full rounded-xl bg-sky-600 hover:bg-sky-500 py-2.5 text-xs font-bold uppercase tracking-wider text-white shadow-md shadow-sky-600/20 transition disabled:opacity-60 cursor-pointer font-humanist"
               >
                 {busy ? (
                   <span className="flex items-center justify-center gap-2">
@@ -2949,9 +2986,9 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                     <span>Authenticating Workspace…</span>
                   </span>
                 ) : authMode === "register" ? (
-                  "Create Workspace & Launch Console"
+                  "Create Workspace & Launch Console →"
                 ) : (
-                  "Enter Console"
+                  "Sign In to Console →"
                 )}
               </button>
 
@@ -2968,7 +3005,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
               )}
             </form>
 
-            <div className="mt-5 border-t border-slate-100 pt-4 text-center text-xs text-slate-500">
+            <div className="mt-3.5 border-t border-slate-100 pt-3 text-center text-xs text-slate-500">
               {authMode === "register" ? (
                 <span>
                   Already have an enterprise tenant?{" "}
@@ -2998,7 +3035,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                     }}
                     className="font-bold text-sky-600 hover:underline cursor-pointer"
                   >
-                    Register Tenant
+                    Create Workspace
                   </button>
                 </span>
               )}
