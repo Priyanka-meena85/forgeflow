@@ -26,6 +26,7 @@ export function LiveAiAnswerEngineSimulator({
   const [engine, setEngine] = useState<EngineType>("Google AI Overview");
   const [queryInput, setQueryInput] = useState(defaultQuery);
   const [loading, setLoading] = useState(false);
+  const [simError, setSimError] = useState<string | null>(null);
 
   useEffect(() => {
     if (initialQuery || initialTitle) {
@@ -69,6 +70,7 @@ export function LiveAiAnswerEngineSimulator({
 
   const handleSimulate = async (selectedEngine: EngineType = engine) => {
     setLoading(true);
+    setSimError(null);
     try {
       const res = await fetch("/api/ai/simulate-aeo", {
         method: "POST",
@@ -86,9 +88,11 @@ export function LiveAiAnswerEngineSimulator({
       const data = await res.json();
       if (res.ok && data.simulation) {
         setSimulation(data.simulation);
+      } else {
+        setSimError("Live SERP engine simulation returned an issue. Showing verified local telemetry.");
       }
     } catch {
-      // Keep existing simulation state on network error
+      setSimError("Unable to reach SERP simulation endpoint. Displaying cached baseline response.");
     } finally {
       setLoading(false);
     }
@@ -148,11 +152,12 @@ export function LiveAiAnswerEngineSimulator({
 
       {/* Query Bar */}
       <div className="space-y-2">
-        <label className="block text-xs font-mono font-bold text-slate-600 uppercase">
+        <label htmlFor="aeo-query-input" className="block text-xs font-mono font-bold text-slate-600 uppercase cursor-pointer">
           Target Industrial Query &amp; Fault Code
         </label>
         <div className="flex flex-col sm:flex-row gap-2">
           <input
+            id="aeo-query-input"
             type="text"
             value={queryInput}
             onChange={(e) => setQueryInput(e.target.value)}
@@ -179,12 +184,26 @@ export function LiveAiAnswerEngineSimulator({
           </button>
         </div>
 
+        {simError && (
+          <div className="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs flex items-center justify-between">
+            <span className="font-medium">{simError}</span>
+            <button
+              type="button"
+              onClick={() => setSimError(null)}
+              className="text-amber-600 hover:text-amber-900 font-bold ml-2 cursor-pointer"
+              aria-label="Dismiss message"
+            >
+              ✕
+            </button>
+          </div>
+        )}
+
         {/* Query Suggestions */}
         <div className="flex flex-wrap items-center gap-1.5 pt-1">
           <span className="text-[11px] font-mono text-slate-500 mr-1">Quick Presets:</span>
-          {sampleQueries.map((q, idx) => (
+          {sampleQueries.map((q) => (
             <button
-              key={idx}
+              key={q}
               type="button"
               onClick={() => {
                 setQueryInput(q);
@@ -242,9 +261,9 @@ export function LiveAiAnswerEngineSimulator({
                 Primary Citations &amp; Linked OEM Entities
               </span>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {simulation?.sources.map((src, i) => (
+                {simulation?.sources.map((src) => (
                   <div
-                    key={i}
+                    key={`${src.domain}-${src.citationNumber}`}
                     className={`p-3.5 rounded-xl border transition ${
                       src.isClient
                         ? "bg-sky-50/70 border-sky-300 ring-1 ring-sky-200"
@@ -276,8 +295,8 @@ export function LiveAiAnswerEngineSimulator({
                 Key Industrial Takeaways
               </span>
               <ul className="space-y-1.5 text-xs text-slate-700">
-                {simulation?.keyTakeaways.map((point, idx) => (
-                  <li key={idx} className="flex items-start gap-2">
+                {simulation?.keyTakeaways.map((point) => (
+                  <li key={point} className="flex items-start gap-2">
                     <span className="css-icon-check text-emerald-600 shrink-0 mt-1"></span>
                     <span>{point}</span>
                   </li>
@@ -303,8 +322,8 @@ export function LiveAiAnswerEngineSimulator({
             </div>
 
             <div className="flex flex-wrap gap-2 pb-1">
-              {simulation?.sources.map((s, i) => (
-                <div key={i} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 border border-slate-200 text-xs text-slate-700 font-mono">
+              {simulation?.sources.map((s) => (
+                <div key={`${s.domain}-${s.citationNumber}`} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 border border-slate-200 text-xs text-slate-700 font-mono">
                   <span className="font-bold text-slate-900">[{s.citationNumber}]</span>
                   <span className="truncate max-w-[130px] font-medium">{s.domain}</span>
                 </div>
@@ -320,9 +339,9 @@ export function LiveAiAnswerEngineSimulator({
               <table className="w-full text-left text-xs">
                 <thead className="bg-slate-50 border-b border-slate-200 text-[10.5px] font-mono uppercase text-slate-500">
                   <tr>
-                    <th className="px-3.5 py-2">Parameter</th>
-                    <th className="px-3.5 py-2 text-sky-800">Your OEM Spec (AccuDrive)</th>
-                    <th className="px-3.5 py-2 text-slate-500">Competitor Generic Spec</th>
+                    <th scope="col" className="px-3.5 py-2">Parameter</th>
+                    <th scope="col" className="px-3.5 py-2 text-sky-800">Your OEM Spec (AccuDrive)</th>
+                    <th scope="col" className="px-3.5 py-2 text-slate-500">Competitor Generic Spec</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-slate-700">
@@ -351,9 +370,9 @@ export function LiveAiAnswerEngineSimulator({
                 Related Engineering Inquiries (Perplexity Thread)
               </span>
               <div className="flex flex-col gap-1.5">
-                {simulation?.followUpQueries.map((f, idx) => (
+                {simulation?.followUpQueries.map((f) => (
                   <button
-                    key={idx}
+                    key={f}
                     type="button"
                     onClick={() => setQueryInput(f)}
                     className="text-left text-xs text-slate-700 hover:text-sky-800 hover:bg-sky-50/50 p-2 rounded-lg border border-slate-200 transition cursor-pointer flex items-center justify-between"
@@ -405,9 +424,9 @@ export function LiveAiAnswerEngineSimulator({
                 Suggested Follow-up Prompts:
               </span>
               <div className="flex flex-wrap gap-2">
-                {simulation?.followUpQueries.map((f, idx) => (
+                {simulation?.followUpQueries.map((f) => (
                   <button
-                    key={idx}
+                    key={f}
                     type="button"
                     onClick={() => setQueryInput(f)}
                     className="text-xs text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-xl transition cursor-pointer text-left"

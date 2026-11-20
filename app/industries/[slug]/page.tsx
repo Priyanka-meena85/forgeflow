@@ -29,15 +29,23 @@ export default async function IndustrySectorDetailPage({
       {/* Sector Hero */}
       <section className="pt-14 pb-12 bg-white border-b border-slate-200">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 space-y-4">
-          <div className="flex flex-wrap items-center gap-2 text-xs">
-            <Link href="/industries" className="text-slate-500 hover:text-sky-600 font-medium">
-              Industries Directory
-            </Link>
-            <span className="text-slate-300">&gt;</span>
-            <span className="text-sky-700 font-mono font-bold">{sector.category}</span>
-            <span className="text-slate-300">&gt;</span>
-            <span className="text-slate-900 font-semibold">{sector.title}</span>
-          </div>
+          <nav aria-label="Breadcrumb">
+            <ol className="flex flex-wrap items-center gap-2 text-xs">
+              <li>
+                <Link href="/industries" className="text-slate-500 hover:text-sky-600 font-medium">
+                  Industries Directory
+                </Link>
+              </li>
+              <li aria-hidden="true" className="text-slate-300">&gt;</li>
+              <li>
+                <span className="text-sky-700 font-mono font-bold">{sector.category}</span>
+              </li>
+              <li aria-hidden="true" className="text-slate-300">&gt;</li>
+              <li aria-current="page">
+                <span className="text-slate-900 font-semibold">{sector.title}</span>
+              </li>
+            </ol>
+          </nav>
 
           <div className="flex flex-wrap items-center gap-3 pt-2">
             <span className="px-3 py-1 rounded-full text-xs font-mono font-bold bg-sky-50 text-sky-800 border border-sky-200">
@@ -108,6 +116,45 @@ export default async function IndustrySectorDetailPage({
               <span>Length: ~45 words</span>
             </div>
             <span className="text-sky-400">Targeting Google AI Overview Box #1</span>
+          </div>
+        </div>
+
+        {/* Competitive Citation Displacement Card */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="p-6 rounded-3xl bg-white border border-slate-200 space-y-3 shadow-xs">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-mono uppercase font-bold text-slate-400">Status Quo</span>
+              <span className="text-[10px] font-mono text-rose-700 bg-rose-50 px-2 py-0.5 rounded font-bold border border-rose-200">
+                Competitor Legacy PDF
+              </span>
+            </div>
+            <h3 className="text-sm font-bold text-slate-900 font-humanist">
+              Unindexed Scanned Catalog PDF
+            </h3>
+            <p className="text-xs text-slate-500 leading-relaxed">
+              Competitor OEM keeps technical troubleshooting buried in a 140-page scanned PDF. Google AI Overviews and Perplexity cannot easily extract or cite the answer capsule.
+            </p>
+            <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-[11px] font-mono text-slate-500">
+              Citations: 0 | LLM Share of Voice: 12% | Conversion: Low
+            </div>
+          </div>
+
+          <div className="p-6 rounded-3xl bg-sky-50/50 border-2 border-sky-300 space-y-3 shadow-sm ring-4 ring-sky-100/50">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-mono uppercase font-bold text-sky-700">With ForgeFlow</span>
+              <span className="text-[10px] font-mono text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded font-bold border border-emerald-200">
+                Verified #1 Citation
+              </span>
+            </div>
+            <h3 className="text-sm font-bold text-slate-900 font-humanist">
+              AEO Optimized TechArticle Capsule
+            </h3>
+            <p className="text-xs text-slate-600 leading-relaxed">
+              Your exact engineering tolerance is published with JSON-LD TechArticle schema, dual-unit DIN/JIS crosswalks, and interactive 3D component tooltips.
+            </p>
+            <div className="p-2.5 rounded-xl bg-white border border-sky-200 text-[11px] font-mono text-sky-800 font-bold">
+              Citations: Top Anchor [1] | LLM Share of Voice: 84% | Target Deal ACV: {sector.avgDealValue}
+            </div>
           </div>
         </div>
 

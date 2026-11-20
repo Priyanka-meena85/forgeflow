@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Fragment } from "react";
 import Link from "next/link";
 import { PublicNavbar } from "@/components/PublicNavbar";
 import { PublicFooter } from "@/components/PublicFooter";
@@ -198,11 +198,10 @@ export default function PricingPage() {
               <button
                 type="button"
                 onClick={() => setBillingCycle("annual")}
-                className={`px-5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                  billingCycle === "annual"
-                    ? "bg-white text-slate-900 shadow-xs border border-slate-200"
-                    : "text-slate-500 hover:text-slate-900"
-                }`}
+                className={`px-5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${billingCycle === "annual"
+                  ? "bg-white text-slate-900 shadow-xs border border-slate-200"
+                  : "text-slate-500 hover:text-slate-900"
+                  }`}
               >
                 <span>Annual Billing</span>
                 <span className="ml-2 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-100 text-emerald-800">
@@ -212,15 +211,34 @@ export default function PricingPage() {
               <button
                 type="button"
                 onClick={() => setBillingCycle("monthly")}
-                className={`px-5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                  billingCycle === "monthly"
-                    ? "bg-white text-slate-900 shadow-xs border border-slate-200"
-                    : "text-slate-500 hover:text-slate-900"
-                }`}
+                className={`px-5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${billingCycle === "monthly"
+                  ? "bg-white text-slate-900 shadow-xs border border-slate-200"
+                  : "text-slate-500 hover:text-slate-900"
+                  }`}
               >
                 Monthly Billing
               </button>
             </div>
+          </div>
+
+          {/* Enterprise Trust Strip */}
+          <div className="pt-4 flex flex-wrap items-center justify-center gap-2 text-[11px] font-mono text-slate-600">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+              SOC2 Type II Certified
+            </span>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+              <span className="w-1.5 h-1.5 rounded-full bg-sky-500"></span>
+              99.9% Uptime SLA Guarantee
+            </span>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+              <span className="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
+              Okta SAML 2.0 &amp; SCIM 2.0
+            </span>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+              14-Day Free Pilot
+            </span>
           </div>
         </div>
       </section>
@@ -235,11 +253,10 @@ export default function PricingPage() {
             return (
               <div
                 key={tier.name}
-                className={`rounded-3xl p-7 sm:p-8 flex flex-col justify-between transition-all duration-200 relative ${
-                  tier.highlight
-                    ? "bg-white border-2 border-sky-500 shadow-xl shadow-sky-500/10 ring-4 ring-sky-100"
-                    : "bg-white border border-slate-200 shadow-xs hover:shadow-md"
-                }`}
+                className={`rounded-3xl p-7 sm:p-8 flex flex-col justify-between transition-all duration-200 relative ${tier.highlight
+                  ? "bg-white border-2 border-sky-500 shadow-xl shadow-sky-500/10 ring-4 ring-sky-100"
+                  : "bg-white border border-slate-200 shadow-xs hover:shadow-md"
+                  }`}
               >
                 {tier.highlight && (
                   <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-[10px] font-mono font-bold bg-sky-600 text-white shadow-xs tracking-wider uppercase">
@@ -293,11 +310,10 @@ export default function PricingPage() {
                 <div className="pt-8 mt-6 border-t border-slate-100">
                   <Link
                     href={`/?mode=${tier.ctaMode}`}
-                    className={`block w-full py-3 rounded-xl text-center text-xs font-bold uppercase tracking-wider transition-all shadow-xs cursor-pointer ${
-                      tier.highlight
-                        ? "bg-sky-600 hover:bg-sky-500 text-white shadow-sky-600/20"
-                        : "bg-slate-900 hover:bg-slate-800 text-white"
-                    }`}
+                    className={`block w-full py-3 rounded-xl text-center text-xs font-bold uppercase tracking-wider transition-all shadow-xs cursor-pointer ${tier.highlight
+                      ? "bg-sky-600 hover:bg-sky-500 text-white shadow-sky-600/20"
+                      : "bg-slate-900 hover:bg-slate-800 text-white"
+                      }`}
                   >
                     {tier.ctaText}
                   </Link>
@@ -330,11 +346,12 @@ export default function PricingPage() {
             {/* Sliders Column */}
             <div className="space-y-5">
               <div>
-                <div className="flex justify-between text-xs font-bold text-slate-800 mb-1">
+                <label htmlFor="slider-pages" className="flex justify-between text-xs font-bold text-slate-800 mb-1 cursor-pointer">
                   <span>Technical Pages Published</span>
                   <span className="font-mono text-sky-700">{calcPages} pages</span>
-                </div>
+                </label>
                 <input
+                  id="slider-pages"
                   type="range"
                   min={10}
                   max={200}
@@ -342,16 +359,18 @@ export default function PricingPage() {
                   value={calcPages}
                   onChange={(e) => setCalcPages(Number(e.target.value))}
                   className="w-full accent-sky-600 cursor-pointer"
+                  aria-label="Technical Pages Published"
                 />
                 <span className="text-[10px] text-slate-400">Spec sheets, troubleshooting SOPs &amp; crosswalks</span>
               </div>
 
               <div>
-                <div className="flex justify-between text-xs font-bold text-slate-800 mb-1">
+                <label htmlFor="slider-searches" className="flex justify-between text-xs font-bold text-slate-800 mb-1 cursor-pointer">
                   <span>Monthly Searches per Fault / Query</span>
                   <span className="font-mono text-sky-700">{calcSearches} searches/mo</span>
-                </div>
+                </label>
                 <input
+                  id="slider-searches"
                   type="range"
                   min={10}
                   max={100}
@@ -359,16 +378,18 @@ export default function PricingPage() {
                   value={calcSearches}
                   onChange={(e) => setCalcSearches(Number(e.target.value))}
                   className="w-full accent-sky-600 cursor-pointer"
+                  aria-label="Monthly Searches per Fault"
                 />
                 <span className="text-[10px] text-slate-400">High-intent zero-volume diagnostic search volume</span>
               </div>
 
               <div>
-                <div className="flex justify-between text-xs font-bold text-slate-800 mb-1">
+                <label htmlFor="slider-deal-value" className="flex justify-between text-xs font-bold text-slate-800 mb-1 cursor-pointer">
                   <span>Average Equipment Deal Value (ACV)</span>
                   <span className="font-mono text-sky-700">${calcAvgDeal.toLocaleString()}</span>
-                </div>
+                </label>
                 <input
+                  id="slider-deal-value"
                   type="range"
                   min={15000}
                   max={300000}
@@ -376,16 +397,18 @@ export default function PricingPage() {
                   value={calcAvgDeal}
                   onChange={(e) => setCalcAvgDeal(Number(e.target.value))}
                   className="w-full accent-sky-600 cursor-pointer"
+                  aria-label="Average Equipment Deal Value"
                 />
                 <span className="text-[10px] text-slate-400">Typical replacement unit, retrofit, or maintenance contract</span>
               </div>
 
               <div>
-                <div className="flex justify-between text-xs font-bold text-slate-800 mb-1">
+                <label htmlFor="slider-close-rate" className="flex justify-between text-xs font-bold text-slate-800 mb-1 cursor-pointer">
                   <span>Sales Opportunity Win Rate</span>
                   <span className="font-mono text-sky-700">{calcCloseRate}%</span>
-                </div>
+                </label>
                 <input
+                  id="slider-close-rate"
                   type="range"
                   min={5}
                   max={40}
@@ -393,6 +416,7 @@ export default function PricingPage() {
                   value={calcCloseRate}
                   onChange={(e) => setCalcCloseRate(Number(e.target.value))}
                   className="w-full accent-sky-600 cursor-pointer"
+                  aria-label="Sales Opportunity Win Rate"
                 />
                 <span className="text-[10px] text-slate-400">Sales qualification to contract signature</span>
               </div>
@@ -463,7 +487,7 @@ export default function PricingPage() {
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {comparisonCategories.map((cat) => (
-                  <tr key={cat.category} className="contents">
+                  <Fragment key={cat.category}>
                     <tr className="bg-slate-100/70 border-y border-slate-200 font-mono text-[10.5px] font-bold text-slate-500 uppercase tracking-wider">
                       <td colSpan={4} className="py-2.5 px-6">{cat.category}</td>
                     </tr>
@@ -475,7 +499,7 @@ export default function PricingPage() {
                         <td className="py-3 px-4 text-center font-bold text-purple-800 font-mono">{item.enterprise}</td>
                       </tr>
                     ))}
-                  </tr>
+                  </Fragment>
                 ))}
               </tbody>
             </table>

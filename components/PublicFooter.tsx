@@ -11,7 +11,8 @@ export function PublicFooter() {
 
   function handleNewsletterSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (newsletterEmail.includes("@")) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (emailRegex.test(newsletterEmail.trim())) {
       setSubscribed(true);
     }
   }
@@ -73,8 +74,10 @@ export function PublicFooter() {
                   <span>Subscribed! Check your inbox for the Q1 2026 Industrial Benchmark.</span>
                 </div>
               ) : (
-                <form onSubmit={handleNewsletterSubmit} className="flex gap-2 max-w-sm">
+                <form onSubmit={handleNewsletterSubmit} aria-label="Industrial AEO newsletter subscription" className="flex gap-2 max-w-sm">
+                  <label htmlFor="newsletter-email" className="sr-only">Email address</label>
                   <input
+                    id="newsletter-email"
                     type="email"
                     required
                     placeholder="engineer@manufacturing.com"
@@ -211,7 +214,7 @@ export function PublicFooter() {
         {/* Bottom Bar: Copyright & Compliance */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
           <div>
-            &copy; 2026 ForgeFlow Systems Inc. All rights reserved. Industrial SEO &amp; AEO Content Engine.
+            &copy; {new Date().getFullYear()} ForgeFlow Systems Inc. All rights reserved. Industrial SEO &amp; AEO Content Engine.
           </div>
           <div className="flex items-center gap-6">
             <Link href="/pricing" className="hover:text-slate-800 transition">

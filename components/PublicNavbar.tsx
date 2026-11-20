@@ -46,7 +46,7 @@ export function PublicNavbar({ onOpenAuth, onOpenDemo, activeNav = "home" }: Pub
         </div>
 
         {/* Desktop Navigation Links with Mega-Menus */}
-        <nav className="hidden lg:flex items-center gap-7 text-xs font-semibold text-slate-600">
+        <nav aria-label="Main navigation" className="hidden lg:flex items-center gap-7 text-xs font-semibold text-slate-600">
           {/* 1. Features Mega-Menu (Matches iFactory AI Solutions reference) */}
           <div
             className="relative"
@@ -60,7 +60,7 @@ export function PublicNavbar({ onOpenAuth, onOpenDemo, activeNav = "home" }: Pub
               }`}
             >
               <span>Platform Features</span>
-              <span className="text-[10px] text-slate-400">⌄</span>
+              <span aria-hidden="true" className="text-[10px] text-slate-400">⌄</span>
             </Link>
 
             {activeDropdown === "features" && (
@@ -276,7 +276,7 @@ export function PublicNavbar({ onOpenAuth, onOpenDemo, activeNav = "home" }: Pub
               }`}
             >
               <span>Industries &amp; Verticals</span>
-              <span className="text-[10px] text-slate-400">⌄</span>
+              <span aria-hidden="true" className="text-[10px] text-slate-400">⌄</span>
             </Link>
 
             {activeDropdown === "industries" && (
@@ -474,40 +474,67 @@ export function PublicNavbar({ onOpenAuth, onOpenDemo, activeNav = "home" }: Pub
           )}
 
           {/* Sign In Button */}
-          <button
-            type="button"
-            onClick={() => onOpenAuth ? onOpenAuth("login") : (window.location.href = "/?mode=login")}
-            className="px-3.5 py-1.5 rounded-xl text-slate-700 hover:text-slate-900 text-xs font-bold transition cursor-pointer"
-          >
-            Sign In
-          </button>
+          {onOpenAuth ? (
+            <button
+              type="button"
+              onClick={() => onOpenAuth("login")}
+              className="px-3.5 py-1.5 rounded-xl text-slate-700 hover:text-slate-900 text-xs font-bold transition cursor-pointer"
+            >
+              Sign In
+            </button>
+          ) : (
+            <Link
+              href="/?mode=login"
+              className="px-3.5 py-1.5 rounded-xl text-slate-700 hover:text-slate-900 text-xs font-bold transition inline-block"
+            >
+              Sign In
+            </Link>
+          )}
 
           {/* Primary Call to Action */}
-          <button
-            type="button"
-            onClick={() => onOpenAuth ? onOpenAuth("register") : (window.location.href = "/?mode=register")}
-            className="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold tracking-tight shadow-md shadow-sky-600/20 transition cursor-pointer"
-          >
-            Launch Console &rarr;
-          </button>
+          {onOpenAuth ? (
+            <button
+              type="button"
+              onClick={() => onOpenAuth("register")}
+              className="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold tracking-tight shadow-md shadow-sky-600/20 transition cursor-pointer"
+            >
+              Launch Console &rarr;
+            </button>
+          ) : (
+            <Link
+              href="/?mode=register"
+              className="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold tracking-tight shadow-md shadow-sky-600/20 transition inline-block"
+            >
+              Launch Console &rarr;
+            </Link>
+          )}
         </div>
 
         {/* Mobile Hamburger Button */}
         <div className="flex lg:hidden items-center gap-2">
-          <button
-            type="button"
-            onClick={() => onOpenAuth ? onOpenAuth("login") : (window.location.href = "/?mode=login")}
-            className="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-700 bg-slate-100"
-          >
-            Sign In
-          </button>
+          {onOpenAuth ? (
+            <button
+              type="button"
+              onClick={() => onOpenAuth("login")}
+              className="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-700 bg-slate-100"
+            >
+              Sign In
+            </button>
+          ) : (
+            <Link
+              href="/?mode=login"
+              className="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-700 bg-slate-100 inline-block"
+            >
+              Sign In
+            </Link>
+          )}
           <button
             type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="p-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition cursor-pointer"
             aria-label="Toggle navigation menu"
           >
-            <span className={mobileMenuOpen ? "css-icon-cross" : "css-icon-grid"}></span>
+            <span aria-hidden="true" className={mobileMenuOpen ? "css-icon-cross" : "css-icon-grid"}></span>
           </button>
         </div>
       </div>
@@ -515,7 +542,7 @@ export function PublicNavbar({ onOpenAuth, onOpenDemo, activeNav = "home" }: Pub
       {/* Mobile Drawer Overlay */}
       {mobileMenuOpen && (
         <div className="lg:hidden border-b border-slate-200 bg-white px-4 pt-3 pb-6 space-y-4 shadow-xl">
-          <div className="space-y-1">
+          <nav aria-label="Mobile navigation" className="space-y-1">
             <Link
               href="/"
               onClick={() => setMobileMenuOpen(false)}
@@ -551,30 +578,41 @@ export function PublicNavbar({ onOpenAuth, onOpenDemo, activeNav = "home" }: Pub
             >
               Pricing &amp; Plans
             </Link>
-          </div>
+          </nav>
 
           <div className="pt-3 border-t border-slate-100 space-y-2">
-            <button
-              type="button"
-              onClick={() => {
-                setMobileMenuOpen(false);
-                if (onOpenDemo) onOpenDemo();
-              }}
-              className="w-full py-2.5 rounded-xl border border-slate-300 text-slate-800 font-bold text-xs"
-            >
-              Book A Demo
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setMobileMenuOpen(false);
-                if (onOpenAuth) onOpenAuth("register");
-                else window.location.href = "/?mode=register";
-              }}
-              className="w-full py-2.5 rounded-xl bg-sky-600 text-white font-bold text-xs shadow-xs"
-            >
-              Launch Console &rarr;
-            </button>
+            {onOpenDemo && (
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  onOpenDemo();
+                }}
+                className="w-full py-2.5 rounded-xl border border-slate-300 text-slate-800 font-bold text-xs cursor-pointer hover:bg-slate-50 transition"
+              >
+                Book A Demo
+              </button>
+            )}
+            {onOpenAuth ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  onOpenAuth("register");
+                }}
+                className="w-full py-2.5 rounded-xl bg-sky-600 text-white font-bold text-xs shadow-xs cursor-pointer hover:bg-sky-500 transition"
+              >
+                Launch Console &rarr;
+              </button>
+            ) : (
+              <Link
+                href="/?mode=register"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block text-center w-full py-2.5 rounded-xl bg-sky-600 text-white font-bold text-xs shadow-xs hover:bg-sky-500 transition"
+              >
+                Launch Console &rarr;
+              </Link>
+            )}
           </div>
         </div>
       )}
