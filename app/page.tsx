@@ -789,6 +789,7 @@ function ForgeFlowWorkspace() {
 
   // Sidebar State (Matches Reference Design)
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const userInitials = (() => {
     if (user?.name && user.name.trim()) {
@@ -2210,6 +2211,147 @@ function ForgeFlowWorkspace() {
         </div>
       </aside>
 
+      {/* MOBILE SIDEBAR DRAWER OVERLAY */}
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 z-50 flex md:hidden animate-fade-in">
+          <div
+            className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs transition-opacity"
+            onClick={() => setMobileMenuOpen(false)}
+            aria-hidden="true"
+          />
+          <aside className="relative w-72 max-w-[85vw] bg-white p-4 flex flex-col justify-between shadow-2xl z-10 overflow-y-auto">
+            <div className="space-y-3">
+              <div className="pb-3 border-b border-slate-100 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Image
+                    src="/logo-icon.png"
+                    alt="ForgeFlow Emblem"
+                    width={36}
+                    height={26}
+                    className="h-8 w-auto object-contain shrink-0"
+                    priority
+                  />
+                  <div className="min-w-0">
+                    <div className="text-[16px] font-black tracking-tight text-slate-900 leading-tight">
+                      Forge<span className="text-sky-600">Flow</span>
+                    </div>
+                    <div className="text-[9px] font-semibold text-slate-400 uppercase tracking-tight truncate">
+                      Plan • Generate • Optimize
+                    </div>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition cursor-pointer"
+                  aria-label="Close menu"
+                >
+                  <span className="css-icon-cross"></span>
+                </button>
+              </div>
+
+              {/* Top Feature Pill */}
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveTab("Industrial Analytics");
+                  setMobileMenuOpen(false);
+                }}
+                className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl hover:bg-slate-50 text-xs font-semibold text-slate-700 transition border border-transparent hover:border-slate-200 cursor-pointer"
+              >
+                <div className="flex items-center gap-2">
+                  <div className="w-5 h-5 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center font-mono font-bold text-[11px]">
+                    $
+                  </div>
+                  <span className="font-medium text-slate-700">Financial overview</span>
+                </div>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-50 text-sky-700 border border-sky-200/60 font-sans">
+                  Agentic
+                </span>
+              </button>
+
+              {/* Navigation Items */}
+              <div className="space-y-1 pt-1">
+                <div className="text-[11px] font-bold text-slate-400 px-1 uppercase tracking-wider">
+                  Industrial Suite ({navItems.length} modules)
+                </div>
+                <div className="space-y-0.5 max-h-[50vh] overflow-y-auto pr-1">
+                  {navItems.map((item) => {
+                    const isActive = activeTab === item.label;
+                    return (
+                      <button
+                        key={item.label}
+                        type="button"
+                        onClick={() => {
+                          setActiveTab(item.label);
+                          setMobileMenuOpen(false);
+                        }}
+                        className={`w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-xs transition cursor-pointer ${
+                          isActive
+                            ? "bg-sky-50 text-sky-700 font-bold border border-sky-200/70 shadow-2xs"
+                            : "text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium border border-transparent"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className={`${item.iconClass} shrink-0`}></span>
+                          <span className="truncate">{item.label}</span>
+                        </div>
+                        {item.badge ? (
+                          <span className="px-1.5 py-0.5 text-[9.5px] font-mono rounded font-bold shrink-0 bg-slate-100 text-slate-600 border border-slate-200/60">
+                            {item.badge}
+                          </span>
+                        ) : null}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* Mobile Footer */}
+            <div className="space-y-1.5 pt-3 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveTab("Workspace & Rules");
+                  setMobileMenuOpen(false);
+                }}
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-50 transition cursor-pointer"
+              >
+                <span className="css-icon-gear text-slate-500"></span>
+                <span>Settings</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveTab("Billing & Quotas");
+                  setMobileMenuOpen(false);
+                }}
+                className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-sky-800 bg-sky-50/60 border border-sky-200/60 transition cursor-pointer"
+              >
+                <div className="flex items-center gap-2.5">
+                  <span className="css-icon-grid text-sky-600"></span>
+                  <span>Upgrade</span>
+                </div>
+                <span className="text-[10px] font-bold uppercase text-sky-700 bg-sky-100 px-1.5 py-0.5 rounded">
+                  {organizationPlan}
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  signOut().catch(() => {});
+                }}
+                className="w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-red-600 hover:bg-red-50 transition cursor-pointer"
+              >
+                Sign Out ({userEmail.split("@")[0] || "User"})
+              </button>
+            </div>
+          </aside>
+        </div>
+      )}
+
       {/* MAIN VIEWPORT */}
       <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
         {/* TOP ANNOUNCEMENT BANNER - SOBER ENTERPRISE */}
@@ -2243,23 +2385,32 @@ function ForgeFlowWorkspace() {
         )}
 
         {/* Top Header Bar */}
-        <header className="h-16 border-b border-slate-200 bg-white px-6 flex items-center justify-between shrink-0 shadow-xs">
-          <div className="flex items-center gap-4">
-            <span className="text-xs font-mono font-bold px-2.5 py-1 rounded bg-slate-100 text-slate-700 border border-slate-200">
+        <header className="h-16 border-b border-slate-200 bg-white px-4 sm:px-6 flex items-center justify-between shrink-0 shadow-xs">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen(true)}
+              aria-label="Open navigation menu"
+              className="p-2 -ml-1 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 md:hidden cursor-pointer transition"
+            >
+              <span className="css-icon-menu"></span>
+            </button>
+            <span className="text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-800 border border-slate-200/90 shadow-2xs">
               {activeTab}
             </span>
             <span className="text-xs text-slate-500 hidden sm:inline">
-              Tenant: <strong className="text-slate-800">{organizationName}</strong> ({userEmail})
+              Tenant: <strong className="text-slate-800 font-semibold">{organizationName}</strong> ({userEmail})
             </span>
           </div>
 
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 font-medium">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <div className="flex items-center gap-2 px-2.5 sm:px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200/80 text-xs text-emerald-800 font-medium shadow-2xs">
               <span className="relative flex h-2 w-2">
                 <span className="radar-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                 <span className={`relative inline-flex rounded-full h-2 w-2 ${workspaceLoading ? "bg-amber-500" : "bg-emerald-500"}`}></span>
               </span>
-              <span className="font-mono text-xs">{workspaceLoading ? "Loading workspace" : "Workspace active"}</span>
+              <span className="font-mono text-xs hidden sm:inline">{workspaceLoading ? "Loading workspace" : "Workspace active"}</span>
+              <span className="font-mono text-xs sm:hidden">{workspaceLoading ? "Syncing" : "Active"}</span>
             </div>
 
             <button
@@ -2267,7 +2418,7 @@ function ForgeFlowWorkspace() {
               onClick={() => {
                 setActiveTab("Taxonomy Matrix");
               }}
-              className="px-4 py-2 rounded-xl bg-sky-600 text-xs font-bold text-white hover:bg-sky-500 shadow-sm transition card-interactive"
+              className="btn-primary-premium px-3 sm:px-4 py-2 text-xs"
             >
               + New Batch
             </button>
@@ -2275,24 +2426,25 @@ function ForgeFlowWorkspace() {
             <button
               type="button"
               onClick={() => signOut().catch((error: unknown) => setActionMessage(error instanceof Error ? error.message : "Could not sign out."))}
-              className="px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs text-slate-600 hover:bg-slate-50 font-medium transition"
+              className="btn-secondary-premium px-3 py-2 text-xs hidden sm:inline-flex"
             >
               Sign Out
             </button>
           </div>
         </header>
 
-        <nav aria-label="Workspace navigation" className="flex gap-2 overflow-x-auto border-b border-slate-200 bg-white px-4 py-2 md:hidden">
+        <nav aria-label="Workspace navigation" className="flex gap-1.5 overflow-x-auto border-b border-slate-200 bg-white/95 backdrop-blur-sm px-3 py-2 md:hidden scrollbar-none shadow-2xs">
           {navItems.map((item) => (
             <button
               key={item.label}
               type="button"
               onClick={() => setActiveTab(item.label)}
               aria-current={activeTab === item.label ? "page" : undefined}
-              className={`shrink-0 rounded-lg px-3 py-2 text-xs font-semibold ${activeTab === item.label ? "bg-sky-50 text-sky-700" : "text-slate-600 hover:bg-slate-50"
-                }`}
+              className={`shrink-0 rounded-lg px-2.5 py-1.5 text-xs font-semibold transition ${
+                activeTab === item.label ? "bg-sky-50 text-sky-700 border border-sky-200/80 shadow-2xs" : "text-slate-600 hover:bg-slate-50"
+              }`}
             >
-              <span className={`${item.iconClass} shrink-0`}></span> <span>{item.label}</span>
+              <span className={`${item.iconClass} shrink-0`}></span> <span className="ml-1">{item.label}</span>
             </button>
           ))}
         </nav>
@@ -2343,13 +2495,16 @@ function ForgeFlowWorkspace() {
                   key={metric.label}
                   type="button"
                   onClick={() => setActiveTab(metric.target)}
-                  className="rounded-2xl border border-slate-200 bg-white p-5 text-left shadow-xs transition card-interactive hover:border-sky-300 hover:bg-sky-50/50"
+                  className="card-premium rounded-2xl p-5 text-left transition card-interactive hover:border-sky-300 hover:bg-sky-50/30 cursor-pointer group"
                 >
-                  <div className="text-xs font-mono text-slate-500 uppercase">{metric.label}</div>
-                  <div className="mt-2 text-3xl font-extrabold text-slate-900">
+                  <div className="text-[11px] font-mono text-slate-500 uppercase tracking-wider font-semibold">{metric.label}</div>
+                  <div className="mt-2 text-3xl font-extrabold text-slate-900 tracking-tight">
                     <AnimatedCounter value={metric.value} />
                   </div>
-                  <div className="mt-1 text-xs text-slate-600">{metric.detail} · Open</div>
+                  <div className="mt-1.5 text-xs text-slate-600 flex items-center justify-between">
+                    <span>{metric.detail}</span>
+                    <span className="text-sky-600 font-semibold opacity-0 group-hover:opacity-100 transition-opacity">Open →</span>
+                  </div>
                 </button>
               ))}
             </div>
