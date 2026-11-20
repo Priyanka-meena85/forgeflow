@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { PublicNavbar } from "@/components/PublicNavbar";
+import { PublicFooter } from "@/components/PublicFooter";
 
 export type AuthUser = {
   id: string;
@@ -86,6 +88,115 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
 
   // Pricing Billing Toggle (Web-Style Monthly vs Annual)
   const [pricingBilling, setPricingBilling] = useState<"monthly" | "annual">("annual");
+
+  // Interactive Live AI Search Simulator State (Home Page 10x Feature)
+  const [simulatorScenario, setSimulatorScenario] = useState<"hvac" | "sanitary" | "cnc">("hvac");
+  const [simulatorEngine, setSimulatorEngine] = useState<"google" | "perplexity" | "chatgpt">("google");
+
+  const simulatorScenarios = {
+    hvac: {
+      name: "Commercial RTU Compressors",
+      badge: "ASHRAE 90.1",
+      query: "How to prevent commercial RTU compressor flooded starts during ambient temperature drops?",
+      specTitle: "ASHRAE Standard 90.1-2025 • AHRI 550/590",
+      tolerance: "Crankcase heater sump min 20°F (11.1°C) above saturated suction temp",
+      googleOverview: {
+        capsule:
+          "Compressor flooded starts in commercial RTUs are eliminated by maintaining crankcase heater sump temperature at minimum 20°F (11.1°C) above saturated suction temperature, paired with automatic pump-down solenoid cycles calibrated to ASHRAE 90.1-2025 requirements. This stops liquid refrigerant migration during off-cycles.",
+        sources: [
+          { name: "AccuDrive Reliability Systems", url: "accudrive.io/specs/rtu-compressor" },
+          { name: "ASHRAE Technical Portal", url: "ashrae.org/standards-90-1" },
+        ],
+        confidence: "98.4% Confidence",
+      },
+      perplexity: {
+        summary:
+          "Based on certified industrial specifications from AccuDrive and AHRI technical guidelines, flooded starts occur when idle off-cycle refrigerant dissolves into crankcase lubricant. Key preventative parameters compared below:",
+        table: [
+          { param: "Sump Temp Delta", certified: "+20°F above suction", standard: "≥15°F", competitor: "Not specified" },
+          { param: "Pump-Down Cut-Out", certified: "15 PSI (1.03 bar)", standard: "15–20 PSI", competitor: "Static cycle" },
+          { param: "Superheat Margin", certified: "12°F ± 1.5°F", standard: "10–14°F", competitor: "Generic 10°F" },
+        ],
+      },
+      chatgpt: {
+        directQuote:
+          "\"According to verified engineering protocols from AccuDrive Reliability Systems: RTU compressor flooded starts are mitigated by interlocking crankcase heaters to maintain oil sump temperature at least 20°F (11.1°C) above saturated suction temperature, accompanied by automatic low-pressure pump-down solenoids.\"",
+        keyActions: [
+          "Verify crankcase heater continuous power feed during off-cycles",
+          "Calibrate low-pressure switch cut-in at 35 PSI and cut-out at 15 PSI",
+          "Confirm minimum 12°F suction superheat at expansion valve bulb",
+        ],
+      },
+    },
+    sanitary: {
+      name: "Sanitary Rotary Lobe Pumps",
+      badge: "3-A Standard 02-12",
+      query: "Why do EPDM elastomer seals swell in rotary lobe pumps during caustic CIP washdown?",
+      specTitle: "3-A Sanitary Standard 02-12 • FDA 21 CFR 177.2600",
+      tolerance: "Max 1.5% volumetric swell in 3.0% NaOH at 185°F (85°C)",
+      googleOverview: {
+        capsule:
+          "EPDM elastomer seal swelling in sanitary rotary lobe pumps is caused by chemical incompatibility with high-temperature (>80°C) sodium hydroxide washdowns (>2.5% NaOH). The 3-A Sanitary Standard 02-12 protocol mandates transitioning to peroxide-cured fluoroelastomers (FKM/FFKM) to restrict volumetric swell under 1.5%.",
+        sources: [
+          { name: "AccuDrive Sanitary Reliability", url: "accudrive.io/specs/sanitary-pumps" },
+          { name: "3-A SSI Certified Database", url: "3-a.org/standards" },
+        ],
+        confidence: "99.1% Confidence",
+      },
+      perplexity: {
+        summary:
+          "Comparing food-grade elastomer swelling under 3.0% caustic washdown at 185°F (85°C) across sanitary pump manufacturers:",
+        table: [
+          { param: "Volumetric Swell", certified: "< 1.5% (FFKM/FKM)", standard: "< 3.0%", competitor: "> 8.0% (EPDM)" },
+          { param: "Surface Finish (Ra)", certified: "32 µin (0.8 µm Ra)", standard: "32 µin", competitor: "45 µin Ra" },
+          { param: "Rotor-to-Case Gap", certified: "0.004 in ± 0.0005 in", standard: "0.004 in", competitor: "0.006 in" },
+        ],
+      },
+      chatgpt: {
+        directQuote:
+          "\"Direct answer from 3-A Sanitary Standard 02-12 maintenance guidelines published by AccuDrive: Standard EPDM seals absorb alkaline CIP washdowns, expanding up to 8% and binding pump rotors. Upgrading to peroxide-cured FKM seals reduces volumetric swell to under 1.5%.\"",
+        keyActions: [
+          "Audit washdown caustic concentration to ensure it does not exceed 3.0% NaOH",
+          "Replace standard EPDM O-rings with FDA-compliant FKM or encapsulated FFKM",
+          "Re-torque rotor retaining bolts to 42 Nm following thermal sanitization cycles",
+        ],
+      },
+    },
+    cnc: {
+      name: "5-Axis CNC Milling Spindles",
+      badge: "ISO 230-3",
+      query: "How to eliminate Z-axis spindle thermal expansion drift in 5-axis high-speed CNC milling?",
+      specTitle: "ISO 230-3 Thermal Environment Test • ASME B5.54",
+      tolerance: "Axial thermal elongation max 2.5 µm across 4-hour cycle",
+      googleOverview: {
+        capsule:
+          "Z-axis spindle thermal drift in 5-axis precision machining is controlled within ±2.5 µm by integrating closed-loop chiller recirculators maintaining spindle cooling jackets at 20.0°C ± 0.5°C, combined with fiber-optic thermal expansion growth compensation compliant with ISO 230-3 test codes.",
+        sources: [
+          { name: "AccuDrive Precision Spindles", url: "accudrive.io/specs/5axis-spindles" },
+          { name: "ISO International Standards", url: "iso.org/standard/230-3" },
+        ],
+        confidence: "97.8% Confidence",
+      },
+      perplexity: {
+        summary:
+          "Thermal elongation comparisons for HSK-A63 24,000 RPM motorized spindles under continuous aerospace finishing cycles:",
+        table: [
+          { param: "Axial Drift (Z)", certified: "2.5 µm (ISO 230-3)", standard: "≤ 5.0 µm", competitor: "18 µm drift" },
+          { param: "Chiller Temperature", certified: "20.0°C ± 0.5°C", standard: "20.0°C ± 1.0°C", competitor: "Unregulated" },
+          { param: "Dynamic Runout", certified: "1.5 µm TIR at nose", standard: "≤ 2.0 µm", competitor: "3.5 µm" },
+        ],
+      },
+      chatgpt: {
+        directQuote:
+          "\"Per precision machining data from AccuDrive: At 18,000+ RPM, ceramic hybrid spindle bearings induce up to 18 microns of Z-axis thermal growth. Closed-loop jacket chilling at 20.0°C ± 0.5°C with multi-sensor thermal compensation stabilizes axial drift within ±2.5 microns.\"",
+        keyActions: [
+          "Run a stepped 3-stage spindle warmup ramp (30%, 60%, 90% RPM) before finish cuts",
+          "Maintain spindle chiller glycol loop flow rate at minimum 8.5 L/min",
+          "Inspect HSK-A63 drawbar clamping force (minimum 18.0 kN required)",
+        ],
+      },
+    },
+  };
 
   // FAQ Accordion State
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
@@ -303,235 +414,15 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-sky-100 selection:text-sky-900">
-      {/* 1. TOP STICKY ENTERPRISE NAVBAR */}
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/90 shadow-2xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          {/* Logo & Brand */}
-          <div className="flex items-center gap-3">
-            <Image src="/logo-icon.png" alt="ForgeFlow Logo" width={40} height={40} className="h-10 w-10 object-contain shrink-0 drop-shadow-xs" />
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-lg font-black tracking-tight text-slate-900">ForgeFlow</span>
-                <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-sky-50 text-sky-700 border border-sky-200">
-                  AEO &amp; SEO
-                </span>
-              </div>
-              <p className="text-[11px] font-mono uppercase tracking-wider text-slate-500 font-medium">
-                Industrial Content Engine
-              </p>
-            </div>
-          </div>
-
-          {/* Desktop Navigation Links */}
-          <nav className="hidden lg:flex items-center gap-6 text-xs font-semibold text-slate-600">
-            {/* Features Dropdown */}
-            <div
-              className="relative"
-              onMouseEnter={() => setActiveNavDropdown("features")}
-              onMouseLeave={() => setActiveNavDropdown(null)}
-            >
-              <button
-                type="button"
-                className={`flex items-center gap-1.5 py-2 hover:text-sky-600 transition cursor-pointer ${
-                  activeNavDropdown === "features" ? "text-sky-600 font-bold" : ""
-                }`}
-              >
-                <span>Platform Features</span>
-                <span className="text-[10px]">⌄</span>
-              </button>
-
-              {activeNavDropdown === "features" && (
-                <div className="absolute top-full left-0 w-80 p-3 bg-white rounded-2xl border border-slate-200 shadow-xl space-y-1 z-50 animate-in fade-in zoom-in-95 duration-100">
-                  <div className="px-3 py-1.5 text-[10px] font-mono uppercase tracking-wider font-bold text-slate-400">
-                    Industrial Content Suite
-                  </div>
-                  <a
-                    href="#platform-suite"
-                    onClick={() => { setActiveFeatureTab("matrix"); setActiveNavDropdown(null); }}
-                    className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition"
-                  >
-                    <span className="css-icon-grid"></span>
-                    <div>
-                      <div className="font-bold text-slate-900 text-xs">Taxonomy Matrix</div>
-                      <div className="text-[11px] text-slate-500 font-normal">Cross-index equipment, failure modes, &amp; specs</div>
-                    </div>
-                  </a>
-                  <a
-                    href="#platform-suite"
-                    onClick={() => { setActiveFeatureTab("qa"); setActiveNavDropdown(null); }}
-                    className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition"
-                  >
-                    <span className="css-icon-shield"></span>
-                    <div>
-                      <div className="font-bold text-slate-900 text-xs">Deterministic QA Studio</div>
-                      <div className="text-[11px] text-slate-500 font-normal">Closed-loop word count, fluff &amp; spec validation</div>
-                    </div>
-                  </a>
-                  <a
-                    href="#platform-suite"
-                    onClick={() => { setActiveFeatureTab("schema"); setActiveNavDropdown(null); }}
-                    className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition"
-                  >
-                    <span className="css-icon-gear"></span>
-                    <div>
-                      <div className="font-bold text-slate-900 text-xs">AEO Schema Graph Hub</div>
-                      <div className="text-[11px] text-slate-500 font-normal">JSON-LD TechArticle &amp; FAQPage syndication</div>
-                    </div>
-                  </a>
-                  <a
-                    href="#platform-suite"
-                    onClick={() => { setActiveFeatureTab("risk"); setActiveNavDropdown(null); }}
-                    className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition"
-                  >
-                    <span className="css-icon-alert"></span>
-                    <div>
-                      <div className="font-bold text-slate-900 text-xs">Risk &amp; Compliance Gating</div>
-                      <div className="text-[11px] text-slate-500 font-normal">Zero-hallucination engineering tolerances</div>
-                    </div>
-                  </a>
-                  <a
-                    href="#platform-suite"
-                    onClick={() => { setActiveFeatureTab("kanban"); setActiveNavDropdown(null); }}
-                    className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition"
-                  >
-                    <span className="css-icon-launch"></span>
-                    <div>
-                      <div className="font-bold text-slate-900 text-xs">Publishing Kanban</div>
-                      <div className="text-[11px] text-slate-500 font-normal">Human-in-the-loop review &amp; CMS webhooks</div>
-                    </div>
-                  </a>
-                  <a
-                    href="#platform-suite"
-                    onClick={() => { setActiveFeatureTab("analytics"); setActiveNavDropdown(null); }}
-                    className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition"
-                  >
-                    <span className="css-icon-chart"></span>
-                    <div>
-                      <div className="font-bold text-slate-900 text-xs">Answer Engine Analytics</div>
-                      <div className="text-[11px] text-slate-500 font-normal">Track zero-volume LLM citations &amp; RFQs</div>
-                    </div>
-                  </a>
-                </div>
-              )}
-            </div>
-
-            {/* Industries Dropdown */}
-            <div
-              className="relative"
-              onMouseEnter={() => setActiveNavDropdown("industries")}
-              onMouseLeave={() => setActiveNavDropdown(null)}
-            >
-              <button
-                type="button"
-                className={`flex items-center gap-1.5 py-2 hover:text-sky-600 transition cursor-pointer ${
-                  activeNavDropdown === "industries" ? "text-sky-600 font-bold" : ""
-                }`}
-              >
-                <span>Industries &amp; Solutions</span>
-                <span className="text-[10px]">⌄</span>
-              </button>
-
-              {activeNavDropdown === "industries" && (
-                <div className="absolute top-full left-0 w-84 p-3 bg-white rounded-2xl border border-slate-200 shadow-xl space-y-1 z-50 animate-in fade-in zoom-in-95 duration-100">
-                  <div className="px-3 py-1.5 text-[10px] font-mono uppercase tracking-wider font-bold text-slate-400">
-                    7 Pre-Built Industrial Verticals
-                  </div>
-                  {verticalShowcase.slice(0, 5).map((v, i) => (
-                    <a
-                      key={v.title}
-                      href="#taxonomies"
-                      onClick={() => { setActiveVerticalIndex(i); setActiveNavDropdown(null); }}
-                      className="flex items-center justify-between p-2 rounded-xl hover:bg-slate-50 transition text-xs"
-                    >
-                      <span className="font-semibold text-slate-800">{v.title}</span>
-                      <span className="font-mono text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                        {v.badge}
-                      </span>
-                    </a>
-                  ))}
-                  <div className="pt-2 border-t border-slate-100 text-center">
-                    <a
-                      href="#taxonomies"
-                      onClick={() => setActiveNavDropdown(null)}
-                      className="text-xs font-bold text-sky-600 hover:text-sky-700"
-                    >
-                      View All 7 Sector Taxonomies →
-                    </a>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <a href="#workflow" className="hover:text-sky-600 transition">8-Step Protocol</a>
-            <a href="#industry-calculator" className="hover:text-sky-600 transition">Footprint Calculator</a>
-            <a href="#pricing" className="hover:text-sky-600 transition">Pricing</a>
-            <a href="#faq" className="hover:text-sky-600 transition">FAQ</a>
-          </nav>
-
-          {/* Action CTAs */}
-          <div className="flex items-center gap-2.5">
-            <button
-              type="button"
-              onClick={() => openAuth("login")}
-              className="hidden sm:inline-flex px-3 py-2 text-xs font-bold text-slate-700 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition cursor-pointer"
-            >
-              Sign In
-            </button>
-            <button
-              type="button"
-              onClick={() => { setDemoSubmitted(false); setDemoModalOpen(true); }}
-              className="hidden md:inline-flex px-3.5 py-2 text-xs font-bold text-sky-700 bg-sky-50 hover:bg-sky-100 border border-sky-200/80 rounded-xl transition cursor-pointer"
-            >
-              Book a Demo
-            </button>
-            <button
-              type="button"
-              onClick={() => openAuth("register")}
-              className="px-4 py-2 text-xs font-bold text-white bg-sky-600 hover:bg-sky-500 rounded-xl shadow-sm shadow-sky-600/20 transition cursor-pointer flex items-center gap-1.5"
-            >
-              <span>Start Free Pilot</span>
-              <span className="text-sky-200">→</span>
-            </button>
-
-            {/* Mobile Hamburger */}
-            <button
-              type="button"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-2 rounded-lg text-slate-600 hover:bg-slate-100"
-              aria-label="Toggle Menu"
-            >
-              <span className="css-icon-menu"></span>
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile Nav Drawer */}
-        {mobileMenuOpen && (
-          <div className="lg:hidden border-t border-slate-200 bg-white px-4 py-4 space-y-3 text-xs font-semibold">
-            <a href="#platform-suite" onClick={() => setMobileMenuOpen(false)} className="block py-1.5 text-slate-700">Platform Features</a>
-            <a href="#taxonomies" onClick={() => setMobileMenuOpen(false)} className="block py-1.5 text-slate-700">Vertical Taxonomies</a>
-            <a href="#workflow" onClick={() => setMobileMenuOpen(false)} className="block py-1.5 text-slate-700">8-Step Workflow</a>
-            <a href="#industry-calculator" onClick={() => setMobileMenuOpen(false)} className="block py-1.5 text-slate-700">Footprint Calculator</a>
-            <a href="#pricing" onClick={() => setMobileMenuOpen(false)} className="block py-1.5 text-slate-700">Pricing</a>
-            <div className="pt-3 border-t border-slate-100 flex gap-2">
-              <button
-                type="button"
-                onClick={() => { setMobileMenuOpen(false); setDemoModalOpen(true); }}
-                className="w-1/2 py-2 text-center rounded-lg bg-sky-50 text-sky-700 border border-sky-200 font-bold"
-              >
-                Book Demo
-              </button>
-              <button
-                type="button"
-                onClick={() => { setMobileMenuOpen(false); openAuth("register"); }}
-                className="w-1/2 py-2 text-center rounded-lg bg-sky-600 text-white font-bold"
-              >
-                Start Pilot
-              </button>
-            </div>
-          </div>
-        )}
-      </header>
+      {/* 1. TOP STICKY ENTERPRISE NAVBAR WITH MULTI-PAGE MEGA-MENUS */}
+      <PublicNavbar
+        onOpenAuth={openAuth}
+        onOpenDemo={() => {
+          setDemoSubmitted(false);
+          setDemoModalOpen(true);
+        }}
+        activeNav="home"
+      />
 
       {/* 2. HERO SECTION */}
       <section className="relative overflow-hidden pt-12 pb-20 border-b border-slate-200/80 bg-gradient-to-b from-white via-slate-50 to-slate-100/60">
@@ -1649,131 +1540,281 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
         </div>
       </section>
 
-      {/* 9. TRANSPARENT PRICING: CLEAN WEB CARDS WITH ANNUAL TOGGLE */}
-      <section id="pricing" className="py-20 bg-slate-50 border-b border-slate-200">
+      {/* 9. INTERACTIVE LIVE AI SEARCH SIMULATOR (10X INTERACTIVE UPGRADE) */}
+      <section id="ai-simulator" className="py-20 bg-slate-900 text-white border-b border-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
           <div className="text-center max-w-3xl mx-auto space-y-3">
-            <span className="text-xs font-mono uppercase tracking-wider font-bold text-sky-700 bg-sky-50 px-3 py-1 rounded-full border border-sky-200">
-              Predictable Pricing
+            <span className="text-xs font-mono uppercase tracking-wider font-bold text-sky-400 bg-sky-950/80 px-3 py-1 rounded-full border border-sky-800">
+              Interactive Live AI Search Simulator
             </span>
-            <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
-              Enterprise Plans Built for Engineering Scale
+            <h2 className="text-3xl sm:text-4xl font-black tracking-tight font-humanist">
+              Test How AI Engines Cite Your Technical Specifications
             </h2>
-            <p className="text-sm text-slate-600 leading-relaxed">
-              Capture zero-volume search and dominate Answer Engines across all product lines. No hidden overages.
+            <p className="text-xs sm:text-sm text-slate-400 leading-relaxed max-w-2xl mx-auto">
+              Choose an industrial failure mode and toggle between Google AI Overviews, Perplexity Pro, and ChatGPT Search to see exactly how ForgeFlow&apos;s verified 45-word capsules are synthesized into top citation cards.
             </p>
 
-            {/* Interactive Billing Toggle */}
-            <div className="flex items-center justify-center gap-3 pt-3">
-              <span className={`text-xs font-bold ${pricingBilling === "monthly" ? "text-slate-900" : "text-slate-500"}`}>
-                Monthly Billing
-              </span>
-              <button
-                type="button"
-                onClick={() => setPricingBilling(pricingBilling === "monthly" ? "annual" : "monthly")}
-                className="w-12 h-6 rounded-full bg-slate-900 p-0.5 transition cursor-pointer relative"
-                aria-label="Toggle annual or monthly pricing"
-              >
-                <div className={`w-5 h-5 rounded-full bg-white transition-transform duration-200 ${pricingBilling === "annual" ? "translate-x-6" : "translate-x-0"}`} />
-              </button>
-              <span className={`text-xs font-bold flex items-center gap-1.5 ${pricingBilling === "annual" ? "text-slate-900" : "text-slate-500"}`}>
-                <span>Annual Billing</span>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
-                  SAVE 20%
-                </span>
-              </span>
+            {/* Scenario Selector Pills */}
+            <div className="pt-4 flex flex-wrap items-center justify-center gap-2">
+              {(["hvac", "sanitary", "cnc"] as const).map((scKey) => {
+                const sc = simulatorScenarios[scKey];
+                const isActive = simulatorScenario === scKey;
+                return (
+                  <button
+                    key={scKey}
+                    type="button"
+                    onClick={() => setSimulatorScenario(scKey)}
+                    className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer ${
+                      isActive
+                        ? "bg-sky-600 text-white shadow-md shadow-sky-600/30"
+                        : "bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white"
+                    }`}
+                  >
+                    <span>{sc.name}</span>
+                    <span className={`px-1.5 py-0.2 rounded text-[10px] font-mono ${
+                      isActive ? "bg-sky-800 text-sky-100" : "bg-slate-700 text-slate-400"
+                    }`}>
+                      {sc.badge}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Pilot Tier */}
-            <div className="p-7 rounded-2xl border border-slate-200 bg-white shadow-xs flex flex-col justify-between">
-              <div>
-                <div className="text-xs font-mono font-bold uppercase text-slate-500 mb-2">Starter Pilot</div>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-4xl font-extrabold text-slate-900">
-                    {pricingBilling === "annual" ? "$159" : "$199"}
-                  </span>
-                  <span className="text-xs text-slate-500">/ month</span>
-                </div>
-                <p className="text-xs text-slate-500 mt-2">For mid-size equipment makers testing programmatic AEO.</p>
-                <div className="mt-6 space-y-2.5 text-xs border-t border-slate-100 pt-5 text-slate-700">
-                  <div className="flex items-center gap-2"><span className="css-icon-check text-emerald-600"></span> <span>50 Spec-Verified Technical Slices / mo</span></div>
-                  <div className="flex items-center gap-2"><span className="css-icon-check text-emerald-600"></span> <span>1 Verified Corporate Domain</span></div>
-                  <div className="flex items-center gap-2"><span className="css-icon-check text-emerald-600"></span> <span>2 Pre-Built Vertical Taxonomies</span></div>
-                  <div className="flex items-center gap-2"><span className="css-icon-check text-emerald-600"></span> <span>Closed-Loop QA &amp; Anti-Fluff Stripper</span></div>
-                  <div className="flex items-center gap-2"><span className="css-icon-check text-emerald-600"></span> <span>Native TechArticle JSON-LD Schema</span></div>
-                  <div className="flex items-center gap-2"><span className="css-icon-check text-emerald-600"></span> <span>3 Application Engineering Seats</span></div>
-                </div>
+          {/* Simulator Console Canvas */}
+          <div className="max-w-4xl mx-auto bg-slate-950 rounded-3xl border border-slate-800 shadow-2xl overflow-hidden">
+            {/* Simulator Top Engine Bar */}
+            <div className="p-3 sm:px-6 sm:py-3.5 bg-slate-900/90 border-b border-slate-800 flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span className="text-[11px] font-mono font-bold text-slate-300 uppercase tracking-wider">
+                  Live Engine Perspective:
+                </span>
               </div>
-              <button
-                type="button"
-                onClick={() => openAuth("register")}
-                className="mt-8 w-full py-2.5 rounded-xl border border-slate-300 bg-slate-50 text-xs font-bold text-slate-700 hover:bg-slate-100 transition cursor-pointer"
-              >
-                Start Free 14-Day Pilot →
-              </button>
+              <div className="flex items-center gap-1.5 p-1 bg-slate-950 rounded-xl border border-slate-800 text-xs">
+                <button
+                  type="button"
+                  onClick={() => setSimulatorEngine("google")}
+                  className={`px-3 py-1 rounded-lg font-bold transition cursor-pointer text-[11px] ${
+                    simulatorEngine === "google"
+                      ? "bg-sky-600 text-white shadow-xs"
+                      : "text-slate-400 hover:text-slate-200"
+                  }`}
+                >
+                  Google AI Overviews
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSimulatorEngine("perplexity")}
+                  className={`px-3 py-1 rounded-lg font-bold transition cursor-pointer text-[11px] ${
+                    simulatorEngine === "perplexity"
+                      ? "bg-cyan-600 text-white shadow-xs"
+                      : "text-slate-400 hover:text-slate-200"
+                  }`}
+                >
+                  Perplexity Pro Matrix
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSimulatorEngine("chatgpt")}
+                  className={`px-3 py-1 rounded-lg font-bold transition cursor-pointer text-[11px] ${
+                    simulatorEngine === "chatgpt"
+                      ? "bg-emerald-600 text-white shadow-xs"
+                      : "text-slate-400 hover:text-slate-200"
+                  }`}
+                >
+                  ChatGPT Search Direct
+                </button>
+              </div>
             </div>
 
-            {/* Growth Tier (Recommended) */}
-            <div className="p-7 rounded-2xl border-2 border-sky-600 bg-white shadow-lg shadow-sky-600/10 flex flex-col justify-between relative">
-              <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-sky-600 text-white font-mono text-[10px] font-bold uppercase tracking-wider">
-                Most Popular · Recommended for OEMs
+            {/* Simulated Search Prompt Bar */}
+            <div className="p-4 sm:p-5 bg-slate-900/40 border-b border-slate-800/80 flex items-center gap-3">
+              <span className="css-icon-search text-slate-400 shrink-0"></span>
+              <div className="flex-1 font-mono text-xs sm:text-sm text-slate-200 truncate">
+                {simulatorScenarios[simulatorScenario].query}
+              </div>
+              <span className="text-[10px] font-mono text-emerald-400 bg-emerald-950 px-2 py-0.5 rounded border border-emerald-800 shrink-0 hidden sm:inline">
+                Verified Intent
               </span>
-              <div>
-                <div className="text-xs font-mono font-bold uppercase text-sky-700 mb-2">Growth Engine</div>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-4xl font-extrabold text-slate-900">
-                    {pricingBilling === "annual" ? "$319" : "$399"}
-                  </span>
-                  <span className="text-xs text-slate-500">/ month</span>
-                </div>
-                <p className="text-xs text-slate-500 mt-2">For scaling equipment brands dominating multiple product lines.</p>
-                <div className="mt-6 space-y-2.5 text-xs border-t border-slate-100 pt-5 text-slate-700">
-                  <div className="flex items-center gap-2"><span className="css-icon-check text-emerald-600"></span> <span>150 Spec-Verified Technical Slices / mo</span></div>
-                  <div className="flex items-center gap-2"><span className="css-icon-check text-emerald-600"></span> <span>3 Connected Corporate Domains</span></div>
-                  <div className="flex items-center gap-2"><span className="css-icon-check text-emerald-600"></span> <span>All 7 Pre-Built Industrial Taxonomies</span></div>
-                  <div className="flex items-center gap-2"><span className="css-icon-check text-emerald-600"></span> <span>Full Multi-Schema (TechArticle + HowTo + FAQ)</span></div>
-                  <div className="flex items-center gap-2"><span className="css-icon-check text-emerald-600"></span> <span>Google AI Overviews &amp; Perplexity Syndication</span></div>
-                  <div className="flex items-center gap-2"><span className="css-icon-check text-emerald-600"></span> <span>Direct Webflow &amp; WordPress CMS API Sync</span></div>
-                  <div className="flex items-center gap-2"><span className="css-icon-check text-emerald-600"></span> <span>7 Engineering Seats + Role-Based Access</span></div>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => openAuth("register")}
-                className="mt-8 w-full py-2.5 rounded-xl bg-sky-600 text-xs font-bold text-white shadow-sm hover:bg-sky-500 transition cursor-pointer"
-              >
-                Launch Growth Engine →
-              </button>
             </div>
 
-            {/* Fleet / Enterprise Tier */}
-            <div className="p-7 rounded-2xl border border-slate-200 bg-white shadow-xs flex flex-col justify-between">
-              <div>
-                <div className="text-xs font-mono font-bold uppercase text-purple-700 mb-2">Fleet Tier · Multi-Plant</div>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-4xl font-extrabold text-slate-900">
-                    {pricingBilling === "annual" ? "$639" : "$799"}
-                  </span>
-                  <span className="text-xs text-slate-500">/ month</span>
+            {/* Engine Specific Live Response Body */}
+            <div className="p-6 sm:p-8 space-y-5">
+              {/* GOOGLE AI OVERVIEWS VIEW */}
+              {simulatorEngine === "google" && (
+                <div className="space-y-4 animate-in fade-in duration-200">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-sky-500/20 text-sky-400 border border-sky-500/40">
+                        AI Overview
+                      </span>
+                      <span className="text-xs text-slate-400 font-mono">
+                        Multi-Source Grounding Synthesis
+                      </span>
+                    </div>
+                    <span className="text-xs font-mono font-bold text-emerald-400">
+                      {simulatorScenarios[simulatorScenario].googleOverview.confidence}
+                    </span>
+                  </div>
+
+                  <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 text-slate-200 text-xs sm:text-sm leading-relaxed font-sans shadow-inner">
+                    <p>{simulatorScenarios[simulatorScenario].googleOverview.capsule}</p>
+                  </div>
+
+                  <div className="pt-2 flex flex-wrap items-center gap-3 text-xs font-mono">
+                    <span className="text-slate-500 font-bold uppercase text-[10px]">Cited In Overview:</span>
+                    {simulatorScenarios[simulatorScenario].googleOverview.sources.map((src, i) => (
+                      <span
+                        key={src.name}
+                        className="px-2.5 py-1 rounded-lg bg-slate-800 text-sky-300 border border-slate-700 flex items-center gap-1.5"
+                      >
+                        <span className="w-1.5 h-1.5 rounded-full bg-sky-400"></span>
+                        <span>[{i + 1}] {src.name}</span>
+                      </span>
+                    ))}
+                  </div>
                 </div>
-                <p className="text-xs text-slate-500 mt-2">For multi-brand conglomerates &amp; industrial B2B agencies.</p>
-                <div className="mt-6 space-y-2.5 text-xs border-t border-slate-100 pt-5 text-slate-700">
-                  <div className="flex items-center gap-2"><span className="css-icon-check text-emerald-600"></span> <span>400+ Technical Slices included</span></div>
-                  <div className="flex items-center gap-2"><span className="css-icon-check text-emerald-600"></span> <span>Unlimited Client Tenants &amp; Domains</span></div>
-                  <div className="flex items-center gap-2"><span className="css-icon-check text-emerald-600"></span> <span>Custom CAD &amp; Equipment Specs Ingestion</span></div>
-                  <div className="flex items-center gap-2"><span className="css-icon-check text-emerald-600"></span> <span>White-Label Client Portal &amp; CNAME</span></div>
-                  <div className="flex items-center gap-2"><span className="css-icon-check text-emerald-600"></span> <span>Zero-Hallucination SLA Guarantee</span></div>
-                  <div className="flex items-center gap-2"><span className="css-icon-check text-emerald-600"></span> <span>Dedicated Taxonomy Solutions Architect</span></div>
+              )}
+
+              {/* PERPLEXITY PRO VIEW */}
+              {simulatorEngine === "perplexity" && (
+                <div className="space-y-4 animate-in fade-in duration-200">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
+                        Perplexity Pro Answer
+                      </span>
+                      <span className="text-xs text-slate-400 font-mono">
+                        Comparative Tolerance Table
+                      </span>
+                    </div>
+                    <span className="text-xs font-mono font-bold text-cyan-400">
+                      2 Authoritative Sources
+                    </span>
+                  </div>
+
+                  <p className="text-xs text-slate-300 leading-relaxed">
+                    {simulatorScenarios[simulatorScenario].perplexity.summary}
+                  </p>
+
+                  <div className="rounded-2xl border border-slate-800 overflow-hidden bg-slate-900">
+                    <table className="w-full text-left text-xs font-mono">
+                      <thead>
+                        <tr className="border-b border-slate-800 bg-slate-950 text-slate-400 text-[10px] uppercase">
+                          <th className="py-2.5 px-4">Parameter</th>
+                          <th className="py-2.5 px-4 text-emerald-400">Your Certified Spec</th>
+                          <th className="py-2.5 px-4">Governing Standard</th>
+                          <th className="py-2.5 px-4 text-slate-500">Generic Competitor</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-800/80">
+                        {simulatorScenarios[simulatorScenario].perplexity.table.map((row) => (
+                          <tr key={row.param} className="hover:bg-slate-800/40">
+                            <td className="py-2 px-4 text-slate-300 font-semibold">{row.param}</td>
+                            <td className="py-2 px-4 text-emerald-400 font-bold">{row.certified}</td>
+                            <td className="py-2 px-4 text-slate-400">{row.standard}</td>
+                            <td className="py-2 px-4 text-slate-600 line-through">{row.competitor}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
+              )}
+
+              {/* CHATGPT SEARCH VIEW */}
+              {simulatorEngine === "chatgpt" && (
+                <div className="space-y-4 animate-in fade-in duration-200">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">
+                        ChatGPT Search Direct Quote
+                      </span>
+                      <span className="text-xs text-slate-400 font-mono">
+                        Conversational Attribution
+                      </span>
+                    </div>
+                    <span className="text-xs font-mono font-bold text-emerald-400">
+                      Direct Attributed Answer
+                    </span>
+                  </div>
+
+                  <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800 text-xs sm:text-sm text-slate-200 leading-relaxed font-sans italic border-l-4 border-l-emerald-500">
+                    {simulatorScenarios[simulatorScenario].chatgpt.directQuote}
+                  </div>
+
+                  <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800 text-xs space-y-2">
+                    <span className="font-mono text-[10.5px] font-bold text-slate-400 uppercase tracking-wider">
+                      Recommended Engineering SOP Steps:
+                    </span>
+                    <ul className="space-y-1.5 text-slate-300">
+                      {simulatorScenarios[simulatorScenario].chatgpt.keyActions.map((step) => (
+                        <li key={step} className="flex items-start gap-2">
+                          <span className="css-icon-check text-emerald-400 shrink-0 mt-0.5"></span>
+                          <span>{step}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Bottom Proof Strip */}
+            <div className="p-4 bg-slate-900/80 border-t border-slate-800 flex flex-wrap items-center justify-between gap-3 text-xs font-mono text-slate-400">
+              <div className="flex items-center gap-2">
+                <span className="text-emerald-400 font-bold">&check;</span>
+                <span>Zero Hallucination Verified</span>
+                <span>&bull;</span>
+                <span>Governing Standard: {simulatorScenarios[simulatorScenario].specTitle.split("•")[0]}</span>
               </div>
+              <Link
+                href="/features#serp-simulator"
+                className="text-sky-400 hover:text-sky-300 font-bold flex items-center gap-1"
+              >
+                <span>Read Simulator Architecture</span>
+                <span>&rarr;</span>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 9B. TRANSPARENT PRICING TEASER BANNER (DEDICATED PRICING PAGE LINK) */}
+      <section className="py-16 bg-white border-b border-slate-200">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="p-8 sm:p-10 rounded-3xl bg-gradient-to-r from-sky-50 via-slate-50 to-indigo-50 border border-sky-200/80 flex flex-col md:flex-row items-center justify-between gap-6 shadow-xs">
+            <div className="space-y-2 max-w-2xl">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-mono font-bold uppercase tracking-wider text-sky-700 bg-sky-100 px-2.5 py-0.5 rounded-full">
+                  Predictable Industrial Pricing
+                </span>
+                <span className="text-xs font-mono text-emerald-800 font-bold bg-emerald-100 px-2 py-0.5 rounded-full">
+                  Save 20% on Annual
+                </span>
+              </div>
+              <h3 className="text-2xl sm:text-3xl font-black text-slate-900 font-humanist">
+                Plans Starting at $199/mo for Equipment OEMs
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                Fixed predictable subscription tiers with zero token overages. Includes pre-built industrial taxonomies, deterministic QA validation, 3D CAD inspector, and native AEO schema syndication.
+              </p>
+            </div>
+            <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0">
+              <Link
+                href="/pricing"
+                className="px-6 py-3 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold uppercase tracking-wider transition shadow-md shadow-sky-600/20 text-center cursor-pointer"
+              >
+                Explore Plans &amp; Calculate ROI &rarr;
+              </Link>
               <button
                 type="button"
                 onClick={() => openAuth("register")}
-                className="mt-8 w-full py-2.5 rounded-xl border border-slate-300 bg-slate-50 text-xs font-bold text-slate-700 hover:bg-slate-100 transition cursor-pointer"
+                className="px-5 py-3 rounded-xl border border-slate-300 hover:bg-white text-slate-700 text-xs font-bold transition text-center cursor-pointer"
               >
-                Deploy Fleet Tier →
+                Start 14-Day Pilot
               </button>
             </div>
           </div>
