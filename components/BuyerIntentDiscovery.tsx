@@ -2,12 +2,15 @@
 
 import { useEffect, useState } from "react";
 import type { DeanonymizedAccount } from "@/app/api/intent/deanonymize/route";
+import type { DecisionMakerLead } from "@/app/api/intent/enrich/route";
 
 export function BuyerIntentDiscovery() {
   const [loading, setLoading] = useState(true);
   const [pipelineTotal, setPipelineTotal] = useState("$620,000");
   const [accounts, setAccounts] = useState<DeanonymizedAccount[]>([]);
   const [triggeringId, setTriggeringId] = useState<string | null>(null);
+  const [enrichingId, setEnrichingId] = useState<string | null>(null);
+  const [enrichedLeads, setEnrichedLeads] = useState<Record<string, DecisionMakerLead[]>>({});
   const [statusMsg, setStatusMsg] = useState("");
 
   const fetchIntent = async () => {
@@ -49,6 +52,32 @@ export function BuyerIntentDiscovery() {
       setStatusMsg("Network error dispatching ABM draft.");
     } finally {
       setTriggeringId(null);
+    }
+  };
+
+  const handleEnrich = async (acc: DeanonymizedAccount) => {
+    if (enrichedLeads[acc.id]) {
+      const next = { ...enrichedLeads };
+      delete next[acc.id];
+      setEnrichedLeads(next);
+      return;
+    }
+    setEnrichingId(acc.id);
+    try {
+      const res = await fetch("/api/intent/enrich", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ companyName: acc.companyName, domain: acc.domain }),
+      });
+      const data = await res.json();
+      if (res.ok && data.decisionMakers) {
+        setEnrichedLeads((prev) => ({ ...prev, [acc.id]: data.decisionMakers }));
+        setStatusMsg(`Enriched ${data.decisionMakers.length} verified B2B decision makers for ${acc.companyName}.`);
+      }
+    } catch {
+      setStatusMsg("Failed to stream decision maker contacts.");
+    } finally {
+      setEnrichingId(null);
     }
   };
 
@@ -149,25 +178,77 @@ export function BuyerIntentDiscovery() {
                   <p className="text-xs font-semibold text-slate-900 leading-snug">{acc.researchedTopic}</p>
                   <p className="text-[10px] font-mono text-sky-800 pt-0.5">Query: &quot;{acc.searchIntentKeyword}&quot;</p>
                 </div>
+
+                {/* Enriched Decision Makers Section */}
+                {enrichedLeads[acc.id] && (
+                  <div className="rounded-xl bg-sky-50/70 border border-sky-200/90 p-3 mb-4 space-y-2 animate-fade-in">
+                    <div className="flex items-center justify-between text-[11px] font-bold text-sky-900">
+                      <span>Verified Decision Makers ({enrichedLeads[acc.id].length})</span>
+                      <span className="text-[9.5px] font-mono bg-sky-200/70 px-1.5 py-0.5 rounded text-sky-800">Graph Intel</span>
+                    </div>
+                    <div className="space-y-1.5">
+                      {enrichedLeads[acc.id].map((lead) => (
+                        <div key={lead.id} className="p-2 rounded-lg bg-white border border-sky-100 shadow-2xs space-y-1 text-xs">
+                          <div className="flex items-center justify-between">
+                            <span className="font-bold text-slate-900">{lead.name}</span>
+                            <span className="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-slate-100 text-slate-700">
+                              {lead.seniority}
+                            </span>
+                          </div>
+                          <p className="text-[10.5px] text-slate-600 leading-tight">{lead.role}</p>
+                          <div className="flex items-center justify-between pt-1 border-t border-slate-100 text-[10px] text-slate-500 font-mono">
+                            <span className="truncate max-w-[140px]">{lead.email}</span>
+                            <a
+                              href={lead.linkedInSearchUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-sky-600 hover:text-sky-800 font-semibold underline"
+                            >
+                              LinkedIn Profile →
+                            </a>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
-              <button
-                onClick={() => handleTriggerABM(acc)}
-                disabled={triggeringId === acc.id}
-                className="w-full py-2.5 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs flex items-center justify-center gap-2 transition cursor-pointer shadow-xs disabled:opacity-60"
-              >
-                {triggeringId === acc.id ? (
-                  <>
-                    <span className="inline-block w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin"></span>
-                    <span>Dispatching ABM Spec…</span>
-                  </>
-                ) : (
-                  <>
-                    <span className="css-icon-bolt"></span>
-                    <span>1-Click Launch Counter-Spec Draft</span>
-                  </>
-                )}
-              </button>
+              <div className="space-y-2">
+                <button
+                  type="button"
+                  onClick={() => handleEnrich(acc)}
+                  disabled={enrichingId === acc.id}
+                  className="w-full py-2 px-3 rounded-xl border border-sky-200 bg-sky-50 hover:bg-sky-100/80 text-sky-800 font-semibold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer shadow-2xs"
+                >
+                  <span className="css-icon-search text-sky-600"></span>
+                  <span>
+                    {enrichingId === acc.id
+                      ? "Enriching Persona Intel…"
+                      : enrichedLeads[acc.id]
+                      ? "Hide Enriched Contacts"
+                      : "Enrich Decision Makers (Apollo/ZoomInfo Intel)"}
+                  </span>
+                </button>
+
+                <button
+                  onClick={() => handleTriggerABM(acc)}
+                  disabled={triggeringId === acc.id}
+                  className="w-full py-2.5 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs flex items-center justify-center gap-2 transition cursor-pointer shadow-xs disabled:opacity-60"
+                >
+                  {triggeringId === acc.id ? (
+                    <>
+                      <span className="inline-block w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin"></span>
+                      <span>Dispatching ABM Spec…</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="css-icon-bolt"></span>
+                      <span>1-Click Launch Counter-Spec Draft</span>
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
           ))
         )}

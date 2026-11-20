@@ -21,6 +21,7 @@ import { CadExplodedViewStudio } from "@/components/CadExplodedViewStudio";
 import { BuyerIntentDiscovery } from "@/components/BuyerIntentDiscovery";
 import { DeveloperApiPortal } from "@/components/DeveloperApiPortal";
 import { DistributorSyndication } from "@/components/DistributorSyndication";
+import { MultiBrandDomainManager } from "@/components/MultiBrandDomainManager";
 import { TechnicalWhitepaperGenerator } from "@/components/TechnicalWhitepaperGenerator";
 import { AiRouterCogsMonitor } from "@/components/AiRouterCogsMonitor";
 import { StepCadSchemaExtractor } from "@/components/StepCadSchemaExtractor";
@@ -4740,6 +4741,7 @@ function ForgeFlowWorkspace() {
         {activeTab === "Distributor Co-Marketing" && (
           <div className="p-6 space-y-6 max-w-7xl animate-fade-in">
             <DistributorSyndication />
+            <MultiBrandDomainManager />
           </div>
         )}
 
