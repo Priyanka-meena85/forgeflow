@@ -1,0 +1,45 @@
+name: ForgeFlow Pure Software Enterprise CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  verify:
+    name: Type-Check, Build & Integration Audit
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [20.x]
+
+    steps:
+      - name: Checkout Code Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "npm"
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Strict TypeScript Verification
+        run: npx tsc --noEmit
+
+      - name: Execute Pure Software SaaS Integration Verification
+        run: node scripts/verify-pure-software.mjs
+        env:
+          NODE_ENV: test
+
+      - name: Production Next.js Build
+        run: npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: 1

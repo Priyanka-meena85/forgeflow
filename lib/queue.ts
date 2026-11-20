@@ -1,4 +1,5 @@
 import { EventEmitter } from "node:events";
+import { isRedisConfigured } from "@/lib/redis";
 
 export type JobType =
   | "BATCH_DRAFT_GENERATE"
@@ -160,6 +161,7 @@ export function getQueueMetrics() {
     failed,
     dlqCount: store.dlqJobs.size,
     concurrency: store.maxConcurrency,
+    distributedRedisActive: isRedisConfigured(),
   };
 }
 
