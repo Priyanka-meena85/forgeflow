@@ -474,7 +474,45 @@ if (!store.organizations.has(defaultSeedOrg.id)) {
   store.organizations.set(defaultSeedOrg.id, defaultSeedOrg);
 }
 
+const defaultSeedOrgPriyanka: FallbackOrg = {
+  id: "org_priyanka_dsd",
+  name: "dsd",
+  slug: "dsd",
+  industry: "Industrial Automation & Manufacturing",
+  website: "https://dsd-industrial.example.com",
+  productDescription: "Industrial reliability engineering, automated asset health monitoring, and precision manufacturing systems.",
+  keywords: "predictive maintenance, ISO 9001 compliance, manufacturing automation, asset uptime",
+  plan: "fleet",
+  subscriptionStatus: "active",
+  monthlyPagesLimit: 100,
+  monthlyPagesUsed: 0,
+  billingCycleStart: new Date(),
+  stripeCustomerId: null,
+  stripeSubscriptionId: null,
+  complianceRulesJson: null,
+  brandVoiceJson: null,
+  createdAt: new Date(),
+  updatedAt: new Date(),
+};
+
+if (!store.organizations.has(defaultSeedOrgPriyanka.id)) {
+  store.organizations.set(defaultSeedOrgPriyanka.id, defaultSeedOrgPriyanka);
+}
+
 const defaultSeedUsers: FallbackUser[] = [
+  {
+    id: "seed-usr-priyanka",
+    email: "priyankameena4656@gmail.com",
+    name: "Priyanka Meena (Enterprise Owner)",
+    passwordHash: "1c38c567b07e10db866e982d91cb13af:0d26fb5b7d042b3eb8aeb9379ae0d5966eaf8e9135314eac1112ed86c83b5e1c312f1756943d0006074f2b6077811345b62de1c06efde834c9804a25b554a66e",
+    role: UserRole.OWNER,
+    emailVerified: new Date(),
+    image: null,
+    organizationId: defaultSeedOrgPriyanka.id,
+    organization: defaultSeedOrgPriyanka,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
   {
     id: "seed-usr-admin",
     email: "admin@accudrive.io",
@@ -1191,11 +1229,11 @@ const fallbackDraft = {
     if (draft && draft.organizationId === args.where.organizationId) return draft;
     return null;
   },
-  async findMany(args: { where?: { organizationId?: string; status?: DraftStatus }; orderBy?: { createdAt?: "asc" | "desc" } }): Promise<FallbackDraft[]> {
+  async findMany(args?: { where?: { organizationId?: string; status?: DraftStatus }; orderBy?: { createdAt?: "asc" | "desc" } }): Promise<FallbackDraft[]> {
     const list: FallbackDraft[] = [];
     for (const d of store.drafts.values()) {
-      if (args.where?.organizationId && d.organizationId !== args.where.organizationId) continue;
-      if (args.where?.status && d.status !== args.where.status) continue;
+      if (args?.where?.organizationId && d.organizationId !== args.where.organizationId) continue;
+      if (args?.where?.status && d.status !== args.where.status) continue;
       list.push(d);
     }
     list.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());

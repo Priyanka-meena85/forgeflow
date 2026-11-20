@@ -17,6 +17,11 @@ import { GoogleSearchConsoleSync } from "@/components/GoogleSearchConsoleSync";
 import { UnitStandardConverter } from "@/components/UnitStandardConverter";
 import { EnterpriseSsoConfig } from "@/components/EnterpriseSsoConfig";
 import { CadExplodedViewStudio } from "@/components/CadExplodedViewStudio";
+import { BuyerIntentDiscovery } from "@/components/BuyerIntentDiscovery";
+import { DeveloperApiPortal } from "@/components/DeveloperApiPortal";
+import { DistributorSyndication } from "@/components/DistributorSyndication";
+import { TechnicalWhitepaperGenerator } from "@/components/TechnicalWhitepaperGenerator";
+import { AiRouterCogsMonitor } from "@/components/AiRouterCogsMonitor";
 
 type TabKey =
   | "Mission Control"
@@ -30,6 +35,11 @@ type TabKey =
   | "Global Standardizer"
   | "3D CAD Inspector"
   | "Enterprise SSO"
+  | "Buyer Intent"
+  | "Distributor Co-Marketing"
+  | "Developer API"
+  | "AI COGS & Router"
+  | "Engineering Whitepapers"
   | "Industrial Analytics"
   | "Workspace & Rules"
   | "Billing & Quotas";
@@ -98,6 +108,11 @@ const navItems: Array<{ label: TabKey; badge?: string; iconClass: string }> = [
   { label: "Global Standardizer", iconClass: "css-icon-gear", badge: "ISO / DIN" },
   { label: "3D CAD Inspector", iconClass: "css-icon-box", badge: "Exploded View" },
   { label: "Enterprise SSO", iconClass: "css-icon-shield", badge: "SAML 2.0" },
+  { label: "Buyer Intent", iconClass: "css-icon-search", badge: "Reverse-IP" },
+  { label: "Distributor Co-Marketing", iconClass: "css-icon-launch", badge: "Channel" },
+  { label: "Developer API", iconClass: "css-icon-gear", badge: "REST & Webhooks" },
+  { label: "AI COGS & Router", iconClass: "css-icon-bolt", badge: "Tri-Model" },
+  { label: "Engineering Whitepapers", iconClass: "css-icon-doc", badge: "PDF Gen" },
   { label: "Industrial Analytics", iconClass: "css-icon-chart", badge: "Charts" },
   { label: "Workspace & Rules", iconClass: "css-icon-gear" },
   { label: "Billing & Quotas", iconClass: "css-icon-card" },
@@ -4539,6 +4554,41 @@ function ForgeFlowWorkspace() {
         {activeTab === "Enterprise SSO" && (
           <div className="p-6 space-y-6 max-w-7xl animate-fade-in">
             <EnterpriseSsoConfig />
+          </div>
+        )}
+
+        {/* TAB 6G: B2B BUYER INTENT & REVERSE-IP DEANONYMIZATION */}
+        {activeTab === "Buyer Intent" && (
+          <div className="p-6 space-y-6 max-w-7xl animate-fade-in">
+            <BuyerIntentDiscovery />
+          </div>
+        )}
+
+        {/* TAB 6H: DISTRIBUTOR & DEALER CO-MARKETING SYNDICATION */}
+        {activeTab === "Distributor Co-Marketing" && (
+          <div className="p-6 space-y-6 max-w-7xl animate-fade-in">
+            <DistributorSyndication />
+          </div>
+        )}
+
+        {/* TAB 6I: DEVELOPER API & HEADLESS WEBHOOKS */}
+        {activeTab === "Developer API" && (
+          <div className="p-6 space-y-6 max-w-7xl animate-fade-in">
+            <DeveloperApiPortal />
+          </div>
+        )}
+
+        {/* TAB 6J: TRI-MODEL AI ROUTER & TOKEN COGS MARGIN */}
+        {activeTab === "AI COGS & Router" && (
+          <div className="p-6 space-y-6 max-w-7xl animate-fade-in">
+            <AiRouterCogsMonitor />
+          </div>
+        )}
+
+        {/* TAB 6K: 1-CLICK ENGINEERING WHITEPAPER & SPEC SHEET GENERATOR */}
+        {activeTab === "Engineering Whitepapers" && (
+          <div className="p-6 space-y-6 max-w-7xl animate-fade-in">
+            <TechnicalWhitepaperGenerator />
           </div>
         )}
 

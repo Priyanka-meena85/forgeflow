@@ -242,12 +242,19 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
       return;
     }
     setBusy(true);
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 12000);
+
     try {
       const response = await fetch(`/api/auth/${authMode}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password, companyName }),
+        signal: controller.signal,
       });
+      clearTimeout(timeoutId);
+
       const text = await response.text();
       let data: { user?: AuthUser; error?: string } = {};
       try {
@@ -255,13 +262,40 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
       } catch {
         throw new Error("Server returned an invalid response. Please try again.");
       }
+
+      // Seamless Auto-Recovery: if user registers but the account already exists, auto sign-in!
+      if (!response.ok && authMode === "register" && (response.status === 409 || data.error?.toLowerCase().includes("already exists"))) {
+        try {
+          const loginRes = await fetch("/api/auth/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password }),
+          });
+          const loginData = await loginRes.json().catch(() => null);
+          if (loginRes.ok && loginData?.user) {
+            setAuthModalOpen(false);
+            onAuthenticated(loginData.user);
+            return;
+          }
+        } catch {
+          // Fall through to standard error prompt
+        }
+        setAuthMode("login");
+        throw new Error("An account with this email already exists. Please verify your password to sign in.");
+      }
+
       if (!response.ok || !data.user) {
         throw new Error(data.error ?? "Authentication failed. Please verify your details.");
       }
       setAuthModalOpen(false);
       onAuthenticated(data.user);
-    } catch (submitError) {
-      setError(submitError instanceof Error ? submitError.message : "Could not authenticate.");
+    } catch (submitError: unknown) {
+      clearTimeout(timeoutId);
+      if (submitError instanceof Error && submitError.name === "AbortError") {
+        setError("Connection timed out. Please check your network and try again.");
+      } else {
+        setError(submitError instanceof Error ? submitError.message : "Could not authenticate.");
+      }
     } finally {
       setBusy(false);
     }
@@ -2625,7 +2659,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
 
       {/* 16. AUTH MODAL (SIGN IN / REGISTER) */}
       {authModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs animate-in fade-in duration-150">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs animate-in fade-in duration-150 font-humanist">
           <div className="bg-white rounded-2xl border border-slate-200/90 p-8 shadow-2xl max-w-md w-full relative">
             <button
               type="button"
@@ -2638,13 +2672,13 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
               <Image src="/logo-icon.png" alt="ForgeFlow Logo" width={44} height={44} className="h-11 w-11 object-contain shrink-0" />
               <div>
                 <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-sky-700">Enterprise Tenant</p>
-                <h3 className="text-lg font-extrabold text-slate-900 tracking-tight">
+                <h3 className="text-lg font-extrabold text-slate-900 tracking-tight font-humanist">
                   Forge<span className="text-sky-600">Flow</span> Console
                 </h3>
               </div>
             </div>
 
-            <h4 className="text-base font-bold text-slate-900">
+            <h4 className="text-base font-bold text-slate-900 font-humanist">
               {authMode === "register" ? "Create Enterprise Workspace" : "Sign In to Industrial Console"}
             </h4>
             <p className="mt-1 text-xs text-slate-500 leading-relaxed">
@@ -2654,7 +2688,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
             </p>
 
             {/* Quick 1-Click Demo Console Access */}
-            <div className="mt-4 p-3 rounded-xl bg-slate-900 text-white space-y-2">
+            <div className="mt-4 p-3 rounded-xl bg-slate-900 text-white space-y-2 font-humanist">
               <div className="flex items-center justify-between text-[11px] font-mono">
                 <span className="text-slate-300 font-bold flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
@@ -2672,10 +2706,21 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                     const response = await fetch("/api/auth/login", {
                       method: "POST",
                       headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({ email: "admin@accudrive.io", password: "ForgeFlow2026!" }),
+                      body: JSON.stringify({ email: "priyankameena4656@gmail.com", password: "232RhEGqurSi8jM" }),
                     });
                     const data = await response.json();
-                    if (!response.ok || !data.user) throw new Error(data.error || "Login failed");
+                    if (!response.ok || !data.user) {
+                      const fallback = await fetch("/api/auth/login", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ email: "admin@accudrive.io", password: "ForgeFlow2026!" }),
+                      });
+                      const fbData = await fallback.json();
+                      if (!fallback.ok || !fbData.user) throw new Error(fbData.error || "Login failed");
+                      setAuthModalOpen(false);
+                      onAuthenticated(fbData.user);
+                      return;
+                    }
                     setAuthModalOpen(false);
                     onAuthenticated(data.user);
                   } catch (err: unknown) {
@@ -2684,12 +2729,67 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                     setBusy(false);
                   }
                 }}
-                className="w-full py-2 px-3 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer shadow-sm disabled:opacity-50"
+                className="w-full py-2.5 px-3 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer shadow-sm disabled:opacity-50 font-humanist"
               >
                 <span className="flex items-center gap-1.5"><span className="css-icon-bolt"></span> 1-Click Launch Live Demo Console (Owner / Admin)</span>
               </button>
-              <div className="flex items-center gap-2 pt-1 text-[10px] text-slate-400">
-                <span>Or switch role:</span>
+              <div className="flex items-center justify-between pt-1 text-[10px] text-slate-400">
+                <div className="flex items-center gap-2">
+                  <span>Roles:</span>
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={async () => {
+                      setBusy(true);
+                      setError("");
+                      try {
+                        const response = await fetch("/api/auth/login", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ email: "marcus.vance@accudrive.io", password: "ForgeFlow2026!" }),
+                        });
+                        const data = await response.json();
+                        if (!response.ok || !data.user) throw new Error(data.error || "Login failed");
+                        setAuthModalOpen(false);
+                        onAuthenticated(data.user);
+                      } catch (err: unknown) {
+                        setError(err instanceof Error ? err.message : "Test drive sign-in failed");
+                      } finally {
+                        setBusy(false);
+                      }
+                    }}
+                    className="text-sky-300 hover:underline cursor-pointer"
+                  >
+                    Engineer Reviewer
+                  </button>
+                  <span>•</span>
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={async () => {
+                      setBusy(true);
+                      setError("");
+                      try {
+                        const response = await fetch("/api/auth/login", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ email: "content.lead@accudrive.io", password: "ForgeFlow2026!" }),
+                        });
+                        const data = await response.json();
+                        if (!response.ok || !data.user) throw new Error(data.error || "Login failed");
+                        setAuthModalOpen(false);
+                        onAuthenticated(data.user);
+                      } catch (err: unknown) {
+                        setError(err instanceof Error ? err.message : "Test drive sign-in failed");
+                      } finally {
+                        setBusy(false);
+                      }
+                    }}
+                    className="text-sky-300 hover:underline cursor-pointer"
+                  >
+                    Content Author
+                  </button>
+                </div>
                 <button
                   type="button"
                   disabled={busy}
@@ -2700,7 +2800,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                       const response = await fetch("/api/auth/login", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ email: "marcus.vance@accudrive.io", password: "ForgeFlow2026!" }),
+                        body: JSON.stringify({ email: "admin@accudrive.io", password: "ForgeFlow2026!" }),
                       });
                       const data = await response.json();
                       if (!response.ok || !data.user) throw new Error(data.error || "Login failed");
@@ -2712,36 +2812,9 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                       setBusy(false);
                     }
                   }}
-                  className="text-sky-300 hover:underline cursor-pointer"
+                  className="text-emerald-400 hover:underline cursor-pointer font-bold"
                 >
-                  Engineer Reviewer
-                </button>
-                <span>•</span>
-                <button
-                  type="button"
-                  disabled={busy}
-                  onClick={async () => {
-                    setBusy(true);
-                    setError("");
-                    try {
-                      const response = await fetch("/api/auth/login", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ email: "content.lead@accudrive.io", password: "ForgeFlow2026!" }),
-                      });
-                      const data = await response.json();
-                      if (!response.ok || !data.user) throw new Error(data.error || "Login failed");
-                      setAuthModalOpen(false);
-                      onAuthenticated(data.user);
-                    } catch (err: unknown) {
-                      setError(err instanceof Error ? err.message : "Test drive sign-in failed");
-                    } finally {
-                      setBusy(false);
-                    }
-                  }}
-                  className="text-sky-300 hover:underline cursor-pointer"
-                >
-                  Content Author
+                  AccuDrive Demo
                 </button>
               </div>
             </div>
@@ -2868,10 +2941,31 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
               <button
                 type="submit"
                 disabled={busy}
-                className="w-full rounded-xl bg-sky-600 py-2.5 text-xs font-bold uppercase tracking-wider text-white shadow-md shadow-sky-600/20 transition hover:bg-sky-500 disabled:opacity-60 cursor-pointer"
+                className="w-full rounded-xl bg-sky-600 py-2.5 text-xs font-bold uppercase tracking-wider text-white shadow-md shadow-sky-600/20 transition hover:bg-sky-500 disabled:opacity-60 cursor-pointer font-humanist"
               >
-                {busy ? "Authenticating…" : authMode === "register" ? "Create Workspace & Launch Console" : "Enter Console"}
+                {busy ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <span className="inline-block w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin"></span>
+                    <span>Authenticating Workspace…</span>
+                  </span>
+                ) : authMode === "register" ? (
+                  "Create Workspace & Launch Console"
+                ) : (
+                  "Enter Console"
+                )}
               </button>
+
+              {busy && (
+                <div className="text-center pt-1">
+                  <button
+                    type="button"
+                    onClick={() => setBusy(false)}
+                    className="text-[11px] text-slate-400 hover:text-slate-600 underline font-medium cursor-pointer"
+                  >
+                    Cancel authentication
+                  </button>
+                </div>
+              )}
             </form>
 
             <div className="mt-5 border-t border-slate-100 pt-4 text-center text-xs text-slate-500">
