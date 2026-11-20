@@ -200,7 +200,7 @@ export function generateExpertReviewHtml(options: {
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.5rem;">
         ${verificationItems.map((item) => `
           <div style="background: #ffffff; border: 1px solid #dcfce7; padding: 0.5rem 0.75rem; border-radius: 6px; font-size: 0.75rem; color: #166534; display: flex; align-items: center; gap: 0.4rem;">
-            <span style="font-weight: 800; color: #16a34a;">✓</span>
+            <span style="font-weight: 800; font-family: monospace; font-size: 0.65rem; color: #16a34a; background: #dcfce7; padding: 1px 4px; border-radius: 3px;">PASS</span>
             <span>${escapeHtml(item.split(":")[0])}</span>
           </div>
         `).join("")}

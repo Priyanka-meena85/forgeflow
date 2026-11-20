@@ -22,6 +22,11 @@ import { DeveloperApiPortal } from "@/components/DeveloperApiPortal";
 import { DistributorSyndication } from "@/components/DistributorSyndication";
 import { TechnicalWhitepaperGenerator } from "@/components/TechnicalWhitepaperGenerator";
 import { AiRouterCogsMonitor } from "@/components/AiRouterCogsMonitor";
+import { StepCadSchemaExtractor } from "@/components/StepCadSchemaExtractor";
+import { IndustrialLocalizationStudio } from "@/components/IndustrialLocalizationStudio";
+import { CrmPipelineAttribution } from "@/components/CrmPipelineAttribution";
+import { MdfCoOpBilling } from "@/components/MdfCoOpBilling";
+import { GeoShareOfVoiceTracker } from "@/components/GeoShareOfVoiceTracker";
 
 type TabKey =
   | "Mission Control"
@@ -34,12 +39,17 @@ type TabKey =
   | "GSC Performance"
   | "Global Standardizer"
   | "3D CAD Inspector"
+  | "STEP CAD Extractor"
+  | "Standards Localization"
   | "Enterprise SSO"
   | "Buyer Intent"
   | "Distributor Co-Marketing"
   | "Developer API"
   | "AI COGS & Router"
   | "Engineering Whitepapers"
+  | "CRM Pipeline ROI"
+  | "OEM MDF Billing"
+  | "AI Share of Voice"
   | "Industrial Analytics"
   | "Workspace & Rules"
   | "Billing & Quotas";
@@ -107,12 +117,17 @@ const navItems: Array<{ label: TabKey; badge?: string; iconClass: string }> = [
   { label: "GSC Performance", iconClass: "css-icon-chart", badge: "Live Sync" },
   { label: "Global Standardizer", iconClass: "css-icon-gear", badge: "ISO / DIN" },
   { label: "3D CAD Inspector", iconClass: "css-icon-box", badge: "Exploded View" },
+  { label: "STEP CAD Extractor", iconClass: "css-icon-box", badge: "CAD to Schema" },
+  { label: "Standards Localization", iconClass: "css-icon-gear", badge: "DIN / JIS" },
   { label: "Enterprise SSO", iconClass: "css-icon-shield", badge: "SAML 2.0" },
   { label: "Buyer Intent", iconClass: "css-icon-search", badge: "Reverse-IP" },
   { label: "Distributor Co-Marketing", iconClass: "css-icon-launch", badge: "Channel" },
   { label: "Developer API", iconClass: "css-icon-gear", badge: "REST & Webhooks" },
   { label: "AI COGS & Router", iconClass: "css-icon-bolt", badge: "Tri-Model" },
   { label: "Engineering Whitepapers", iconClass: "css-icon-doc", badge: "PDF Gen" },
+  { label: "CRM Pipeline ROI", iconClass: "css-icon-chart", badge: "Attribution" },
+  { label: "OEM MDF Billing", iconClass: "css-icon-card", badge: "Dealer Funds" },
+  { label: "AI Share of Voice", iconClass: "css-icon-search", badge: "GEO Tracker" },
   { label: "Industrial Analytics", iconClass: "css-icon-chart", badge: "Charts" },
   { label: "Workspace & Rules", iconClass: "css-icon-gear" },
   { label: "Billing & Quotas", iconClass: "css-icon-card" },
@@ -4589,6 +4604,41 @@ function ForgeFlowWorkspace() {
         {activeTab === "Engineering Whitepapers" && (
           <div className="p-6 space-y-6 max-w-7xl animate-fade-in">
             <TechnicalWhitepaperGenerator />
+          </div>
+        )}
+
+        {/* TAB 6L: STEP CAD TO SCHEMA EXTRACTOR */}
+        {activeTab === "STEP CAD Extractor" && (
+          <div className="p-6 space-y-6 max-w-7xl animate-fade-in">
+            <StepCadSchemaExtractor />
+          </div>
+        )}
+
+        {/* TAB 6M: MULTI-LANGUAGE INDUSTRIAL LOCALIZATION */}
+        {activeTab === "Standards Localization" && (
+          <div className="p-6 space-y-6 max-w-7xl animate-fade-in">
+            <IndustrialLocalizationStudio />
+          </div>
+        )}
+
+        {/* TAB 6N: CLOSED-LOOP CRM & RFQ PIPELINE ATTRIBUTION */}
+        {activeTab === "CRM Pipeline ROI" && (
+          <div className="p-6 space-y-6 max-w-7xl animate-fade-in">
+            <CrmPipelineAttribution />
+          </div>
+        )}
+
+        {/* TAB 6O: OEM MDF CO-OP BILLING */}
+        {activeTab === "OEM MDF Billing" && (
+          <div className="p-6 space-y-6 max-w-7xl animate-fade-in">
+            <MdfCoOpBilling />
+          </div>
+        )}
+
+        {/* TAB 6P: GENERATIVE ENGINE OPTIMIZATION SHARE OF VOICE */}
+        {activeTab === "AI Share of Voice" && (
+          <div className="p-6 space-y-6 max-w-7xl animate-fade-in">
+            <GeoShareOfVoiceTracker />
           </div>
         )}
 

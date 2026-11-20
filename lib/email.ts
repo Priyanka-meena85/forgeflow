@@ -269,7 +269,7 @@ export async function sendInvitationEmail({
     </p>
 
     <div style="background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 14px 16px; margin-bottom: 28px; font-size: 13px; color: #166534;">
-      ✓ Full access to deterministic content generation, QA Review Studio, and multi-channel publishing pipelines.
+      [VERIFIED] Full access to deterministic content generation, QA Review Studio, and multi-channel publishing pipelines.
     </div>
 
     <div style="text-align: center; margin: 32px 0;">
@@ -412,8 +412,8 @@ export async function sendReviewDecisionAlert({
   const draftUrl = `${appUrl}/?tab=qa&draftId=${encodeURIComponent(draftId)}`;
   const isApproved = status === "APPROVED";
   const subject = isApproved
-    ? `✔ Approved: ${draftTitle.slice(0, 45)}… ready for syndication`
-    : `✎ Revisions Requested: ${draftTitle.slice(0, 45)}…`;
+    ? `[Approved] ${draftTitle.slice(0, 45)}… ready for syndication`
+    : `[Revisions Requested] ${draftTitle.slice(0, 45)}…`;
 
   const html = `
 <!DOCTYPE html>
@@ -464,7 +464,7 @@ export async function sendPublishedAlert({
   publishedUrl: string;
   cmsType: string;
 }): Promise<EmailResult> {
-  const subject = `🚀 Live on ${cmsType}: ${draftTitle.slice(0, 50)}…`;
+  const subject = `[Published] Live on ${cmsType}: ${draftTitle.slice(0, 50)}…`;
 
   const html = `
 <!DOCTYPE html>
