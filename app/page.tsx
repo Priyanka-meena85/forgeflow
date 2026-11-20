@@ -144,42 +144,42 @@ const navSections: Array<{
     title: "Core Workflow",
     items: [
       { label: "Mission Control", iconClass: "css-icon-bolt" },
-      { label: "Taxonomy Matrix", iconClass: "css-icon-grid", badge: "7 Verticals" },
-      { label: "QA Review Studio", iconClass: "css-icon-shield", badge: "Split-View" },
+      { label: "Taxonomy Matrix", iconClass: "css-icon-grid" },
+      { label: "QA Review Studio", iconClass: "css-icon-shield" },
       { label: "Publishing Pipeline", iconClass: "css-icon-launch" },
     ],
   },
   {
-    title: "AI Search & SERP Simulation",
+    title: "AI Search & SERP",
     items: [
-      { label: "AEO Schema Hub", iconClass: "css-icon-gear", badge: "Live SERP" },
-      { label: "Competitor Displacer", iconClass: "css-icon-bolt", badge: "Steal Matrix" },
-      { label: "GSC Performance", iconClass: "css-icon-chart", badge: "Live Sync" },
-      { label: "AI Share of Voice", iconClass: "css-icon-search", badge: "GEO Tracker" },
+      { label: "AEO Schema Hub", iconClass: "css-icon-gear", badge: "Live" },
+      { label: "Competitor Displacer", iconClass: "css-icon-bolt" },
+      { label: "GSC Performance", iconClass: "css-icon-chart" },
+      { label: "AI Share of Voice", iconClass: "css-icon-search", badge: "GEO" },
     ],
   },
   {
     title: "3D CAD & Standards",
     items: [
-      { label: "3D CAD Inspector", iconClass: "css-icon-box", badge: "360° View" },
-      { label: "Standards Localization", iconClass: "css-icon-gear", badge: "DIN / JIS" },
-      { label: "Global Standardizer", iconClass: "css-icon-gear", badge: "ISO / DIN" },
-      { label: "STEP CAD Extractor", iconClass: "css-icon-box", badge: "Schema AST" },
-      { label: "Engineering Whitepapers", iconClass: "css-icon-doc", badge: "PDF Gen" },
+      { label: "3D CAD Inspector", iconClass: "css-icon-box", badge: "360°" },
+      { label: "Standards Localization", iconClass: "css-icon-gear", badge: "DIN/JIS" },
+      { label: "Global Standardizer", iconClass: "css-icon-gear" },
+      { label: "STEP CAD Extractor", iconClass: "css-icon-box" },
+      { label: "Engineering Whitepapers", iconClass: "css-icon-doc" },
     ],
   },
   {
     title: "Enterprise Hub",
     items: [
-      { label: "Buyer Intent", iconClass: "css-icon-search", badge: "Reverse-IP" },
-      { label: "Distributor Co-Marketing", iconClass: "css-icon-launch", badge: "Channel" },
-      { label: "Developer API", iconClass: "css-icon-gear", badge: "REST v1" },
-      { label: "Enterprise SSO", iconClass: "css-icon-shield", badge: "SAML/SCIM" },
-      { label: "AI COGS & Router", iconClass: "css-icon-bolt", badge: "Margin" },
-      { label: "CRM Pipeline ROI", iconClass: "css-icon-chart", badge: "Attribution" },
-      { label: "OEM MDF Billing", iconClass: "css-icon-card", badge: "Dealer Funds" },
-      { label: "Risk & Compliance", iconClass: "css-icon-alert", badge: "Low Risk" },
-      { label: "Industrial Analytics", iconClass: "css-icon-chart", badge: "APM" },
+      { label: "Buyer Intent", iconClass: "css-icon-search" },
+      { label: "Distributor Co-Marketing", iconClass: "css-icon-launch" },
+      { label: "Developer API", iconClass: "css-icon-gear" },
+      { label: "Enterprise SSO", iconClass: "css-icon-shield", badge: "SAML" },
+      { label: "AI COGS & Router", iconClass: "css-icon-bolt" },
+      { label: "CRM Pipeline ROI", iconClass: "css-icon-chart" },
+      { label: "OEM MDF Billing", iconClass: "css-icon-card" },
+      { label: "Risk & Compliance", iconClass: "css-icon-alert" },
+      { label: "Industrial Analytics", iconClass: "css-icon-chart" },
     ],
   },
 ];
@@ -2077,9 +2077,9 @@ function ForgeFlowWorkspace() {
   }
 
   return (
-    <div className="flex min-h-screen bg-slate-50 text-slate-900 font-sans antialiased">
-            {/* SIDEBAR NAVIGATION - MATCHING USER'S REFERENCE DESIGN & FORGEFLOW BRAND IDENTITY */}
-      <aside className="w-64 shrink-0 border-r border-slate-200 bg-white p-3.5 flex flex-col justify-between hidden md:flex shadow-xs select-none h-screen sticky top-0">
+    <div className="flex h-screen w-screen overflow-hidden bg-slate-50 text-slate-900 font-sans antialiased">
+      {/* SIDEBAR NAVIGATION - FIXED & STICKY LINEAR/STRIPE ENTERPRISE SHELL */}
+      <aside className="w-72 shrink-0 border-r border-slate-200 bg-white p-4 flex flex-col justify-between hidden md:flex shadow-xs select-none h-full z-20">
         <div className="flex flex-col min-h-0 flex-1">
           {/* Official ForgeFlow Logo Header & Top Bar */}
           <div className="space-y-3 shrink-0 pb-3">
@@ -2106,41 +2106,33 @@ function ForgeFlowWorkspace() {
             <button
               type="button"
               onClick={() => setActiveTab("Industrial Analytics")}
-              className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl hover:bg-slate-50 text-xs font-semibold text-slate-700 transition group border border-transparent hover:border-slate-200 cursor-pointer"
+              className="w-full flex items-center justify-between px-3 py-2 rounded-xl hover:bg-slate-50 text-xs font-semibold text-slate-700 transition group border border-slate-200/70 hover:border-slate-300 cursor-pointer shadow-2xs"
             >
-              <div className="flex items-center gap-2">
-                <div className="w-5 h-5 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center font-mono font-bold text-[11px] group-hover:bg-sky-100 group-hover:text-sky-700 transition">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-5 h-5 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center font-mono font-bold text-[11px] group-hover:bg-sky-100 group-hover:text-sky-700 transition shrink-0">
                   $
                 </div>
-                <span className="font-medium text-slate-700 group-hover:text-slate-900">Financial overview</span>
+                <span className="font-medium text-slate-800 whitespace-nowrap">Financial overview</span>
               </div>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-50 text-sky-700 border border-sky-200/60 font-sans tracking-wide">
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-50 text-sky-700 border border-sky-200/60 font-sans tracking-wide shrink-0">
                 Agentic
               </span>
             </button>
 
-            {/* My Tools Quick Bar */}
-            <div className="rounded-xl bg-sky-50/70 border border-sky-100/90 px-3 py-2 flex items-center justify-between text-xs font-semibold text-slate-700 shadow-2xs">
+            {/* Quick Actions Bar */}
+            <div className="rounded-xl bg-slate-50 border border-slate-200/80 px-3 py-1.5 flex items-center justify-between text-xs font-semibold text-slate-700 shadow-2xs">
               <div className="flex items-center gap-2">
                 <span className="css-icon-grid text-sky-600"></span>
-                <span className="text-slate-800 font-medium">My tools</span>
+                <span className="text-slate-800 font-medium">Quick tools</span>
               </div>
-              <div className="flex items-center gap-2 text-slate-400">
-                <button
-                  type="button"
-                  onClick={() => setActionMessage("Quick tools collapsed")}
-                  className="hover:text-slate-600 text-xs transition cursor-pointer"
-                  title="Dismiss"
-                ><span className="css-icon-cross"></span></button>
-                <button
-                  type="button"
-                  onClick={() => setShowQuickActionPalette(true)}
-                  className="hover:text-slate-600 text-sm font-bold transition cursor-pointer hover:scale-110"
-                  title="Open Quick Action Palette (+)"
-                >
-                  +
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={() => setShowQuickActionPalette(true)}
+                className="px-2 py-0.5 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 text-[11px] font-mono font-bold transition cursor-pointer shadow-2xs"
+                title="Open Quick Action Palette (+)"
+              >
+                + Palette
+              </button>
             </div>
           </div>
 
@@ -2159,14 +2151,14 @@ function ForgeFlowWorkspace() {
                         key={item.label}
                         type="button"
                         onClick={() => setActiveTab(item.label)}
-                        className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs transition cursor-pointer ${
+                        className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs transition cursor-pointer ${
                           isActive
-                            ? "bg-sky-50 text-sky-700 font-bold border border-sky-200/70 shadow-2xs"
+                            ? "bg-sky-50 text-sky-700 font-bold border border-sky-200 shadow-2xs"
                             : "text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium border border-transparent"
                         }`}
                       >
-                        <div className="flex items-center gap-2 min-w-0">
-                          <span className={`${item.iconClass} shrink-0`}></span>
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <span className={`${item.iconClass} shrink-0 text-slate-500`}></span>
                           <span className="truncate">{item.label}</span>
                         </div>
                         {item.badge ? (
@@ -2174,8 +2166,6 @@ function ForgeFlowWorkspace() {
                             className={`px-1.5 py-0.5 text-[9px] font-mono rounded font-bold shrink-0 ${
                               isActive
                                 ? "bg-sky-200 text-sky-800"
-                                : item.badge === "Split-View" || item.badge === "Live SERP" || item.badge === "360° View"
-                                ? "bg-sky-50 text-sky-700 border border-sky-100"
                                 : "bg-slate-100 text-slate-500 border border-slate-200/60"
                             }`}
                           >
@@ -2435,8 +2425,8 @@ function ForgeFlowWorkspace() {
         </div>
       )}
 
-      {/* MAIN VIEWPORT */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
+      {/* MAIN VIEWPORT - INDEPENDENT SCROLLING SURFACE */}
+      <div className="flex-1 flex flex-col min-w-0 h-full overflow-y-auto">
         {/* TOP ANNOUNCEMENT BANNER - SOBER ENTERPRISE */}
         {showAnnouncement && (
           <div className="bg-slate-900 border-b border-slate-800 px-6 py-2.5 text-slate-200 text-xs flex items-center justify-between shadow-xs">
