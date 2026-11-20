@@ -91,23 +91,23 @@ export function IndustrialLocalizationStudio({
     <div className="space-y-6 font-humanist">
       {/* Header Banner */}
       <div className="card-premium p-6 rounded-2xl space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-stone-200/80 pb-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200/80 pb-5">
           <div>
             <div className="flex items-center gap-2 mb-1.5">
               <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-50 text-amber-800 border border-amber-200">
                 <span className="w-1.5 h-1.5 rounded-full bg-amber-600 animate-pulse"></span>
                 NIST SP 811 / ISO 80000-1 CROSSWALK
               </span>
-              <span className="text-xs text-stone-500 font-mono">DIN EN &bull; JIS G &bull; ANSI/ASTM</span>
+              <span className="text-xs text-slate-500 font-mono">DIN EN &bull; JIS G &bull; ANSI/ASTM</span>
             </div>
-            <h2 className="text-xl font-bold text-stone-900 tracking-tight">
+            <h2 className="text-xl font-bold text-slate-900 tracking-tight">
               Global Engineering Standards &amp; Unit Crosswalk Engine
             </h2>
-            <p className="mt-1 text-xs text-stone-600 max-w-3xl leading-relaxed">
-              Industrial machinery exports globally. Auto-localize US engineering specifications (AISI 4140, 3,000 PSI, 180°F) into German DIN EN 10083-3 (42CrMo4, 206 bar, 82°C) and Japanese JIS G4053 (SCM440) with automated multi-lingual Schema.org (<code className="px-1 bg-stone-100 rounded text-stone-800">inLanguage: &quot;de&quot; / &quot;ja&quot;</code>) and bidirectional hreflang tags.
+            <p className="mt-1 text-xs text-slate-600 max-w-3xl leading-relaxed">
+              Industrial machinery exports globally. Auto-localize US engineering specifications (AISI 4140, 3,000 PSI, 180°F) into German DIN EN 10083-3 (42CrMo4, 206 bar, 82°C) and Japanese JIS G4053 (SCM440) with automated multi-lingual Schema.org (<code className="px-1 bg-slate-100 rounded text-slate-800">inLanguage: &quot;de&quot; / &quot;ja&quot;</code>) and bidirectional hreflang tags.
             </p>
           </div>
-          <span className="px-3 py-1 rounded-lg text-xs font-mono font-bold bg-stone-100 text-stone-700 border border-stone-200 shrink-0 self-start sm:self-auto">
+          <span className="px-3 py-1 rounded-lg text-xs font-mono font-bold bg-slate-100 text-slate-700 border border-slate-200 shrink-0 self-start sm:self-auto">
             Zero Rounding Drift
           </span>
         </div>
@@ -115,11 +115,11 @@ export function IndustrialLocalizationStudio({
         {/* 1-Click Interactive Parameter Bar */}
         <div className="space-y-3 pt-1">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <span className="text-xs font-mono font-bold text-stone-700 uppercase">
+            <span className="text-xs font-mono font-bold text-slate-700 uppercase">
               1-Click US Imperial Input Parameters
             </span>
             <div className="flex flex-wrap items-center gap-1.5">
-              <span className="text-[11px] font-mono text-stone-400 mr-1">Presets:</span>
+              <span className="text-[11px] font-mono text-slate-400 mr-1">Presets:</span>
               <button
                 type="button"
                 onClick={() =>
@@ -132,7 +132,7 @@ export function IndustrialLocalizationStudio({
                     tq: 65,
                   })
                 }
-                className="text-[11px] px-2.5 py-1 rounded-lg bg-stone-50 hover:bg-sky-50 text-stone-700 hover:text-sky-800 border border-stone-200 transition cursor-pointer"
+                className="text-[11px] px-2.5 py-1 rounded-lg bg-slate-50 hover:bg-sky-50 text-slate-700 hover:text-sky-800 border border-slate-200 transition cursor-pointer"
               >
                 Hydraulic 4140 (3,000 PSI)
               </button>
@@ -148,7 +148,7 @@ export function IndustrialLocalizationStudio({
                     tq: 85,
                   })
                 }
-                className="text-[11px] px-2.5 py-1 rounded-lg bg-stone-50 hover:bg-sky-50 text-stone-700 hover:text-sky-800 border border-stone-200 transition cursor-pointer"
+                className="text-[11px] px-2.5 py-1 rounded-lg bg-slate-50 hover:bg-sky-50 text-slate-700 hover:text-sky-800 border border-slate-200 transition cursor-pointer"
               >
                 Sanitary 316L CIP (350 PSI)
               </button>
@@ -164,7 +164,7 @@ export function IndustrialLocalizationStudio({
                     tq: 45,
                   })
                 }
-                className="text-[11px] px-2.5 py-1 rounded-lg bg-stone-50 hover:bg-sky-50 text-stone-700 hover:text-sky-800 border border-stone-200 transition cursor-pointer"
+                className="text-[11px] px-2.5 py-1 rounded-lg bg-slate-50 hover:bg-sky-50 text-slate-700 hover:text-sky-800 border border-slate-200 transition cursor-pointer"
               >
                 Ductile Iron RTU (ASTM A536)
               </button>
@@ -173,7 +173,7 @@ export function IndustrialLocalizationStudio({
 
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
             <div>
-              <label className="block text-[10px] font-mono uppercase font-bold text-stone-500 mb-1">
+              <label className="block text-[10px] font-mono uppercase font-bold text-slate-500 mb-1">
                 Material Grade
               </label>
               <select
@@ -189,7 +189,7 @@ export function IndustrialLocalizationStudio({
             </div>
 
             <div>
-              <label className="block text-[10px] font-mono uppercase font-bold text-stone-500 mb-1">
+              <label className="block text-[10px] font-mono uppercase font-bold text-slate-500 mb-1">
                 Pressure (PSI)
               </label>
               <input
@@ -201,7 +201,7 @@ export function IndustrialLocalizationStudio({
             </div>
 
             <div>
-              <label className="block text-[10px] font-mono uppercase font-bold text-stone-500 mb-1">
+              <label className="block text-[10px] font-mono uppercase font-bold text-slate-500 mb-1">
                 Temperature (°F)
               </label>
               <input
@@ -213,7 +213,7 @@ export function IndustrialLocalizationStudio({
             </div>
 
             <div>
-              <label className="block text-[10px] font-mono uppercase font-bold text-stone-500 mb-1">
+              <label className="block text-[10px] font-mono uppercase font-bold text-slate-500 mb-1">
                 Clearance (in.)
               </label>
               <input
@@ -226,7 +226,7 @@ export function IndustrialLocalizationStudio({
             </div>
 
             <div>
-              <label className="block text-[10px] font-mono uppercase font-bold text-stone-500 mb-1">
+              <label className="block text-[10px] font-mono uppercase font-bold text-slate-500 mb-1">
                 Torque (ft-lb)
               </label>
               <input
@@ -276,9 +276,9 @@ export function IndustrialLocalizationStudio({
 
       {/* Target Market Navigator */}
       <div className="card-premium p-6 rounded-2xl space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-stone-200/80 pb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200/80 pb-4">
           {/* Market Tabs */}
-          <div className="inline-flex rounded-xl bg-stone-100 p-1 border border-stone-200/90 shadow-2xs">
+          <div className="inline-flex rounded-xl bg-slate-100 p-1 border border-slate-200/90 shadow-2xs">
             {[
               { id: "de-DE", label: "Germany & DACH", code: "DIN EN (42CrMo4)" },
               { id: "ja-JP", label: "Japan & APAC", code: "JIS G (SCM440)" },
@@ -290,12 +290,12 @@ export function IndustrialLocalizationStudio({
                 onClick={() => setSelectedLocale(loc.id as "en-US" | "de-DE" | "ja-JP")}
                 className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer flex items-center gap-1.5 ${
                   selectedLocale === loc.id
-                    ? "bg-white text-stone-900 shadow-xs border border-stone-200/80 font-bold"
-                    : "text-stone-600 hover:text-stone-900"
+                    ? "bg-white text-slate-900 shadow-xs border border-slate-200/80 font-bold"
+                    : "text-slate-600 hover:text-slate-900"
                 }`}
               >
                 <span>{loc.label}</span>
-                <span className="text-[10px] font-mono text-stone-400">({loc.code.split(" ")[0]})</span>
+                <span className="text-[10px] font-mono text-slate-400">({loc.code.split(" ")[0]})</span>
               </button>
             ))}
           </div>
@@ -307,8 +307,8 @@ export function IndustrialLocalizationStudio({
               onClick={() => setActiveView("tolerances")}
               className={`px-3 py-1 rounded-lg transition cursor-pointer ${
                 activeView === "tolerances"
-                  ? "bg-stone-900 text-white font-bold"
-                  : "bg-stone-100 text-stone-600 hover:bg-stone-200"
+                  ? "bg-slate-900 text-white font-bold"
+                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
               }`}
             >
               Physical Tolerances
@@ -318,8 +318,8 @@ export function IndustrialLocalizationStudio({
               onClick={() => setActiveView("schema")}
               className={`px-3 py-1 rounded-lg transition cursor-pointer ${
                 activeView === "schema"
-                  ? "bg-stone-900 text-white font-bold"
-                  : "bg-stone-100 text-stone-600 hover:bg-stone-200"
+                  ? "bg-slate-900 text-white font-bold"
+                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
               }`}
             >
               Multi-Lingual Schema.org
@@ -329,8 +329,8 @@ export function IndustrialLocalizationStudio({
               onClick={() => setActiveView("hreflang")}
               className={`px-3 py-1 rounded-lg transition cursor-pointer ${
                 activeView === "hreflang"
-                  ? "bg-stone-900 text-white font-bold"
-                  : "bg-stone-100 text-stone-600 hover:bg-stone-200"
+                  ? "bg-slate-900 text-white font-bold"
+                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
               }`}
             >
               Hreflang Tags
@@ -340,24 +340,24 @@ export function IndustrialLocalizationStudio({
 
         {loading ? (
           <div className="py-16 text-center space-y-3">
-            <div className="w-8 h-8 border-3 border-stone-800 border-t-transparent rounded-full animate-spin mx-auto"></div>
-            <p className="text-xs font-mono text-stone-500">Crosswalking units via NIST SP 811 &amp; ISO 80000-1...</p>
+            <div className="w-8 h-8 border-3 border-slate-800 border-t-transparent rounded-full animate-spin mx-auto"></div>
+            <p className="text-xs font-mono text-slate-500">Crosswalking units via NIST SP 811 &amp; ISO 80000-1...</p>
           </div>
         ) : activeSlice ? (
           <div className="space-y-6">
             {/* Market Headline Card */}
-            <div className="p-4 rounded-xl bg-stone-50 border border-stone-200/80 space-y-2">
+            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2">
               <div className="flex items-center justify-between text-[11px] font-mono">
-                <span className="font-bold text-stone-500 uppercase">{activeSlice.marketName}</span>
+                <span className="font-bold text-slate-500 uppercase">{activeSlice.marketName}</span>
                 <span className="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
                   {activeSlice.regulatoryBody}
                 </span>
               </div>
-              <h3 className="text-base font-bold text-stone-900 leading-snug">{activeSlice.translatedHeadline}</h3>
-              <p className="text-xs text-stone-600 font-mono">
+              <h3 className="text-base font-bold text-slate-900 leading-snug">{activeSlice.translatedHeadline}</h3>
+              <p className="text-xs text-slate-600 font-mono">
                 Governing Standard: <strong className="text-sky-800">{activeSlice.targetStandard}</strong>
               </p>
-              <p className="text-xs text-stone-500 italic pt-1 border-t border-stone-200/60">
+              <p className="text-xs text-slate-500 italic pt-1 border-t border-slate-200/60">
                 {activeSlice.complianceStatement}
               </p>
             </div>
@@ -367,51 +367,51 @@ export function IndustrialLocalizationStudio({
               <div className="space-y-4 animate-fade-in">
                 {/* 4-Box Unit Crosswalk Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <div className="p-4 rounded-xl border border-stone-200 bg-white shadow-2xs space-y-1.5">
-                    <span className="text-[10px] font-mono uppercase font-bold text-stone-500 block">
+                  <div className="p-4 rounded-xl border border-slate-200 bg-white shadow-2xs space-y-1.5">
+                    <span className="text-[10px] font-mono uppercase font-bold text-slate-500 block">
                       Operating Pressure
                     </span>
-                    <p className="text-base font-extrabold text-stone-900 font-mono">{activeSlice.units.pressure}</p>
-                    <p className="text-[11px] text-stone-500">
+                    <p className="text-base font-extrabold text-slate-900 font-mono">{activeSlice.units.pressure}</p>
+                    <p className="text-[11px] text-slate-500">
                       Converted from {pressurePsi} PSI ({activeSlice.locale === "en-US" ? "Imperial" : "Metric SI"})
                     </p>
                   </div>
 
-                  <div className="p-4 rounded-xl border border-stone-200 bg-white shadow-2xs space-y-1.5">
-                    <span className="text-[10px] font-mono uppercase font-bold text-stone-500 block">
+                  <div className="p-4 rounded-xl border border-slate-200 bg-white shadow-2xs space-y-1.5">
+                    <span className="text-[10px] font-mono uppercase font-bold text-slate-500 block">
                       Operating Temperature
                     </span>
-                    <p className="text-base font-extrabold text-stone-900 font-mono">{activeSlice.units.temperature}</p>
-                    <p className="text-[11px] text-stone-500">
+                    <p className="text-base font-extrabold text-slate-900 font-mono">{activeSlice.units.temperature}</p>
+                    <p className="text-[11px] text-slate-500">
                       Thermal limits ({activeSlice.locale === "en-US" ? `${temperatureF}°F` : `${Math.round(((temperatureF - 32) * 5) / 9)}°C`})
                     </p>
                   </div>
 
-                  <div className="p-4 rounded-xl border border-stone-200 bg-white shadow-2xs space-y-1.5">
-                    <span className="text-[10px] font-mono uppercase font-bold text-stone-500 block">
+                  <div className="p-4 rounded-xl border border-slate-200 bg-white shadow-2xs space-y-1.5">
+                    <span className="text-[10px] font-mono uppercase font-bold text-slate-500 block">
                       Radial Tolerance / Spiel
                     </span>
-                    <p className="text-base font-extrabold text-stone-900 font-mono">{activeSlice.units.clearance}</p>
-                    <p className="text-[11px] text-stone-500">GD&amp;T nominal assembly clearance</p>
+                    <p className="text-base font-extrabold text-slate-900 font-mono">{activeSlice.units.clearance}</p>
+                    <p className="text-[11px] text-slate-500">GD&amp;T nominal assembly clearance</p>
                   </div>
 
-                  <div className="p-4 rounded-xl border border-stone-200 bg-white shadow-2xs space-y-1.5">
-                    <span className="text-[10px] font-mono uppercase font-bold text-stone-500 block">
+                  <div className="p-4 rounded-xl border border-slate-200 bg-white shadow-2xs space-y-1.5">
+                    <span className="text-[10px] font-mono uppercase font-bold text-slate-500 block">
                       Bolt Tightening Torque
                     </span>
-                    <p className="text-base font-extrabold text-stone-900 font-mono">{activeSlice.units.torque}</p>
-                    <p className="text-[11px] text-stone-500">Calibrated assembly torque ±1.5%</p>
+                    <p className="text-base font-extrabold text-slate-900 font-mono">{activeSlice.units.torque}</p>
+                    <p className="text-[11px] text-slate-500">Calibrated assembly torque ±1.5%</p>
                   </div>
                 </div>
 
                 {/* Metallurgy Equivalents Table */}
-                <div className="p-5 rounded-2xl border border-stone-200 bg-white shadow-2xs space-y-3">
+                <div className="p-5 rounded-2xl border border-slate-200 bg-white shadow-2xs space-y-3">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h4 className="text-sm font-bold text-stone-900">
+                      <h4 className="text-sm font-bold text-slate-900">
                         Certified Metallurgy Equivalent: {activeSlice.metallurgy.grade}
                       </h4>
-                      <p className="text-xs text-stone-500 font-mono">
+                      <p className="text-xs text-slate-500 font-mono">
                         Governed by: {activeSlice.metallurgy.equivalentStandard} &bull; Tensile: {activeSlice.metallurgy.tensileStrength}
                       </p>
                     </div>
@@ -424,7 +424,7 @@ export function IndustrialLocalizationStudio({
                       <span>{copiedKey === "metal" ? "Copied!" : "Copy Spec"}</span>
                     </button>
                   </div>
-                  <p className="text-xs text-stone-700 leading-relaxed bg-stone-50 p-3 rounded-xl border border-stone-200/80">
+                  <p className="text-xs text-slate-700 leading-relaxed bg-slate-50 p-3 rounded-xl border border-slate-200/80">
                     {activeSlice.metallurgy.compositionSummary}
                   </p>
                 </div>
@@ -435,19 +435,19 @@ export function IndustrialLocalizationStudio({
             {activeView === "schema" && (
               <div className="space-y-3 animate-fade-in">
                 <div className="flex items-center justify-between text-xs font-mono">
-                  <span className="text-stone-600 font-bold">
+                  <span className="text-slate-600 font-bold">
                     Schema.org TechArticle &bull; inLanguage: &quot;{activeSlice.locale}&quot;
                   </span>
                   <button
                     type="button"
                     onClick={() => handleCopy(JSON.stringify(activeSlice.schemaJsonLd, null, 2), "schema")}
-                    className="px-3 py-1 rounded-lg bg-stone-900 text-white font-bold hover:bg-stone-800 transition cursor-pointer flex items-center gap-1"
+                    className="px-3 py-1 rounded-lg bg-slate-900 text-white font-bold hover:bg-slate-800 transition cursor-pointer flex items-center gap-1"
                   >
                     <span className="css-icon-check"></span>
                     <span>{copiedKey === "schema" ? "Copied Schema!" : "Copy JSON-LD"}</span>
                   </button>
                 </div>
-                <pre className="p-4 rounded-xl bg-stone-900 text-cyan-300 font-mono text-xs overflow-x-auto leading-relaxed max-h-96">
+                <pre className="p-4 rounded-xl bg-slate-900 text-cyan-300 font-mono text-xs overflow-x-auto leading-relaxed max-h-96">
                   {JSON.stringify(activeSlice.schemaJsonLd, null, 2)}
                 </pre>
               </div>
@@ -457,7 +457,7 @@ export function IndustrialLocalizationStudio({
             {activeView === "hreflang" && (
               <div className="space-y-4 animate-fade-in">
                 <div className="flex items-center justify-between text-xs font-mono">
-                  <span className="text-stone-600 font-bold">Bidirectional Hreflang Canonical Injection Block</span>
+                  <span className="text-slate-600 font-bold">Bidirectional Hreflang Canonical Injection Block</span>
                   <button
                     type="button"
                     onClick={() =>
@@ -467,25 +467,25 @@ export function IndustrialLocalizationStudio({
                         "hreflang"
                       )
                     }
-                    className="px-3 py-1 rounded-lg bg-stone-900 text-white font-bold hover:bg-stone-800 transition cursor-pointer flex items-center gap-1"
+                    className="px-3 py-1 rounded-lg bg-slate-900 text-white font-bold hover:bg-slate-800 transition cursor-pointer flex items-center gap-1"
                   >
                     <span className="css-icon-check"></span>
                     <span>{copiedKey === "hreflang" ? "Copied Hreflang!" : "Copy Hreflang Cluster"}</span>
                   </button>
                 </div>
 
-                <div className="p-4 rounded-xl bg-stone-950 text-emerald-400 font-mono text-xs space-y-2 leading-relaxed">
+                <div className="p-4 rounded-xl bg-slate-950 text-emerald-400 font-mono text-xs space-y-2 leading-relaxed">
                   {slices.map((s, idx) => (
                     <div key={idx} className="truncate">
                       {s.hreflangTag}
                     </div>
                   ))}
-                  <div className="text-stone-400">
+                  <div className="text-slate-400">
                     &lt;link rel=&quot;alternate&quot; hreflang=&quot;x-default&quot; href=&quot;https://industrial-oem.com/en-us/{title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}&quot; /&gt;
                   </div>
                 </div>
-                <p className="text-xs text-stone-500">
-                  Inject this cluster in your CMS <code className="text-stone-800 bg-stone-100 px-1 py-0.5 rounded">&lt;head&gt;</code> tag to guarantee Google and Baidu/Yahoo Japan direct traffic to localized regional engineering versions without duplicate content penalties.
+                <p className="text-xs text-slate-500">
+                  Inject this cluster in your CMS <code className="text-slate-800 bg-slate-100 px-1 py-0.5 rounded">&lt;head&gt;</code> tag to guarantee Google and Baidu/Yahoo Japan direct traffic to localized regional engineering versions without duplicate content penalties.
                 </p>
               </div>
             )}

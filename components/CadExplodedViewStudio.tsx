@@ -152,6 +152,7 @@ export function CadExplodedViewStudio() {
   const [isWireframe, setIsWireframe] = useState<boolean>(false);
   const [isAutoSpin, setIsAutoSpin] = useState<boolean>(true);
   const [copiedEmbed, setCopiedEmbed] = useState<boolean>(false);
+  const [copiedParams, setCopiedParams] = useState<boolean>(false);
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const isDraggingRef = useRef<boolean>(false);
@@ -470,7 +471,7 @@ export function CadExplodedViewStudio() {
                 setRotX(20);
                 setRotY(-35);
               }}
-              className="px-3 py-1.5 rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-700 font-mono font-bold text-xs transition cursor-pointer"
+              className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-mono font-bold text-xs transition cursor-pointer"
             >
               Reset Camera
             </button>
@@ -631,11 +632,21 @@ export function CadExplodedViewStudio() {
                 navigator.clipboard.writeText(
                   `${selectedPart.name} | SKU: ${selectedPart.partNumber} | Torque: ${selectedPart.torqueLimit.metric} | Material: ${selectedPart.materialEquivalents.din}`
                 );
-                alert(`Copied ${selectedPart.name} engineering specifications to clipboard.`);
+                setCopiedParams(true);
+                setTimeout(() => setCopiedParams(false), 2200);
               }}
-              className="w-full py-2 rounded-xl bg-stone-900 hover:bg-stone-800 text-white font-bold text-xs transition cursor-pointer text-center"
+              className={`w-full py-2.5 rounded-xl text-white font-bold text-xs transition cursor-pointer text-center flex items-center justify-center gap-2 ${
+                copiedParams ? "bg-emerald-600 hover:bg-emerald-700 shadow-xs" : "bg-slate-900 hover:bg-slate-800"
+              }`}
             >
-              Copy Verified Engineering Parameters
+              {copiedParams ? (
+                <>
+                  <span className="css-icon-check text-white"></span>
+                  <span>Parameters Copied to Clipboard!</span>
+                </>
+              ) : (
+                "Copy Verified Engineering Parameters"
+              )}
             </button>
           </div>
         </div>

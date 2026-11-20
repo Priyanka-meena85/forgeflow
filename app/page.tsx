@@ -136,6 +136,54 @@ const navItems: Array<{ label: TabKey; badge?: string; iconClass: string }> = [
   { label: "Billing & Quotas", iconClass: "css-icon-card" },
 ];
 
+const navSections: Array<{
+  title: string;
+  items: Array<{ label: TabKey; badge?: string; iconClass: string }>;
+}> = [
+  {
+    title: "Core Workflow",
+    items: [
+      { label: "Mission Control", iconClass: "css-icon-bolt" },
+      { label: "Taxonomy Matrix", iconClass: "css-icon-grid", badge: "7 Verticals" },
+      { label: "QA Review Studio", iconClass: "css-icon-shield", badge: "Split-View" },
+      { label: "Publishing Pipeline", iconClass: "css-icon-launch" },
+    ],
+  },
+  {
+    title: "AI Search & SERP Simulation",
+    items: [
+      { label: "AEO Schema Hub", iconClass: "css-icon-gear", badge: "Live SERP" },
+      { label: "Competitor Displacer", iconClass: "css-icon-bolt", badge: "Steal Matrix" },
+      { label: "GSC Performance", iconClass: "css-icon-chart", badge: "Live Sync" },
+      { label: "AI Share of Voice", iconClass: "css-icon-search", badge: "GEO Tracker" },
+    ],
+  },
+  {
+    title: "3D CAD & Standards",
+    items: [
+      { label: "3D CAD Inspector", iconClass: "css-icon-box", badge: "360° View" },
+      { label: "Standards Localization", iconClass: "css-icon-gear", badge: "DIN / JIS" },
+      { label: "Global Standardizer", iconClass: "css-icon-gear", badge: "ISO / DIN" },
+      { label: "STEP CAD Extractor", iconClass: "css-icon-box", badge: "Schema AST" },
+      { label: "Engineering Whitepapers", iconClass: "css-icon-doc", badge: "PDF Gen" },
+    ],
+  },
+  {
+    title: "Enterprise Hub",
+    items: [
+      { label: "Buyer Intent", iconClass: "css-icon-search", badge: "Reverse-IP" },
+      { label: "Distributor Co-Marketing", iconClass: "css-icon-launch", badge: "Channel" },
+      { label: "Developer API", iconClass: "css-icon-gear", badge: "REST v1" },
+      { label: "Enterprise SSO", iconClass: "css-icon-shield", badge: "SAML/SCIM" },
+      { label: "AI COGS & Router", iconClass: "css-icon-bolt", badge: "Margin" },
+      { label: "CRM Pipeline ROI", iconClass: "css-icon-chart", badge: "Attribution" },
+      { label: "OEM MDF Billing", iconClass: "css-icon-card", badge: "Dealer Funds" },
+      { label: "Risk & Compliance", iconClass: "css-icon-alert", badge: "Low Risk" },
+      { label: "Industrial Analytics", iconClass: "css-icon-chart", badge: "APM" },
+    ],
+  },
+];
+
 const verticalTaxonomies: Record<
   string,
   {
@@ -2031,96 +2079,80 @@ function ForgeFlowWorkspace() {
   return (
     <div className="flex min-h-screen bg-slate-50 text-slate-900 font-sans antialiased">
             {/* SIDEBAR NAVIGATION - MATCHING USER'S REFERENCE DESIGN & FORGEFLOW BRAND IDENTITY */}
-      <aside className="w-64 shrink-0 border-r border-slate-200 bg-white p-3.5 flex flex-col justify-between hidden md:flex shadow-xs select-none">
-        <div className="space-y-3">
-          {/* Official ForgeFlow Logo Header */}
-          <div className="pb-3 border-b border-slate-100 flex items-center gap-3">
-            <Image
-              src="/logo-icon.png"
-              alt="ForgeFlow Emblem"
-              width={42}
-              height={30}
-              className="h-9 w-auto object-contain shrink-0"
-              priority
-            />
-            <div className="min-w-0">
-              <div className="text-[17px] font-black tracking-tight text-slate-900 leading-tight">
-                Forge<span className="text-sky-600">Flow</span>
+      <aside className="w-64 shrink-0 border-r border-slate-200 bg-white p-3.5 flex flex-col justify-between hidden md:flex shadow-xs select-none h-screen sticky top-0">
+        <div className="flex flex-col min-h-0 flex-1">
+          {/* Official ForgeFlow Logo Header & Top Bar */}
+          <div className="space-y-3 shrink-0 pb-3">
+            <div className="pb-3 border-b border-slate-100 flex items-center gap-3">
+              <Image
+                src="/logo-icon.png"
+                alt="ForgeFlow Emblem"
+                width={42}
+                height={30}
+                className="h-9 w-auto object-contain shrink-0"
+                priority
+              />
+              <div className="min-w-0">
+                <div className="text-[17px] font-black tracking-tight text-slate-900 leading-tight">
+                  Forge<span className="text-sky-600">Flow</span>
+                </div>
+                <div className="text-[9px] font-semibold text-slate-400 uppercase tracking-tight truncate">
+                  Plan • Generate • Optimize • Grow
+                </div>
               </div>
-              <div className="text-[9px] font-semibold text-slate-400 uppercase tracking-tight truncate">
-                Plan • Generate • Optimize • Grow
-              </div>
-            </div>
-          </div>
-
-          {/* Top Feature Pill: Financial overview [Agentic] */}
-          <button
-            type="button"
-            onClick={() => setActiveTab("Industrial Analytics")}
-            className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl hover:bg-slate-50 text-xs font-semibold text-slate-700 transition group border border-transparent hover:border-slate-200 cursor-pointer"
-          >
-            <div className="flex items-center gap-2">
-              <div className="w-5 h-5 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center font-mono font-bold text-[11px] group-hover:bg-sky-100 group-hover:text-sky-700 transition">
-                $
-              </div>
-              <span className="font-medium text-slate-700 group-hover:text-slate-900">Financial overview</span>
-            </div>
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-50 text-sky-700 border border-sky-200/60 font-sans tracking-wide">
-              Agentic
-            </span>
-          </button>
-
-          {/* My Tools Quick Bar */}
-          <div className="rounded-xl bg-sky-50/70 border border-sky-100/90 px-3 py-2 flex items-center justify-between text-xs font-semibold text-slate-700 shadow-2xs">
-            <div className="flex items-center gap-2">
-              <span className="css-icon-grid text-sky-600"></span>
-              <span className="text-slate-800 font-medium">My tools</span>
-            </div>
-            <div className="flex items-center gap-2 text-slate-400">
-              <button
-                type="button"
-                onClick={() => setActionMessage("Quick tools collapsed")}
-                className="hover:text-slate-600 text-xs transition cursor-pointer"
-                title="Dismiss"
-              ><span className="css-icon-cross"></span></button>
-              <button
-                type="button"
-                onClick={() => setShowQuickActionPalette(true)}
-                className="hover:text-slate-600 text-sm font-bold transition cursor-pointer hover:scale-110"
-                title="Open Quick Action Palette (+)"
-              >
-                +
-              </button>
-            </div>
-          </div>
-
-          {/* Category Section: Maintenance */}
-          <div className="space-y-1 pt-1">
-            <div className="text-[11px] font-bold text-slate-400 px-1 uppercase tracking-wider">
-              Maintenance
             </div>
 
-            {/* Expandable Group: Maintenance / Industrial SEO & AEO */}
+            {/* Top Feature Pill: Financial overview [Agentic] */}
             <button
               type="button"
-              onClick={() => setEngineMenuOpen(!engineMenuOpen)}
-              className="w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-bold text-slate-800 hover:bg-slate-50 transition cursor-pointer"
+              onClick={() => setActiveTab("Industrial Analytics")}
+              className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl hover:bg-slate-50 text-xs font-semibold text-slate-700 transition group border border-transparent hover:border-slate-200 cursor-pointer"
             >
-              <div className="flex items-center gap-2.5">
-                <div className="w-7 h-7 rounded-lg bg-sky-100 text-sky-600 flex items-center justify-center border border-sky-200/60 shadow-2xs shrink-0">
-                  <span className="css-icon-doc text-sky-600"></span>
+              <div className="flex items-center gap-2">
+                <div className="w-5 h-5 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center font-mono font-bold text-[11px] group-hover:bg-sky-100 group-hover:text-sky-700 transition">
+                  $
                 </div>
-                <span className="font-semibold text-slate-800">Maintenance</span>
+                <span className="font-medium text-slate-700 group-hover:text-slate-900">Financial overview</span>
               </div>
-              <span className={`css-icon-chevron-down text-slate-400 transition-transform duration-200 ${engineMenuOpen ? "rotate-0" : "-rotate-90"}`}></span>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-50 text-sky-700 border border-sky-200/60 font-sans tracking-wide">
+                Agentic
+              </span>
             </button>
 
-            {/* Indented Sub-Items with Vertical Connector Line */}
-            {engineMenuOpen && (
-              <div className="relative ml-5 pl-3.5 border-l border-slate-200 space-y-0.5 py-1">
-                {navItems
-                  .filter((item) => item.label !== "Workspace & Rules" && item.label !== "Billing & Quotas")
-                  .map((item) => {
+            {/* My Tools Quick Bar */}
+            <div className="rounded-xl bg-sky-50/70 border border-sky-100/90 px-3 py-2 flex items-center justify-between text-xs font-semibold text-slate-700 shadow-2xs">
+              <div className="flex items-center gap-2">
+                <span className="css-icon-grid text-sky-600"></span>
+                <span className="text-slate-800 font-medium">My tools</span>
+              </div>
+              <div className="flex items-center gap-2 text-slate-400">
+                <button
+                  type="button"
+                  onClick={() => setActionMessage("Quick tools collapsed")}
+                  className="hover:text-slate-600 text-xs transition cursor-pointer"
+                  title="Dismiss"
+                ><span className="css-icon-cross"></span></button>
+                <button
+                  type="button"
+                  onClick={() => setShowQuickActionPalette(true)}
+                  className="hover:text-slate-600 text-sm font-bold transition cursor-pointer hover:scale-110"
+                  title="Open Quick Action Palette (+)"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Categorized Navigation Suite (Linear/Stripe Grouped Hierarchy) */}
+          <div className="flex-1 overflow-y-auto space-y-4 pr-1 scrollbar-none">
+            {navSections.map((sec) => (
+              <div key={sec.title} className="space-y-1">
+                <div className="text-[10px] font-bold text-slate-400 px-2 uppercase tracking-wider font-mono">
+                  {sec.title}
+                </div>
+                <div className="space-y-0.5">
+                  {sec.items.map((item) => {
                     const isActive = activeTab === item.label;
                     return (
                       <button
@@ -2139,10 +2171,10 @@ function ForgeFlowWorkspace() {
                         </div>
                         {item.badge ? (
                           <span
-                            className={`px-1.5 py-0.5 text-[9.5px] font-mono rounded font-bold shrink-0 ${
+                            className={`px-1.5 py-0.5 text-[9px] font-mono rounded font-bold shrink-0 ${
                               isActive
                                 ? "bg-sky-200 text-sky-800"
-                                : item.badge === "Split-View" || item.badge === "Low Risk"
+                                : item.badge === "Split-View" || item.badge === "Live SERP" || item.badge === "360° View"
                                 ? "bg-sky-50 text-sky-700 border border-sky-100"
                                 : "bg-slate-100 text-slate-500 border border-slate-200/60"
                             }`}
@@ -2153,8 +2185,9 @@ function ForgeFlowWorkspace() {
                       </button>
                     );
                   })}
+                </div>
               </div>
-            )}
+            ))}
           </div>
         </div>
 
@@ -2316,41 +2349,45 @@ function ForgeFlowWorkspace() {
                 </span>
               </button>
 
-              {/* Navigation Items */}
-              <div className="space-y-1 pt-1">
-                <div className="text-[11px] font-bold text-slate-400 px-1 uppercase tracking-wider">
-                  Industrial Suite ({navItems.length} modules)
-                </div>
-                <div className="space-y-0.5 max-h-[50vh] overflow-y-auto pr-1">
-                  {navItems.map((item) => {
-                    const isActive = activeTab === item.label;
-                    return (
-                      <button
-                        key={item.label}
-                        type="button"
-                        onClick={() => {
-                          setActiveTab(item.label);
-                          setMobileMenuOpen(false);
-                        }}
-                        className={`w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-xs transition cursor-pointer ${
-                          isActive
-                            ? "bg-sky-50 text-sky-700 font-bold border border-sky-200/70 shadow-2xs"
-                            : "text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium border border-transparent"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2 min-w-0">
-                          <span className={`${item.iconClass} shrink-0`}></span>
-                          <span className="truncate">{item.label}</span>
-                        </div>
-                        {item.badge ? (
-                          <span className="px-1.5 py-0.5 text-[9.5px] font-mono rounded font-bold shrink-0 bg-slate-100 text-slate-600 border border-slate-200/60">
-                            {item.badge}
-                          </span>
-                        ) : null}
-                      </button>
-                    );
-                  })}
-                </div>
+              {/* Navigation Items Grouped by Category */}
+              <div className="space-y-3 pt-1 max-h-[55vh] overflow-y-auto pr-1">
+                {navSections.map((sec) => (
+                  <div key={sec.title} className="space-y-1">
+                    <div className="text-[10px] font-bold text-slate-400 px-1 uppercase tracking-wider font-mono">
+                      {sec.title}
+                    </div>
+                    <div className="space-y-0.5">
+                      {sec.items.map((item) => {
+                        const isActive = activeTab === item.label;
+                        return (
+                          <button
+                            key={item.label}
+                            type="button"
+                            onClick={() => {
+                              setActiveTab(item.label);
+                              setMobileMenuOpen(false);
+                            }}
+                            className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs transition cursor-pointer ${
+                              isActive
+                                ? "bg-sky-50 text-sky-700 font-bold border border-sky-200/70 shadow-2xs"
+                                : "text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium border border-transparent"
+                            }`}
+                          >
+                            <div className="flex items-center gap-2 min-w-0">
+                              <span className={`${item.iconClass} shrink-0`}></span>
+                              <span className="truncate">{item.label}</span>
+                            </div>
+                            {item.badge ? (
+                              <span className="px-1.5 py-0.5 text-[9px] font-mono rounded font-bold shrink-0 bg-slate-100 text-slate-600 border border-slate-200/60">
+                                {item.badge}
+                              </span>
+                            ) : null}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
 
@@ -2681,7 +2718,7 @@ function ForgeFlowWorkspace() {
                 </span>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-xs">
                 <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
                   <span className="font-mono font-bold text-slate-500 uppercase text-[11px] block">Verified Standards & Codes</span>
                   <div className="flex flex-wrap gap-1.5">
@@ -3673,13 +3710,14 @@ function ForgeFlowWorkspace() {
               {/* Live Render & Structured Pane */}
               <div className="lg:col-span-9 space-y-4">
                 {/* View Mode Toggle */}
-                <div className="flex justify-between items-center bg-white border border-slate-200 rounded-xl p-1.5 text-xs font-mono shadow-xs">
+                <div className="flex flex-wrap items-center justify-between gap-2 bg-slate-100/90 border border-slate-200/90 rounded-xl p-1 text-xs font-mono shadow-2xs">
                   <div className="flex gap-1 flex-wrap">
                     <button
+                      type="button"
                       onClick={() => setPreviewTab("HumanView")}
-                      className={`px-3 py-1.5 rounded-lg transition ${previewTab === "HumanView"
-                        ? "bg-sky-50 text-sky-700 font-bold border border-sky-200"
-                        : "text-slate-600 hover:text-slate-900"
+                      className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${previewTab === "HumanView"
+                        ? "bg-white text-sky-700 font-bold border border-slate-200 shadow-2xs"
+                        : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/50"
                         }`}
                     >
                       Rendered Layout & Capsule
@@ -3688,27 +3726,29 @@ function ForgeFlowWorkspace() {
                       type="button"
                       onClick={() => setPreviewTab("AeoPreview")}
                       className={`px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 cursor-pointer ${previewTab === "AeoPreview"
-                        ? "bg-purple-50 text-purple-700 font-bold border border-purple-200 shadow-2xs"
-                        : "text-slate-600 hover:text-slate-900"
+                        ? "bg-white text-purple-700 font-bold border border-slate-200 shadow-2xs"
+                        : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/50"
                         }`}
                     >
                       <span className="w-1.5 h-1.5 rounded-full bg-purple-600 animate-pulse"></span>
                       <span>Live AI SERP Simulator</span>
                     </button>
                     <button
+                      type="button"
                       onClick={() => setPreviewTab("StructuredNodes")}
-                      className={`px-3 py-1.5 rounded-lg transition ${previewTab === "StructuredNodes"
-                        ? "bg-sky-50 text-sky-700 font-bold border border-sky-200"
-                        : "text-slate-600 hover:text-slate-900"
+                      className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${previewTab === "StructuredNodes"
+                        ? "bg-white text-sky-700 font-bold border border-slate-200 shadow-2xs"
+                        : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/50"
                         }`}
                     >
                       Structured AST Nodes
                     </button>
                     <button
+                      type="button"
                       onClick={() => setPreviewTab("SchemaJSON")}
-                      className={`px-3 py-1.5 rounded-lg transition ${previewTab === "SchemaJSON"
-                        ? "bg-sky-50 text-sky-700 font-bold border border-sky-200"
-                        : "text-slate-600 hover:text-slate-900"
+                      className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${previewTab === "SchemaJSON"
+                        ? "bg-white text-sky-700 font-bold border border-slate-200 shadow-2xs"
+                        : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/50"
                         }`}
                     >
                       Exported JSON-LD Schema
@@ -3716,7 +3756,7 @@ function ForgeFlowWorkspace() {
                   </div>
                   <a
                     href={`/api/drafts/${encodeURIComponent(String(selectedDraft.id))}/export`}
-                    className="px-3.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 font-sans font-bold text-xs"
+                    className="px-3.5 py-1.5 rounded-lg bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 font-sans font-bold text-xs shadow-2xs"
                   >
                     Download HTML ↓
                   </a>
@@ -3979,7 +4019,7 @@ function ForgeFlowWorkspace() {
                 </span>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-xs">
                 <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
                   <span className="font-mono font-bold text-slate-500 uppercase text-[11px] block">Verified Standards & Codes</span>
                   <div className="flex flex-wrap gap-1.5">
@@ -4173,7 +4213,7 @@ function ForgeFlowWorkspace() {
                 </span>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-xs">
                 <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
                   <span className="font-mono font-bold text-slate-500 uppercase text-[11px] block">Verified Standards & Codes</span>
                   <div className="flex flex-wrap gap-1.5">
@@ -4357,7 +4397,7 @@ function ForgeFlowWorkspace() {
                 </span>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-xs">
                 <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
                   <span className="font-mono font-bold text-slate-500 uppercase text-[11px] block">Verified Standards & Codes</span>
                   <div className="flex flex-wrap gap-1.5">
@@ -4565,7 +4605,7 @@ function ForgeFlowWorkspace() {
                 </span>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-xs">
                 <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
                   <span className="font-mono font-bold text-slate-500 uppercase text-[11px] block">Verified Standards & Codes</span>
                   <div className="flex flex-wrap gap-1.5">
@@ -4891,7 +4931,7 @@ function ForgeFlowWorkspace() {
                 </span>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-xs">
                 <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
                   <span className="font-mono font-bold text-slate-500 uppercase text-[11px] block">Verified Standards & Codes</span>
                   <div className="flex flex-wrap gap-1.5">
@@ -5451,7 +5491,7 @@ function ForgeFlowWorkspace() {
                 </span>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-xs">
                 <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
                   <span className="font-mono font-bold text-slate-500 uppercase text-[11px] block">Verified Standards & Codes</span>
                   <div className="flex flex-wrap gap-1.5">

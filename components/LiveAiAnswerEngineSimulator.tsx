@@ -103,26 +103,26 @@ export function LiveAiAnswerEngineSimulator({
   return (
     <div className="card-premium p-6 rounded-2xl space-y-6 font-humanist">
       {/* Top Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-stone-200/80 pb-5">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200/80 pb-5">
         <div>
           <div className="flex items-center gap-2 mb-1.5">
             <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-purple-50 text-purple-700 border border-purple-200">
               <span className="w-1.5 h-1.5 rounded-full bg-purple-600 animate-pulse"></span>
               AEO / GEO LIVE SIMULATOR
             </span>
-            <span className="text-xs text-stone-500 font-mono">Real-Time Search Engine Visualizer</span>
+            <span className="text-xs text-slate-500 font-mono">Real-Time Search Engine Visualizer</span>
           </div>
-          <h2 className="text-xl font-bold text-stone-900 tracking-tight">
+          <h2 className="text-xl font-bold text-slate-900 tracking-tight">
             Live AI Answer Engine Simulator
           </h2>
-          <p className="text-xs text-stone-600 max-w-2xl">
+          <p className="text-xs text-slate-600 max-w-2xl">
             Simulate how Google AI Overviews, Perplexity Pro, and ChatGPT Search cite your OEM tolerances in real time. 
             Confirm 100% citation authority before exporting or publishing.
           </p>
         </div>
 
         {/* Engine Switcher Tabs */}
-        <div className="inline-flex rounded-xl bg-stone-100 p-1 border border-stone-200/90 shadow-2xs self-start md:self-auto">
+        <div className="inline-flex rounded-xl bg-slate-100 p-1 border border-slate-200/90 shadow-2xs self-start md:self-auto">
           {(["Google AI Overview", "Perplexity Copilot", "ChatGPT Search"] as const).map((eng) => {
             const isActive = engine === eng;
             return (
@@ -135,8 +135,8 @@ export function LiveAiAnswerEngineSimulator({
                 }}
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer ${
                   isActive
-                    ? "bg-white text-stone-900 shadow-xs border border-stone-200/80"
-                    : "text-stone-600 hover:text-stone-900 hover:bg-stone-50"
+                    ? "bg-white text-slate-900 shadow-xs border border-slate-200/80"
+                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
                 }`}
               >
                 {eng === "Google AI Overview" ? "Google AI" : eng === "Perplexity Copilot" ? "Perplexity Pro" : "ChatGPT Search"}
@@ -148,7 +148,7 @@ export function LiveAiAnswerEngineSimulator({
 
       {/* Query Bar */}
       <div className="space-y-2">
-        <label className="block text-xs font-mono font-bold text-stone-600 uppercase">
+        <label className="block text-xs font-mono font-bold text-slate-600 uppercase">
           Target Industrial Query &amp; Fault Code
         </label>
         <div className="flex flex-col sm:flex-row gap-2">
@@ -181,7 +181,7 @@ export function LiveAiAnswerEngineSimulator({
 
         {/* Query Suggestions */}
         <div className="flex flex-wrap items-center gap-1.5 pt-1">
-          <span className="text-[11px] font-mono text-stone-500 mr-1">Quick Presets:</span>
+          <span className="text-[11px] font-mono text-slate-500 mr-1">Quick Presets:</span>
           {sampleQueries.map((q, idx) => (
             <button
               key={idx}
@@ -189,7 +189,7 @@ export function LiveAiAnswerEngineSimulator({
               onClick={() => {
                 setQueryInput(q);
               }}
-              className="text-[11px] font-medium text-stone-600 bg-stone-50 hover:bg-sky-50 hover:text-sky-800 px-2.5 py-1 rounded-lg border border-stone-200 transition cursor-pointer truncate max-w-[260px]"
+              className="text-[11px] font-medium text-slate-600 bg-slate-50 hover:bg-sky-50 hover:text-sky-800 px-2.5 py-1 rounded-lg border border-slate-200 transition cursor-pointer truncate max-w-[260px]"
             >
               {q}
             </button>
@@ -198,47 +198,47 @@ export function LiveAiAnswerEngineSimulator({
       </div>
 
       {/* Authority Benchmark Strip */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3.5 rounded-xl bg-stone-50/80 border border-stone-200/80 text-xs">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3.5 rounded-xl bg-slate-50/80 border border-slate-200/80 text-xs">
         <div>
-          <span className="text-[10px] font-mono uppercase text-stone-500 block">Citation Rank</span>
+          <span className="text-[10px] font-mono uppercase text-slate-500 block">Citation Rank</span>
           <span className="font-extrabold text-emerald-700 font-mono text-sm">#1 PRIMARY SOURCE</span>
         </div>
         <div>
-          <span className="text-[10px] font-mono uppercase text-stone-500 block">Citation Confidence</span>
-          <span className="font-extrabold text-stone-900 font-mono text-sm">{simulation?.confidenceScore || 98}%</span>
+          <span className="text-[10px] font-mono uppercase text-slate-500 block">Citation Confidence</span>
+          <span className="font-extrabold text-slate-900 font-mono text-sm">{simulation?.confidenceScore || 98}%</span>
         </div>
         <div>
-          <span className="text-[10px] font-mono uppercase text-stone-500 block">Hallucination Risk</span>
+          <span className="text-[10px] font-mono uppercase text-slate-500 block">Hallucination Risk</span>
           <span className="font-extrabold text-sky-700 font-mono text-sm">0.0% (ZERO FLUFF)</span>
         </div>
         <div>
-          <span className="text-[10px] font-mono uppercase text-stone-500 block">Target Engine</span>
-          <span className="font-bold text-stone-800 font-mono text-sm truncate">{engine}</span>
+          <span className="text-[10px] font-mono uppercase text-slate-500 block">Target Engine</span>
+          <span className="font-bold text-slate-800 font-mono text-sm truncate">{engine}</span>
         </div>
       </div>
 
       {/* LIVE SIMULATION CANVAS */}
-      <div className="rounded-2xl border border-stone-200 bg-white p-5 sm:p-6 shadow-sm space-y-5">
+      <div className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 shadow-xs space-y-5">
         {/* Google AI Overview Layout */}
         {engine === "Google AI Overview" && (
           <div className="space-y-4 animate-fade-in">
-            <div className="flex items-center justify-between border-b border-stone-100 pb-3">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-linear-to-r from-sky-500 via-purple-500 to-amber-500 animate-pulse"></span>
-                <span className="text-xs font-bold text-stone-900 font-mono tracking-wider uppercase">
+                <span className="text-xs font-bold text-slate-900 font-mono tracking-wider uppercase">
                   AI Overview · Google Search SGE
                 </span>
               </div>
-              <span className="text-[11px] font-mono text-stone-500">Live Synthesis Preview</span>
+              <span className="text-[11px] font-mono text-slate-500">Live Synthesis Preview</span>
             </div>
 
-            <p className="text-xs sm:text-sm text-stone-800 leading-relaxed font-editorial text-[14px]">
+            <p className="text-sm text-slate-800 leading-relaxed font-editorial">
               {simulation?.directAnswer}
             </p>
 
             {/* Source Cards Carousel */}
             <div>
-              <span className="text-[11px] font-mono font-bold text-stone-500 uppercase tracking-wider block mb-2">
+              <span className="text-[11px] font-mono font-bold text-slate-500 uppercase tracking-wider block mb-2">
                 Primary Citations &amp; Linked OEM Entities
               </span>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -248,34 +248,34 @@ export function LiveAiAnswerEngineSimulator({
                     className={`p-3.5 rounded-xl border transition ${
                       src.isClient
                         ? "bg-sky-50/70 border-sky-300 ring-1 ring-sky-200"
-                        : "bg-stone-50 border-stone-200"
+                        : "bg-slate-50 border-slate-200"
                     }`}
                   >
                     <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-[10px] font-mono font-bold text-stone-500 truncate max-w-[150px]">
+                      <span className="text-[10px] font-mono font-bold text-slate-500 truncate max-w-[150px]">
                         {src.domain}
                       </span>
                       <span
                         className={`text-[9.5px] font-mono font-bold px-1.5 py-0.5 rounded ${
-                          src.isClient ? "bg-sky-200 text-sky-800" : "bg-stone-200 text-stone-700"
+                          src.isClient ? "bg-sky-200 text-sky-800" : "bg-slate-200 text-slate-700"
                         }`}
                       >
                         {src.isClient ? "[1] VERIFIED OEM" : `[${src.citationNumber}] STANDARD`}
                       </span>
                     </div>
-                    <h4 className="text-xs font-bold text-stone-900 leading-snug line-clamp-2">{src.title}</h4>
-                    <p className="text-[11px] text-stone-600 mt-1 line-clamp-2 leading-relaxed">{src.snippet}</p>
+                    <h4 className="text-xs font-bold text-slate-900 leading-snug line-clamp-2">{src.title}</h4>
+                    <p className="text-[11px] text-slate-600 mt-1 line-clamp-2 leading-relaxed">{src.snippet}</p>
                   </div>
                 ))}
               </div>
             </div>
 
             {/* Key Engineering Takeaways */}
-            <div className="rounded-xl bg-stone-50 p-4 border border-stone-200/80 space-y-2">
-              <span className="text-[11px] font-mono font-bold text-stone-700 uppercase tracking-wide block">
+            <div className="rounded-xl bg-slate-50 p-4 border border-slate-200/80 space-y-2">
+              <span className="text-[11px] font-mono font-bold text-slate-700 uppercase tracking-wide block">
                 Key Industrial Takeaways
               </span>
-              <ul className="space-y-1.5 text-xs text-stone-700">
+              <ul className="space-y-1.5 text-xs text-slate-700">
                 {simulation?.keyTakeaways.map((point, idx) => (
                   <li key={idx} className="flex items-start gap-2">
                     <span className="css-icon-check text-emerald-600 shrink-0 mt-1"></span>
@@ -290,10 +290,10 @@ export function LiveAiAnswerEngineSimulator({
         {/* Perplexity Pro Layout */}
         {engine === "Perplexity Copilot" && (
           <div className="space-y-4 animate-fade-in">
-            <div className="flex items-center justify-between border-b border-stone-100 pb-3">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded bg-emerald-600"></span>
-                <span className="text-xs font-bold text-stone-900 font-mono tracking-wider uppercase">
+                <span className="text-xs font-bold text-slate-900 font-mono tracking-wider uppercase">
                   Perplexity Pro · Sonar Technical Research
                 </span>
               </div>
@@ -304,42 +304,42 @@ export function LiveAiAnswerEngineSimulator({
 
             <div className="flex flex-wrap gap-2 pb-1">
               {simulation?.sources.map((s, i) => (
-                <div key={i} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-stone-100 border border-stone-200 text-xs text-stone-700 font-mono">
-                  <span className="font-bold text-stone-900">[{s.citationNumber}]</span>
+                <div key={i} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 border border-slate-200 text-xs text-slate-700 font-mono">
+                  <span className="font-bold text-slate-900">[{s.citationNumber}]</span>
                   <span className="truncate max-w-[130px] font-medium">{s.domain}</span>
                 </div>
               ))}
             </div>
 
-            <p className="text-xs sm:text-sm text-stone-800 leading-relaxed font-humanist">
+            <p className="text-sm text-slate-800 leading-relaxed font-humanist">
               {simulation?.directAnswer}
             </p>
 
             {/* Competitor Comparison Matrix (Perplexity Style) */}
-            <div className="overflow-x-auto rounded-xl border border-stone-200/90 shadow-2xs">
+            <div className="overflow-x-auto rounded-xl border border-slate-200/90 shadow-2xs">
               <table className="w-full text-left text-xs">
-                <thead className="bg-stone-50 border-b border-stone-200 text-[10.5px] font-mono uppercase text-stone-500">
+                <thead className="bg-slate-50 border-b border-slate-200 text-[10.5px] font-mono uppercase text-slate-500">
                   <tr>
                     <th className="px-3.5 py-2">Parameter</th>
                     <th className="px-3.5 py-2 text-sky-800">Your OEM Spec (AccuDrive)</th>
-                    <th className="px-3.5 py-2 text-stone-500">Competitor Generic Spec</th>
+                    <th className="px-3.5 py-2 text-slate-500">Competitor Generic Spec</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-stone-100 text-stone-700">
+                <tbody className="divide-y divide-slate-100 text-slate-700">
                   <tr>
                     <td className="px-3.5 py-2.5 font-medium">Elastomer Compound</td>
                     <td className="px-3.5 py-2.5 font-bold text-sky-900 bg-sky-50/40">FDA-Grade Encapsulated FFKM</td>
-                    <td className="px-3.5 py-2.5 text-stone-500">Standard Industrial EPDM</td>
+                    <td className="px-3.5 py-2.5 text-slate-500">Standard Industrial EPDM</td>
                   </tr>
                   <tr>
                     <td className="px-3.5 py-2.5 font-medium">Caustic Wash Resistance</td>
                     <td className="px-3.5 py-2.5 font-bold text-sky-900 bg-sky-50/40">&gt;2.5% NaOH at 85°C (Certified)</td>
-                    <td className="px-3.5 py-2.5 text-stone-500">Max 1.0% NaOH at 60°C (Unverified)</td>
+                    <td className="px-3.5 py-2.5 text-slate-500">Max 1.0% NaOH at 60°C (Unverified)</td>
                   </tr>
                   <tr>
                     <td className="px-3.5 py-2.5 font-medium">Compliance Norm</td>
                     <td className="px-3.5 py-2.5 font-bold text-sky-900 bg-sky-50/40">3-A Sanitary Standard 02-12</td>
-                    <td className="px-3.5 py-2.5 text-stone-500">Generic Commercial Grade</td>
+                    <td className="px-3.5 py-2.5 text-slate-500">Generic Commercial Grade</td>
                   </tr>
                 </tbody>
               </table>
@@ -347,7 +347,7 @@ export function LiveAiAnswerEngineSimulator({
 
             {/* Follow-up Prompts */}
             <div className="space-y-1.5 pt-2">
-              <span className="text-[11px] font-mono font-bold text-stone-500 uppercase tracking-wide block">
+              <span className="text-[11px] font-mono font-bold text-slate-500 uppercase tracking-wide block">
                 Related Engineering Inquiries (Perplexity Thread)
               </span>
               <div className="flex flex-col gap-1.5">
@@ -356,10 +356,10 @@ export function LiveAiAnswerEngineSimulator({
                     key={idx}
                     type="button"
                     onClick={() => setQueryInput(f)}
-                    className="text-left text-xs text-stone-700 hover:text-sky-800 hover:bg-sky-50/50 p-2 rounded-lg border border-stone-200 transition cursor-pointer flex items-center justify-between"
+                    className="text-left text-xs text-slate-700 hover:text-sky-800 hover:bg-sky-50/50 p-2 rounded-lg border border-slate-200 transition cursor-pointer flex items-center justify-between"
                   >
                     <span>{f}</span>
-                    <span className="text-stone-400 font-mono text-[11px]">→</span>
+                    <span className="text-slate-400 font-mono text-[11px]">→</span>
                   </button>
                 ))}
               </div>
@@ -370,28 +370,28 @@ export function LiveAiAnswerEngineSimulator({
         {/* ChatGPT Search Layout */}
         {engine === "ChatGPT Search" && (
           <div className="space-y-4 animate-fade-in">
-            <div className="flex items-center justify-between border-b border-stone-100 pb-3">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-stone-900"></span>
-                <span className="text-xs font-bold text-stone-900 font-mono tracking-wider uppercase">
+                <span className="w-2.5 h-2.5 rounded-full bg-slate-900"></span>
+                <span className="text-xs font-bold text-slate-900 font-mono tracking-wider uppercase">
                   ChatGPT Search · OpenAI GPT-4o
                 </span>
               </div>
-              <span className="text-[11px] font-mono text-stone-600 bg-stone-100 px-2 py-0.5 rounded">
+              <span className="text-[11px] font-mono text-slate-600 bg-slate-100 px-2 py-0.5 rounded">
                 Conversational Synthesis
               </span>
             </div>
 
-            <p className="text-xs sm:text-sm text-stone-800 leading-relaxed font-humanist">
+            <p className="text-sm text-slate-800 leading-relaxed font-humanist">
               {simulation?.directAnswer}
             </p>
 
             {/* Verbatim Excerpt Card */}
-            <div className="p-4 rounded-xl border border-stone-200 bg-stone-50/80 space-y-2">
-              <span className="text-[10.5px] font-mono font-bold text-stone-500 uppercase block">
+            <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/80 space-y-2">
+              <span className="text-[10.5px] font-mono font-bold text-slate-500 uppercase block">
                 Verbatim Cited Passage from Your Draft:
               </span>
-              <blockquote className="text-xs italic text-stone-700 border-l-2 border-sky-600 pl-3 leading-relaxed">
+              <blockquote className="text-xs italic text-slate-700 border-l-2 border-sky-600 pl-3 leading-relaxed">
                 &quot;Elastomer seal swelling in sanitary rotary lobe pumps is primarily caused by chemical incompatibility between EPDM elastomers and aggressive caustic wash formulations (&gt;2.5% NaOH at &gt;80°C). Remediation requires transitioning to FDA-compliant FKM or encapsulated FFKM compounds certified under 3-A Sanitary Standard 02-12.&quot;
               </blockquote>
               <span className="text-[10px] font-mono text-sky-700 block text-right font-semibold">
@@ -401,7 +401,7 @@ export function LiveAiAnswerEngineSimulator({
 
             {/* Follow-up Prompts */}
             <div className="space-y-1.5 pt-1">
-              <span className="text-[11px] font-mono font-bold text-stone-500 uppercase tracking-wide block">
+              <span className="text-[11px] font-mono font-bold text-slate-500 uppercase tracking-wide block">
                 Suggested Follow-up Prompts:
               </span>
               <div className="flex flex-wrap gap-2">
@@ -410,7 +410,7 @@ export function LiveAiAnswerEngineSimulator({
                     key={idx}
                     type="button"
                     onClick={() => setQueryInput(f)}
-                    className="text-xs text-stone-700 hover:text-stone-900 bg-stone-100 hover:bg-stone-200 px-3 py-1.5 rounded-xl transition cursor-pointer text-left"
+                    className="text-xs text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-xl transition cursor-pointer text-left"
                   >
                     {f}
                   </button>
