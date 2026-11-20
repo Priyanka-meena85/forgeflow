@@ -136,9 +136,19 @@ const navItems: Array<{ label: TabKey; badge?: string; iconClass: string }> = [
   { label: "Billing & Quotas", iconClass: "css-icon-card" },
 ];
 
+const ADMIN_ONLY_TABS: TabKey[] = [
+  "Distributor Co-Marketing",
+  "Developer API",
+  "Enterprise SSO",
+  "AI COGS & Router",
+  "OEM MDF Billing",
+  "Workspace & Rules",
+  "Billing & Quotas",
+];
+
 const navSections: Array<{
   title: string;
-  items: Array<{ label: TabKey; badge?: string; iconClass: string }>;
+  items: Array<{ label: TabKey; badge?: string; iconClass: string; adminOnly?: boolean }>;
 }> = [
   {
     title: "Core Workflow",
@@ -172,12 +182,12 @@ const navSections: Array<{
     title: "Enterprise Hub",
     items: [
       { label: "Buyer Intent", iconClass: "css-icon-search" },
-      { label: "Distributor Co-Marketing", iconClass: "css-icon-launch" },
-      { label: "Developer API", iconClass: "css-icon-gear" },
-      { label: "Enterprise SSO", iconClass: "css-icon-shield", badge: "SAML" },
-      { label: "AI COGS & Router", iconClass: "css-icon-bolt" },
+      { label: "Distributor Co-Marketing", iconClass: "css-icon-launch", adminOnly: true },
+      { label: "Developer API", iconClass: "css-icon-gear", adminOnly: true },
+      { label: "Enterprise SSO", iconClass: "css-icon-shield", badge: "SAML", adminOnly: true },
+      { label: "AI COGS & Router", iconClass: "css-icon-bolt", adminOnly: true },
       { label: "CRM Pipeline ROI", iconClass: "css-icon-chart" },
-      { label: "OEM MDF Billing", iconClass: "css-icon-card" },
+      { label: "OEM MDF Billing", iconClass: "css-icon-card", adminOnly: true },
       { label: "Risk & Compliance", iconClass: "css-icon-alert" },
       { label: "Industrial Analytics", iconClass: "css-icon-chart" },
     ],
@@ -658,6 +668,13 @@ function ForgeFlowWorkspace() {
   const organizationName = user?.organization?.name ?? "Enterprise Tenant";
   const organizationPlan = user?.organization?.plan ?? "free";
   const userEmail = user?.email ?? "";
+
+  // Role-Based Access Control (RBAC) System
+  const [simulatedRole, setSimulatedRole] = useState<string | null>(null);
+  const userRole = simulatedRole || user?.role || "OWNER";
+  const isAdmin = userRole === "OWNER" || userRole === "ADMIN";
+  const isReviewer = userRole === "REVIEWER";
+  const isAuthor = userRole === "AUTHOR" || userRole === "MEMBER";
 
   const [activeTab, setActiveTab] = useState<TabKey>("Mission Control");
   const [selectedVertical, setSelectedVertical] = useState<string>("Food & beverage manufacturing");
@@ -2079,7 +2096,7 @@ function ForgeFlowWorkspace() {
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-slate-50 text-slate-900 font-sans antialiased">
       {/* SIDEBAR NAVIGATION - FIXED & STICKY LINEAR/STRIPE ENTERPRISE SHELL */}
-      <aside className="w-72 shrink-0 border-r border-slate-200 bg-white p-4 flex flex-col justify-between hidden md:flex shadow-xs select-none h-full z-20">
+      <aside className="w-80 shrink-0 border-r border-slate-200 bg-white p-4 flex flex-col justify-between hidden md:flex shadow-xs select-none h-screen sticky top-0 z-20">
         <div className="flex flex-col min-h-0 flex-1">
           {/* Official ForgeFlow Logo Header & Top Bar */}
           <div className="space-y-3 shrink-0 pb-3">
@@ -2136,98 +2153,143 @@ function ForgeFlowWorkspace() {
             </div>
           </div>
 
-          {/* Categorized Navigation Suite (Linear/Stripe Grouped Hierarchy) */}
-          <div className="flex-1 overflow-y-auto space-y-4 pr-1 scrollbar-none">
-            {navSections.map((sec) => (
-              <div key={sec.title} className="space-y-1">
-                <div className="text-[10px] font-bold text-slate-400 px-2 uppercase tracking-wider font-mono">
-                  {sec.title}
+          {/* Categorized Navigation Suite (Linear/Stripe Grouped Hierarchy with RBAC) */}
+          <div className="flex-1 overflow-y-auto space-y-4 pr-1 scrollbar-thin">
+            {navSections.map((sec) => {
+              const visibleItems = sec.items.filter((item) => !item.adminOnly || isAdmin);
+              if (visibleItems.length === 0) return null;
+              return (
+                <div key={sec.title} className="space-y-1">
+                  <div className="flex items-center justify-between px-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono">
+                    <span>{sec.title}</span>
+                    {sec.title === "Enterprise Hub" && isAdmin && (
+                      <span className="text-[8.5px] font-bold text-purple-700 bg-purple-50 border border-purple-200/80 px-1.5 py-0.2 rounded font-mono">
+                        Admin Only
+                      </span>
+                    )}
+                  </div>
+                  <div className="space-y-0.5">
+                    {visibleItems.map((item) => {
+                      const isActive = activeTab === item.label;
+                      return (
+                        <button
+                          key={item.label}
+                          type="button"
+                          onClick={() => setActiveTab(item.label)}
+                          className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs transition cursor-pointer ${
+                            isActive
+                              ? "bg-sky-50 text-sky-700 font-bold border border-sky-200 shadow-2xs"
+                              : "text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium border border-transparent"
+                          }`}
+                        >
+                          <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                            <span className={`${item.iconClass} shrink-0 text-slate-500`}></span>
+                            <span className="truncate text-slate-800 text-xs font-medium">{item.label}</span>
+                          </div>
+                          {item.adminOnly ? (
+                            <span className="px-1.5 py-0.5 text-[8.5px] font-mono rounded font-bold shrink-0 bg-purple-50 text-purple-700 border border-purple-200/70 ml-2">
+                              Admin
+                            </span>
+                          ) : item.badge ? (
+                            <span
+                              className={`px-1.5 py-0.5 text-[8.5px] font-mono rounded font-bold shrink-0 ml-2 ${
+                                isActive
+                                  ? "bg-sky-200 text-sky-800"
+                                  : "bg-slate-100 text-slate-500 border border-slate-200/60"
+                              }`}
+                            >
+                              {item.badge}
+                            </span>
+                          ) : null}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
-                <div className="space-y-0.5">
-                  {sec.items.map((item) => {
-                    const isActive = activeTab === item.label;
-                    return (
-                      <button
-                        key={item.label}
-                        type="button"
-                        onClick={() => setActiveTab(item.label)}
-                        className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs transition cursor-pointer ${
-                          isActive
-                            ? "bg-sky-50 text-sky-700 font-bold border border-sky-200 shadow-2xs"
-                            : "text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium border border-transparent"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2.5 min-w-0">
-                          <span className={`${item.iconClass} shrink-0 text-slate-500`}></span>
-                          <span className="truncate">{item.label}</span>
-                        </div>
-                        {item.badge ? (
-                          <span
-                            className={`px-1.5 py-0.5 text-[9px] font-mono rounded font-bold shrink-0 ${
-                              isActive
-                                ? "bg-sky-200 text-sky-800"
-                                : "bg-slate-100 text-slate-500 border border-slate-200/60"
-                            }`}
-                          >
-                            {item.badge}
-                          </span>
-                        ) : null}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
         {/* Bottom Section: Settings, Upgrade & User Profile */}
         <div className="space-y-1.5 pt-3 border-t border-slate-100">
-          {/* Settings */}
-          <button
-            type="button"
-            onClick={() => setActiveTab("Workspace & Rules")}
-            className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition cursor-pointer ${
-              activeTab === "Workspace & Rules"
-                ? "bg-sky-50 text-sky-700 border border-sky-200"
-                : "text-slate-600 hover:bg-slate-50 hover:text-slate-900 border border-transparent"
-            }`}
-          >
-            <span className="css-icon-gear text-slate-500"></span>
-            <span>Settings</span>
-          </button>
-
-          {/* Upgrade */}
-          <button
-            type="button"
-            onClick={() => setActiveTab("Billing & Quotas")}
-            className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-sky-800 bg-sky-50/60 hover:bg-sky-100/70 border border-sky-200/60 transition cursor-pointer"
-          >
-            <div className="flex items-center gap-2.5">
-              <span className="css-icon-grid text-sky-600"></span>
-              <span>Upgrade</span>
+          {/* Settings - Admin Protected */}
+          {isAdmin ? (
+            <button
+              type="button"
+              onClick={() => setActiveTab("Workspace & Rules")}
+              className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition cursor-pointer ${
+                activeTab === "Workspace & Rules"
+                  ? "bg-sky-50 text-sky-700 border border-sky-200"
+                  : "text-slate-600 hover:bg-slate-50 hover:text-slate-900 border border-transparent"
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <span className="css-icon-gear text-slate-500"></span>
+                <span>Settings</span>
+              </div>
+              <span className="text-[9px] font-mono uppercase bg-purple-50 text-purple-700 px-1.5 py-0.2 rounded border border-purple-200 font-bold">
+                Admin
+              </span>
+            </button>
+          ) : (
+            <div className="px-3 py-2 rounded-xl bg-slate-50 border border-slate-200/60 text-slate-500 text-xs flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="css-icon-gear text-slate-400"></span>
+                <span>Settings</span>
+              </div>
+              <span className="text-[9px] font-mono text-slate-400 font-semibold">Admin Protected</span>
             </div>
-            <span className="text-[10px] font-bold uppercase text-sky-700 bg-sky-100 px-1.5 py-0.5 rounded">
-              {organizationPlan}
-            </span>
-          </button>
+          )}
 
-          {/* User Profile Card (Matches Reference Image) */}
+          {/* Upgrade / Plan Status */}
+          {isAdmin ? (
+            <button
+              type="button"
+              onClick={() => setActiveTab("Billing & Quotas")}
+              className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-sky-800 bg-sky-50/60 hover:bg-sky-100/70 border border-sky-200/60 transition cursor-pointer"
+            >
+              <div className="flex items-center gap-2.5">
+                <span className="css-icon-grid text-sky-600"></span>
+                <span>Upgrade Plan</span>
+              </div>
+              <span className="text-[10px] font-bold uppercase text-sky-700 bg-sky-100 px-1.5 py-0.5 rounded">
+                {organizationPlan}
+              </span>
+            </button>
+          ) : (
+            <div className="px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200/60 flex items-center justify-between text-xs">
+              <span className="text-slate-600 font-medium text-[11px] truncate">Organization: {organizationName}</span>
+              <span className="text-[9px] font-mono text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200 font-bold shrink-0">
+                Seat Active
+              </span>
+            </div>
+          )}
+
+          {/* User Profile Card with Role Badge */}
           <div className="relative pt-1">
             <div
               onClick={() => setUserMenuOpen(!userMenuOpen)}
               className="flex items-center justify-between p-2 rounded-xl hover:bg-slate-100/80 cursor-pointer transition border border-transparent hover:border-slate-200"
             >
               <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-9 h-9 rounded-full bg-sky-100 text-sky-700 flex items-center justify-center font-bold text-xs shrink-0 border border-sky-200">
+                <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs shrink-0 border ${
+                  isAdmin
+                    ? "bg-purple-100 text-purple-700 border-purple-200"
+                    : isReviewer
+                    ? "bg-emerald-100 text-emerald-700 border-emerald-200"
+                    : "bg-sky-100 text-sky-700 border-sky-200"
+                }`}>
                   {userInitials}
                 </div>
                 <div className="min-w-0 truncate">
                   <div className="text-xs font-bold text-slate-900 truncate">
                     {userDisplayName}
                   </div>
-                  <div className="text-[11px] text-slate-500 truncate">
-                    {userDisplayOrg}
+                  <div className="text-[10px] font-mono truncate text-slate-500 flex items-center gap-1">
+                    <span className="font-bold text-slate-700">{isAdmin ? "👑 Admin" : isReviewer ? "🛡️ Reviewer" : "✍️ Author"}</span>
+                    <span>&bull;</span>
+                    <span className="truncate">{userDisplayOrg}</span>
                   </div>
                 </div>
               </div>
@@ -2235,42 +2297,89 @@ function ForgeFlowWorkspace() {
               <span className="css-icon-selector text-slate-400 shrink-0 ml-1"></span>
             </div>
 
-            {/* User Popover Menu */}
+            {/* User Popover Menu with Interactive Role Switcher */}
             {userMenuOpen && (
-              <div className="absolute bottom-full left-0 right-0 mb-2 p-2 rounded-xl bg-white border border-slate-200 shadow-xl space-y-1 text-xs animate-in fade-in zoom-in-95 duration-150 z-30">
-                <div className="px-2.5 py-1.5 border-b border-slate-100 flex items-center justify-between gap-1 text-[11px] text-slate-500 font-mono">
+              <div className="absolute bottom-full left-0 right-0 mb-2 p-2.5 rounded-2xl bg-white border border-slate-200 shadow-xl space-y-2 text-xs animate-in fade-in zoom-in-95 duration-150 z-30">
+                <div className="px-2 py-1 border-b border-slate-100 flex items-center justify-between gap-1 text-[11px] text-slate-500 font-mono">
                   <span className="truncate">{userEmail}</span>
-                  <span className="uppercase font-bold text-sky-700 bg-sky-50 px-1.5 py-0.5 rounded border border-sky-200 text-[10px] shrink-0">
-                    {organizationPlan}
+                  <span className={`uppercase font-bold px-1.5 py-0.5 rounded text-[9.5px] shrink-0 border ${
+                    isAdmin
+                      ? "bg-purple-50 text-purple-700 border-purple-200"
+                      : isReviewer
+                      ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                      : "bg-sky-50 text-sky-700 border-sky-200"
+                  }`}>
+                    {userRole}
                   </span>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setActiveTab("Workspace & Rules");
-                    setUserMenuOpen(false);
-                  }}
-                  className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-slate-50 text-slate-700 font-medium cursor-pointer"
-                >
-                  Manage Workspace
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setActiveTab("Billing & Quotas");
-                    setUserMenuOpen(false);
-                  }}
-                  className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-slate-50 text-slate-700 font-medium cursor-pointer"
-                >
-                  Plan &amp; Subscription
-                </button>
+
+                {/* Role Switcher (RBAC Live Test Drive) */}
+                <div className="py-1">
+                  <span className="text-[10px] font-mono uppercase text-slate-400 font-bold px-1.5 block mb-1.5">
+                    Role Perspective (RBAC):
+                  </span>
+                  <div className="grid grid-cols-3 gap-1">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSimulatedRole("ADMIN");
+                        setActionMessage("Switched to Administrator perspective (full access to all 22 modules).");
+                      }}
+                      className={`py-1.5 px-1 rounded-lg text-[10px] font-bold font-mono text-center transition cursor-pointer ${
+                        isAdmin ? "bg-purple-600 text-white shadow-2xs" : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                      }`}
+                    >
+                      👑 Admin
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSimulatedRole("REVIEWER");
+                        if (ADMIN_ONLY_TABS.includes(activeTab)) setActiveTab("Mission Control");
+                        setActionMessage("Switched to Engineer Reviewer perspective (engineering sign-off authority).");
+                      }}
+                      className={`py-1.5 px-1 rounded-lg text-[10px] font-bold font-mono text-center transition cursor-pointer ${
+                        isReviewer ? "bg-emerald-600 text-white shadow-2xs" : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                      }`}
+                    >
+                      🛡️ Reviewer
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSimulatedRole("AUTHOR");
+                        if (ADMIN_ONLY_TABS.includes(activeTab)) setActiveTab("Mission Control");
+                        setActionMessage("Switched to Content Author perspective (draft authoring, admin hub locked).");
+                      }}
+                      className={`py-1.5 px-1 rounded-lg text-[10px] font-bold font-mono text-center transition cursor-pointer ${
+                        isAuthor ? "bg-sky-600 text-white shadow-2xs" : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                      }`}
+                    >
+                      ✍️ Author
+                    </button>
+                  </div>
+                </div>
+
+                {isAdmin && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActiveTab("Workspace & Rules");
+                      setUserMenuOpen(false);
+                    }}
+                    className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-slate-50 text-slate-700 font-medium cursor-pointer"
+                  >
+                    Manage Workspace (Admin)
+                  </button>
+                )}
+
                 <button
                   type="button"
                   onClick={() => {
                     setUserMenuOpen(false);
                     signOut().catch((error: unknown) => setActionMessage(error instanceof Error ? error.message : "Could not sign out."));
                   }}
-                  className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-red-50 text-red-600 font-medium cursor-pointer"
+                  className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-red-50 text-red-600 font-medium cursor-pointer border-t border-slate-100"
                 >
                   Sign Out
                 </button>
@@ -2288,7 +2397,7 @@ function ForgeFlowWorkspace() {
             onClick={() => setMobileMenuOpen(false)}
             aria-hidden="true"
           />
-          <aside className="relative w-72 max-w-[85vw] bg-white p-4 flex flex-col justify-between shadow-2xl z-10 overflow-y-auto">
+          <aside className="relative w-80 max-w-[85vw] bg-white p-4 flex flex-col justify-between shadow-2xl z-10 overflow-y-auto">
             <div className="space-y-3">
               <div className="pb-3 border-b border-slate-100 flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -2339,77 +2448,89 @@ function ForgeFlowWorkspace() {
                 </span>
               </button>
 
-              {/* Navigation Items Grouped by Category */}
+              {/* Navigation Items Grouped by Category with RBAC Filter */}
               <div className="space-y-3 pt-1 max-h-[55vh] overflow-y-auto pr-1">
-                {navSections.map((sec) => (
-                  <div key={sec.title} className="space-y-1">
-                    <div className="text-[10px] font-bold text-slate-400 px-1 uppercase tracking-wider font-mono">
-                      {sec.title}
+                {navSections.map((sec) => {
+                  const visibleItems = sec.items.filter((item) => !item.adminOnly || isAdmin);
+                  if (visibleItems.length === 0) return null;
+                  return (
+                    <div key={sec.title} className="space-y-1">
+                      <div className="text-[10px] font-bold text-slate-400 px-1 uppercase tracking-wider font-mono">
+                        {sec.title}
+                      </div>
+                      <div className="space-y-0.5">
+                        {visibleItems.map((item) => {
+                          const isActive = activeTab === item.label;
+                          return (
+                            <button
+                              key={item.label}
+                              type="button"
+                              onClick={() => {
+                                setActiveTab(item.label);
+                                setMobileMenuOpen(false);
+                              }}
+                              className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs transition cursor-pointer ${
+                                isActive
+                                  ? "bg-sky-50 text-sky-700 font-bold border border-sky-200/70 shadow-2xs"
+                                  : "text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium border border-transparent"
+                              }`}
+                            >
+                              <div className="flex items-center gap-2 min-w-0 flex-1">
+                                <span className={`${item.iconClass} shrink-0`}></span>
+                                <span className="truncate text-slate-800 font-medium">{item.label}</span>
+                              </div>
+                              {item.adminOnly ? (
+                                <span className="px-1.5 py-0.5 text-[8.5px] font-mono rounded font-bold shrink-0 bg-purple-50 text-purple-700 border border-purple-200/60 ml-2">
+                                  Admin
+                                </span>
+                              ) : item.badge ? (
+                                <span className="px-1.5 py-0.5 text-[8.5px] font-mono rounded font-bold shrink-0 bg-slate-100 text-slate-600 border border-slate-200/60 ml-2">
+                                  {item.badge}
+                                </span>
+                              ) : null}
+                            </button>
+                          );
+                        })}
+                      </div>
                     </div>
-                    <div className="space-y-0.5">
-                      {sec.items.map((item) => {
-                        const isActive = activeTab === item.label;
-                        return (
-                          <button
-                            key={item.label}
-                            type="button"
-                            onClick={() => {
-                              setActiveTab(item.label);
-                              setMobileMenuOpen(false);
-                            }}
-                            className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs transition cursor-pointer ${
-                              isActive
-                                ? "bg-sky-50 text-sky-700 font-bold border border-sky-200/70 shadow-2xs"
-                                : "text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium border border-transparent"
-                            }`}
-                          >
-                            <div className="flex items-center gap-2 min-w-0">
-                              <span className={`${item.iconClass} shrink-0`}></span>
-                              <span className="truncate">{item.label}</span>
-                            </div>
-                            {item.badge ? (
-                              <span className="px-1.5 py-0.5 text-[9px] font-mono rounded font-bold shrink-0 bg-slate-100 text-slate-600 border border-slate-200/60">
-                                {item.badge}
-                              </span>
-                            ) : null}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
 
             {/* Mobile Footer */}
             <div className="space-y-1.5 pt-3 border-t border-slate-100">
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveTab("Workspace & Rules");
-                  setMobileMenuOpen(false);
-                }}
-                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-50 transition cursor-pointer"
-              >
-                <span className="css-icon-gear text-slate-500"></span>
-                <span>Settings</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveTab("Billing & Quotas");
-                  setMobileMenuOpen(false);
-                }}
-                className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-sky-800 bg-sky-50/60 border border-sky-200/60 transition cursor-pointer"
-              >
-                <div className="flex items-center gap-2.5">
-                  <span className="css-icon-grid text-sky-600"></span>
-                  <span>Upgrade</span>
-                </div>
-                <span className="text-[10px] font-bold uppercase text-sky-700 bg-sky-100 px-1.5 py-0.5 rounded">
-                  {organizationPlan}
-                </span>
-              </button>
+              {isAdmin && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActiveTab("Workspace & Rules");
+                      setMobileMenuOpen(false);
+                    }}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-50 transition cursor-pointer"
+                  >
+                    <span className="css-icon-gear text-slate-500"></span>
+                    <span>Settings (Admin)</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActiveTab("Billing & Quotas");
+                      setMobileMenuOpen(false);
+                    }}
+                    className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-sky-800 bg-sky-50/60 border border-sky-200/60 transition cursor-pointer"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <span className="css-icon-grid text-sky-600"></span>
+                      <span>Upgrade Plan</span>
+                    </div>
+                    <span className="text-[10px] font-bold uppercase text-sky-700 bg-sky-100 px-1.5 py-0.5 rounded">
+                      {organizationPlan}
+                    </span>
+                  </button>
+                </>
+              )}
               <button
                 type="button"
                 onClick={() => {
@@ -2473,6 +2594,15 @@ function ForgeFlowWorkspace() {
             </span>
             <span className="text-xs text-slate-500 hidden sm:inline">
               Tenant: <strong className="text-slate-800 font-semibold">{organizationName}</strong> ({userEmail})
+            </span>
+            <span className={`hidden md:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold border ${
+              isAdmin
+                ? "bg-purple-50 text-purple-700 border-purple-200"
+                : isReviewer
+                ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                : "bg-sky-50 text-sky-700 border-sky-200"
+            }`}>
+              <span>{isAdmin ? "👑 Administrator" : isReviewer ? "🛡️ Reviewer" : "✍️ Author"}</span>
             </span>
           </div>
 
@@ -2552,6 +2682,39 @@ function ForgeFlowWorkspace() {
             <button type="button" aria-label="Dismiss message" onClick={() => setActionMessage("")} className="text-sky-600 hover:text-sky-900 font-bold"><span className="css-icon-cross"></span></button>
           </div>
         ) : null}
+
+        {/* SOC2 / ISO 27001 ROLE-BASED ACCESS CONTROL GUARD FOR ADMIN MODULES */}
+        {ADMIN_ONLY_TABS.includes(activeTab) && !isAdmin && (
+          <div className="p-8 max-w-2xl mx-auto my-12 bg-white rounded-3xl border border-slate-200 text-center space-y-4 shadow-sm animate-fade-in font-humanist">
+            <div className="w-14 h-14 rounded-2xl bg-amber-50 border border-amber-200 text-amber-700 flex items-center justify-center mx-auto text-xl font-mono shadow-2xs">
+              <span className="css-icon-shield"></span>
+            </div>
+            <div className="space-y-1">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-100 text-amber-900 uppercase">
+                SOC2 / ISO 27001 Access Control
+              </span>
+              <h3 className="text-xl font-bold text-slate-900">Administrator Privileges Required</h3>
+            </div>
+            <p className="text-xs text-slate-600 leading-relaxed max-w-md mx-auto">
+              The module <strong>&quot;{activeTab}&quot;</strong> manages sensitive enterprise governance, financial billing, or security credentials. It is strictly restricted to Organization Owners &amp; Administrators.
+            </p>
+            <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono text-slate-600 flex items-center justify-between max-w-md mx-auto">
+              <span>Your Active Session:</span>
+              <span className="font-bold text-slate-900 bg-white px-2 py-0.5 rounded border border-slate-200">
+                {isReviewer ? "🛡️ Engineer Reviewer" : "✍️ Content Author (Staff)"}
+              </span>
+            </div>
+            <div className="pt-2 flex items-center justify-center gap-3">
+              <button
+                type="button"
+                onClick={() => setActiveTab("Mission Control")}
+                className="btn-primary-premium px-4 py-2 text-xs"
+              >
+                Return to Mission Control →
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* TAB 1: MISSION CONTROL */}
         {activeTab === "Mission Control" && (
@@ -3258,25 +3421,49 @@ function ForgeFlowWorkspace() {
                   Approve (Marketer)
                 </button>
 
-                <button
-                  type="button"
-                  onClick={() => setShowSignOffModal(true)}
-                  className="px-4 py-2 rounded-xl bg-sky-700 hover:bg-sky-600 text-white text-xs font-bold shadow-sm flex items-center gap-1.5 cursor-pointer"
-                >
-                  <span className="css-icon-edit"></span>
-                  <span>Engineering Sign-Off</span>
-                </button>
-
+                {/* Engineering Sign-Off - Gated to Reviewers & Admins */}
                 <button
                   type="button"
                   onClick={() => {
+                    if (!isAdmin && !isReviewer) {
+                      setActionMessage("Access Denied: Only Chief Reliability Engineers (Reviewers) or Admins can sign off.");
+                      return;
+                    }
+                    setShowSignOffModal(true);
+                  }}
+                  disabled={!isAdmin && !isReviewer}
+                  title={!isAdmin && !isReviewer ? "Requires Chief Reliability Engineer or Admin credentials" : "Stamp Engineering Sign-Off"}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold shadow-sm flex items-center gap-1.5 transition ${
+                    isAdmin || isReviewer
+                      ? "bg-sky-700 hover:bg-sky-600 text-white cursor-pointer"
+                      : "bg-slate-200 text-slate-400 cursor-not-allowed opacity-60"
+                  }`}
+                >
+                  <span className="css-icon-edit"></span>
+                  <span>{isAdmin || isReviewer ? "Engineering Sign-Off" : "Reviewer Sign-Off Required"}</span>
+                </button>
+
+                {/* 1-Click CMS Publishing - Gated to Admins */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!isAdmin) {
+                      setActionMessage("Access Denied: Only Organization Administrators can publish live to CMS.");
+                      return;
+                    }
                     setCmsPublishSuccess(null);
                     setShowCmsPublishModal(true);
                   }}
-                  className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow-sm flex items-center gap-1.5 cursor-pointer"
+                  disabled={!isAdmin}
+                  title={!isAdmin ? "Only Organization Administrators can publish to production CMS" : "Publish to Headless CMS"}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold shadow-sm flex items-center gap-1.5 transition ${
+                    isAdmin
+                      ? "bg-slate-900 hover:bg-slate-800 text-white cursor-pointer"
+                      : "bg-slate-200 text-slate-400 cursor-not-allowed opacity-60"
+                  }`}
                 >
                   <span className="css-icon-launch"></span>
-                  <span>Publish to CMS (1-Click)</span>
+                  <span>{isAdmin ? "Publish to CMS (1-Click)" : "Admin Publishing Only"}</span>
                 </button>
               </div>
             </div>
@@ -4667,7 +4854,7 @@ function ForgeFlowWorkspace() {
         )}
 
         {/* TAB 6F: ENTERPRISE SAML 2.0 & SSO */}
-        {activeTab === "Enterprise SSO" && (
+        {activeTab === "Enterprise SSO" && isAdmin && (
           <div className="p-6 space-y-6 max-w-7xl animate-fade-in">
             <EnterpriseSsoConfig />
             <EnterpriseScimProvisioning />
@@ -4682,7 +4869,7 @@ function ForgeFlowWorkspace() {
         )}
 
         {/* TAB 6H: DISTRIBUTOR & DEALER CO-MARKETING SYNDICATION */}
-        {activeTab === "Distributor Co-Marketing" && (
+        {activeTab === "Distributor Co-Marketing" && isAdmin && (
           <div className="p-6 space-y-6 max-w-7xl animate-fade-in">
             <DistributorSyndication />
             <MultiBrandDomainManager />
@@ -4690,14 +4877,14 @@ function ForgeFlowWorkspace() {
         )}
 
         {/* TAB 6I: DEVELOPER API & HEADLESS WEBHOOKS */}
-        {activeTab === "Developer API" && (
+        {activeTab === "Developer API" && isAdmin && (
           <div className="p-6 space-y-6 max-w-7xl animate-fade-in">
             <DeveloperApiPortal />
           </div>
         )}
 
         {/* TAB 6J: TRI-MODEL AI ROUTER & TOKEN COGS MARGIN */}
-        {activeTab === "AI COGS & Router" && (
+        {activeTab === "AI COGS & Router" && isAdmin && (
           <div className="p-6 space-y-6 max-w-7xl animate-fade-in">
             <AiRouterCogsMonitor />
           </div>
@@ -4732,7 +4919,7 @@ function ForgeFlowWorkspace() {
         )}
 
         {/* TAB 6O: OEM MDF CO-OP BILLING */}
-        {activeTab === "OEM MDF Billing" && (
+        {activeTab === "OEM MDF Billing" && isAdmin && (
           <div className="p-6 space-y-6 max-w-7xl animate-fade-in">
             <MdfCoOpBilling />
           </div>
@@ -4963,7 +5150,7 @@ function ForgeFlowWorkspace() {
         )}
 
         {/* TAB 8: WORKSPACE & RULES */}
-        {activeTab === "Workspace & Rules" && (
+        {activeTab === "Workspace & Rules" && isAdmin && (
           <div className="p-6 space-y-6 max-w-7xl">
             <div className="flex justify-between items-center pb-4 border-b border-slate-200">
               <div>
@@ -5342,7 +5529,7 @@ function ForgeFlowWorkspace() {
       )}
 
         {/* TAB 9: BILLING & QUOTAS */}
-        {activeTab === "Billing & Quotas" && (
+        {activeTab === "Billing & Quotas" && isAdmin && (
           <div className="p-6 space-y-6 max-w-7xl">
             <div className="pb-4 border-b border-slate-200">
               <h2 className="text-xl font-bold text-slate-900">Subscription & Capacity Management</h2>

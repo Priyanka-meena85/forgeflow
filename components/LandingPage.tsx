@@ -2660,13 +2660,13 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
       {/* 16. AUTH MODAL (SIGN IN / REGISTER) */}
       {authModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto animate-in fade-in duration-150 font-humanist">
-          <div className="bg-white rounded-2xl border border-slate-200/90 p-5 sm:p-6 shadow-2xl max-w-md w-full relative max-h-[92vh] overflow-y-auto scrollbar-none my-auto">
-            {/* Header with Logo and Close Button */}
-            <div className="mb-4 flex items-center justify-between border-b border-slate-100 pb-3">
-              <div className="flex items-center gap-3">
-                <Image src="/logo-icon.png" alt="ForgeFlow Logo" width={38} height={38} className="h-9 w-9 object-contain shrink-0" />
+          <div className="bg-white rounded-2xl border border-slate-200/90 shadow-2xl max-w-md w-full relative max-h-[90vh] flex flex-col my-auto overflow-hidden">
+            {/* Pinned Header */}
+            <div className="p-4 sm:px-5 sm:py-3.5 border-b border-slate-100 flex items-center justify-between shrink-0 bg-slate-50/50">
+              <div className="flex items-center gap-2.5">
+                <Image src="/logo-icon.png" alt="ForgeFlow Logo" width={32} height={32} className="h-8 w-8 object-contain shrink-0" />
                 <div>
-                  <h3 className="text-base font-extrabold text-slate-900 tracking-tight leading-tight font-humanist">
+                  <h3 className="text-sm font-extrabold text-slate-900 tracking-tight leading-tight font-humanist">
                     Forge<span className="text-sky-600">Flow</span> Console
                   </h3>
                   <p className="text-[10px] font-mono text-slate-400">Enterprise AI Search Platform</p>
@@ -2682,150 +2682,57 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
               </button>
             </div>
 
-            {/* Segmented Top Mode Switcher (Sign In vs Create Workspace) */}
-            <div className="grid grid-cols-2 p-1 bg-slate-100/90 rounded-xl mb-3.5 border border-slate-200/80 text-xs font-semibold shadow-2xs">
-              <button
-                type="button"
-                onClick={() => {
-                  setAuthMode("login");
-                  setError("");
-                }}
-                className={`py-2 rounded-lg transition-all cursor-pointer text-center font-bold ${
-                  authMode === "login"
-                    ? "bg-white text-slate-900 shadow-xs border border-slate-200"
-                    : "text-slate-500 hover:text-slate-800"
-                }`}
-              >
-                Sign In
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setAuthMode("register");
-                  setError("");
-                }}
-                className={`py-2 rounded-lg transition-all cursor-pointer text-center font-bold ${
-                  authMode === "register"
-                    ? "bg-white text-slate-900 shadow-xs border border-slate-200"
-                    : "text-slate-500 hover:text-slate-800"
-                }`}
-              >
-                Create Workspace
-              </button>
-            </div>
-
-            {/* Form Description */}
-            <p className="text-xs text-slate-500 leading-relaxed mb-3">
-              {authMode === "register"
-                ? "Configure your dedicated workspace with pre-built vertical taxonomies, QA validation, and AEO schema."
-                : "Enter your corporate credentials to access your programmatic drafts and analytics."}
-            </p>
-
-            {/* Quick 1-Click Demo Console Access */}
-            <div className="p-3.5 rounded-xl bg-slate-900 text-white space-y-2.5 font-humanist border border-slate-800 shadow-xs">
-              <div className="flex items-center justify-between text-[11px] font-mono">
-                <span className="text-slate-300 font-bold flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                  Instant Live Demo Console
-                </span>
-                <span className="text-emerald-400 font-bold text-[10px] bg-emerald-950/60 px-1.5 py-0.5 rounded border border-emerald-800/60">
-                  Zero Setup
-                </span>
+            {/* Scrollable Body with Clean Visible Scrollbar */}
+            <div className="p-4 sm:p-5 overflow-y-auto flex-1 space-y-3 scrollbar-thin">
+              {/* Segmented Top Mode Switcher (Sign In vs Create Workspace) */}
+              <div className="grid grid-cols-2 p-1 bg-slate-100/90 rounded-xl border border-slate-200/80 text-xs font-semibold shadow-2xs">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAuthMode("login");
+                    setError("");
+                  }}
+                  className={`py-1.5 rounded-lg transition-all cursor-pointer text-center font-bold ${
+                    authMode === "login"
+                      ? "bg-white text-slate-900 shadow-xs border border-slate-200"
+                      : "text-slate-500 hover:text-slate-800"
+                  }`}
+                >
+                  Sign In
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAuthMode("register");
+                    setError("");
+                  }}
+                  className={`py-1.5 rounded-lg transition-all cursor-pointer text-center font-bold ${
+                    authMode === "register"
+                      ? "bg-white text-slate-900 shadow-xs border border-slate-200"
+                      : "text-slate-500 hover:text-slate-800"
+                  }`}
+                >
+                  Create Workspace
+                </button>
               </div>
-              <button
-                type="button"
-                disabled={busy}
-                onClick={async () => {
-                  setBusy(true);
-                  setError("");
-                  try {
-                    const response = await fetch("/api/auth/login", {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({ email: "admin@accudrive.io", password: "ForgeFlow2026!" }),
-                    });
-                    const data = await response.json();
-                    if (!response.ok || !data.user) {
-                      const fallback = await fetch("/api/auth/login", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ email: "priyankameena4656@gmail.com", password: "232RhEGqurSi8jM" }),
-                      });
-                      const fbData = await fallback.json();
-                      if (!fallback.ok || !fbData.user) throw new Error(fbData.error || "Login failed");
-                      setAuthModalOpen(false);
-                      onAuthenticated(fbData.user);
-                      return;
-                    }
-                    setAuthModalOpen(false);
-                    onAuthenticated(data.user);
-                  } catch (err: unknown) {
-                    setError(err instanceof Error ? err.message : "Test drive sign-in failed");
-                  } finally {
-                    setBusy(false);
-                  }
-                }}
-                className="w-full py-2.5 px-3 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs flex items-center justify-center gap-2 transition cursor-pointer shadow-xs disabled:opacity-50"
-              >
-                <span className="css-icon-bolt"></span>
-                <span>1-Click Launch Live Demo (Admin)</span>
-              </button>
-              <div className="flex items-center justify-between pt-0.5 text-[10.5px] text-slate-400">
-                <div className="flex items-center gap-2">
-                  <span className="text-slate-500">Roles:</span>
-                  <button
-                    type="button"
-                    disabled={busy}
-                    onClick={async () => {
-                      setBusy(true);
-                      setError("");
-                      try {
-                        const response = await fetch("/api/auth/login", {
-                          method: "POST",
-                          headers: { "Content-Type": "application/json" },
-                          body: JSON.stringify({ email: "marcus.vance@accudrive.io", password: "ForgeFlow2026!" }),
-                        });
-                        const data = await response.json();
-                        if (!response.ok || !data.user) throw new Error(data.error || "Login failed");
-                        setAuthModalOpen(false);
-                        onAuthenticated(data.user);
-                      } catch (err: unknown) {
-                        setError(err instanceof Error ? err.message : "Test drive sign-in failed");
-                      } finally {
-                        setBusy(false);
-                      }
-                    }}
-                    className="text-sky-300 hover:text-white underline cursor-pointer"
-                  >
-                    Engineer Reviewer
-                  </button>
-                  <span>•</span>
-                  <button
-                    type="button"
-                    disabled={busy}
-                    onClick={async () => {
-                      setBusy(true);
-                      setError("");
-                      try {
-                        const response = await fetch("/api/auth/login", {
-                          method: "POST",
-                          headers: { "Content-Type": "application/json" },
-                          body: JSON.stringify({ email: "content.lead@accudrive.io", password: "ForgeFlow2026!" }),
-                        });
-                        const data = await response.json();
-                        if (!response.ok || !data.user) throw new Error(data.error || "Login failed");
-                        setAuthModalOpen(false);
-                        onAuthenticated(data.user);
-                      } catch (err: unknown) {
-                        setError(err instanceof Error ? err.message : "Test drive sign-in failed");
-                      } finally {
-                        setBusy(false);
-                      }
-                    }}
-                    className="text-sky-300 hover:text-white underline cursor-pointer"
-                  >
-                    Content Author
-                  </button>
+
+              {/* Form Description */}
+              <p className="text-[11.5px] text-slate-500 leading-relaxed">
+                {authMode === "register"
+                  ? "Configure your dedicated workspace with pre-built vertical taxonomies, QA validation, and AEO schema."
+                  : "Enter your corporate credentials to access your programmatic drafts and analytics."}
+              </p>
+
+              {/* Quick 1-Click Demo Console Access */}
+              <div className="p-3 rounded-xl bg-slate-900 text-white space-y-2 font-humanist border border-slate-800 shadow-xs">
+                <div className="flex items-center justify-between text-[10.5px] font-mono">
+                  <span className="text-slate-300 font-bold flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                    Instant Live Demo Console
+                  </span>
+                  <span className="text-emerald-400 font-bold text-[9.5px] bg-emerald-950/60 px-1.5 py-0.2 rounded border border-emerald-800/60">
+                    Zero Setup
+                  </span>
                 </div>
                 <button
                   type="button"
@@ -2840,7 +2747,18 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                         body: JSON.stringify({ email: "admin@accudrive.io", password: "ForgeFlow2026!" }),
                       });
                       const data = await response.json();
-                      if (!response.ok || !data.user) throw new Error(data.error || "Login failed");
+                      if (!response.ok || !data.user) {
+                        const fallback = await fetch("/api/auth/login", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ email: "priyankameena4656@gmail.com", password: "232RhEGqurSi8jM" }),
+                        });
+                        const fbData = await fallback.json();
+                        if (!fallback.ok || !fbData.user) throw new Error(fbData.error || "Login failed");
+                        setAuthModalOpen(false);
+                        onAuthenticated(fbData.user);
+                        return;
+                      }
                       setAuthModalOpen(false);
                       onAuthenticated(data.user);
                     } catch (err: unknown) {
@@ -2849,196 +2767,281 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                       setBusy(false);
                     }
                   }}
-                  className="text-emerald-400 hover:text-emerald-300 cursor-pointer font-bold"
+                  className="w-full py-2 px-3 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs flex items-center justify-center gap-2 transition cursor-pointer shadow-xs disabled:opacity-50"
                 >
-                  AccuDrive Demo
+                  <span className="css-icon-bolt"></span>
+                  <span>1-Click Launch Live Demo (Admin)</span>
                 </button>
-              </div>
-            </div>
-
-            <div className="relative my-3.5 flex items-center">
-              <div className="flex-grow border-t border-slate-200"></div>
-              <span className="flex-shrink mx-3 text-[10px] font-mono uppercase text-slate-400 font-semibold">
-                Or {authMode === "register" ? "register new organization" : "sign in with credentials"}
-              </span>
-              <div className="flex-grow border-t border-slate-200"></div>
-            </div>
-
-            <form className="mt-3.5 space-y-3" onSubmit={handleAuthSubmit}>
-              {authMode === "register" ? (
-                <div>
-                  <label className="block text-[11px] font-semibold uppercase tracking-wider text-slate-700 mb-1">
-                    Company / Manufacturing Plant Name
-                  </label>
-                  <input
-                    id="company-name"
-                    required
-                    minLength={2}
-                    maxLength={100}
-                    placeholder="e.g. AccuDrive Reliability Systems"
-                    value={companyName}
-                    onChange={(event) => setCompanyName(event.target.value)}
-                    className="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-3.5 py-2 text-xs text-slate-900 placeholder:text-slate-400 outline-none focus:border-sky-600 focus:bg-white focus:ring-2 focus:ring-sky-100 transition"
-                  />
-                </div>
-              ) : null}
-
-              <div>
-                <label className="block text-[11px] font-semibold uppercase tracking-wider text-slate-700 mb-1">
-                  Corporate / Work Email
-                </label>
-                <input
-                  id="email"
-                  type="email"
-                  required
-                  placeholder="engineer@company.com"
-                  value={email}
-                  onChange={(event) => setEmail(event.target.value)}
-                  className="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-3.5 py-2 text-xs text-slate-900 placeholder:text-slate-400 outline-none focus:border-sky-600 focus:bg-white focus:ring-2 focus:ring-sky-100 transition"
-                />
-              </div>
-
-              <div>
-                <div className="flex justify-between items-center mb-1">
-                  <label htmlFor="password" className="block text-[11px] font-semibold uppercase tracking-wider text-slate-700">
-                    Password
-                  </label>
-                  {authMode === "login" && (
-                    <Link href="/forgot-password" className="text-[11px] text-sky-600 hover:underline font-semibold">
-                      Forgot password?
-                    </Link>
-                  )}
-                </div>
-                <div className="flex rounded-xl border border-slate-300 bg-slate-50/50 focus-within:border-sky-600 focus-within:bg-white focus-within:ring-2 focus-within:ring-sky-100 transition">
-                  <input
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    required
-                    minLength={authMode === "register" ? 8 : undefined}
-                    placeholder="••••••••••••"
-                    value={password}
-                    onChange={(event) => setPassword(event.target.value)}
-                    className="min-w-0 flex-1 rounded-l-xl bg-transparent px-3.5 py-2 text-xs text-slate-900 placeholder:text-slate-400 outline-none"
-                  />
+                <div className="flex items-center justify-between pt-0.5 text-[10px] text-slate-400">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-slate-500">Roles:</span>
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={async () => {
+                        setBusy(true);
+                        setError("");
+                        try {
+                          const response = await fetch("/api/auth/login", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ email: "marcus.vance@accudrive.io", password: "ForgeFlow2026!" }),
+                          });
+                          const data = await response.json();
+                          if (!response.ok || !data.user) throw new Error(data.error || "Login failed");
+                          setAuthModalOpen(false);
+                          onAuthenticated(data.user);
+                        } catch (err: unknown) {
+                          setError(err instanceof Error ? err.message : "Test drive sign-in failed");
+                        } finally {
+                          setBusy(false);
+                        }
+                      }}
+                      className="text-sky-300 hover:text-white underline cursor-pointer"
+                    >
+                      Engineer Reviewer
+                    </button>
+                    <span>•</span>
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={async () => {
+                        setBusy(true);
+                        setError("");
+                        try {
+                          const response = await fetch("/api/auth/login", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ email: "content.lead@accudrive.io", password: "ForgeFlow2026!" }),
+                          });
+                          const data = await response.json();
+                          if (!response.ok || !data.user) throw new Error(data.error || "Login failed");
+                          setAuthModalOpen(false);
+                          onAuthenticated(data.user);
+                        } catch (err: unknown) {
+                          setError(err instanceof Error ? err.message : "Test drive sign-in failed");
+                        } finally {
+                          setBusy(false);
+                        }
+                      }}
+                      className="text-sky-300 hover:text-white underline cursor-pointer"
+                    >
+                      Content Author
+                    </button>
+                  </div>
                   <button
                     type="button"
-                    onClick={() => setShowPassword((visible) => !visible)}
-                    className="rounded-r-xl px-3 text-[11px] font-mono font-semibold text-slate-500 hover:text-slate-800 cursor-pointer"
+                    disabled={busy}
+                    onClick={async () => {
+                      setBusy(true);
+                      setError("");
+                      try {
+                        const response = await fetch("/api/auth/login", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ email: "admin@accudrive.io", password: "ForgeFlow2026!" }),
+                        });
+                        const data = await response.json();
+                        if (!response.ok || !data.user) throw new Error(data.error || "Login failed");
+                        setAuthModalOpen(false);
+                        onAuthenticated(data.user);
+                      } catch (err: unknown) {
+                        setError(err instanceof Error ? err.message : "Test drive sign-in failed");
+                      } finally {
+                        setBusy(false);
+                      }
+                    }}
+                    className="text-emerald-400 hover:text-emerald-300 cursor-pointer font-bold"
                   >
-                    {showPassword ? "HIDE" : "SHOW"}
+                    AccuDrive Demo
                   </button>
                 </div>
-                {authMode === "register" ? (
-                  <div className="mt-1 flex items-center justify-between text-[11px]">
-                    <span className={password.length >= 8 ? "text-emerald-700 font-medium flex items-center gap-1" : "text-slate-500"}>
-                      {password.length >= 8 && <span className="css-icon-check text-emerald-700"></span>}
-                      {password.length >= 8 ? "Minimum 8 characters met" : "Requires minimum 8 characters"}
-                    </span>
-                    <span className="font-mono text-slate-400">{password.length}/8+</span>
-                  </div>
-                ) : null}
               </div>
 
-              {authMode === "register" ? (
+              <div className="relative my-2.5 flex items-center">
+                <div className="flex-grow border-t border-slate-200"></div>
+                <span className="flex-shrink mx-2.5 text-[9.5px] font-mono uppercase text-slate-400 font-semibold">
+                  Or {authMode === "register" ? "register new organization" : "sign in with credentials"}
+                </span>
+                <div className="flex-grow border-t border-slate-200"></div>
+              </div>
+
+              <form className="space-y-2.5" onSubmit={handleAuthSubmit}>
+                {authMode === "register" ? (
+                  <div>
+                    <label className="block text-[10.5px] font-semibold uppercase tracking-wider text-slate-700 mb-1">
+                      Company / Manufacturing Plant Name
+                    </label>
+                    <input
+                      id="company-name"
+                      required
+                      minLength={2}
+                      maxLength={100}
+                      placeholder="e.g. AccuDrive Reliability Systems"
+                      value={companyName}
+                      onChange={(event) => setCompanyName(event.target.value)}
+                      className="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-3 py-1.5 text-xs text-slate-900 placeholder:text-slate-400 outline-none focus:border-sky-600 focus:bg-white focus:ring-2 focus:ring-sky-100 transition"
+                    />
+                  </div>
+                ) : null}
+
                 <div>
-                  <label htmlFor="confirm-password" className="block text-[11px] font-semibold uppercase tracking-wider text-slate-700 mb-1">
-                    Confirm Password
+                  <label className="block text-[10.5px] font-semibold uppercase tracking-wider text-slate-700 mb-1">
+                    Corporate / Work Email
                   </label>
                   <input
-                    id="confirm-password"
-                    type={showPassword ? "text" : "password"}
+                    id="email"
+                    type="email"
                     required
-                    minLength={8}
-                    placeholder="••••••••••••"
-                    value={confirmPassword}
-                    onChange={(event) => setConfirmPassword(event.target.value)}
-                    className="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-3.5 py-2 text-xs text-slate-900 placeholder:text-slate-400 outline-none focus:border-sky-600 focus:bg-white focus:ring-2 focus:ring-sky-100 transition"
+                    placeholder="engineer@company.com"
+                    value={email}
+                    onChange={(event) => setEmail(event.target.value)}
+                    className="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-3 py-1.5 text-xs text-slate-900 placeholder:text-slate-400 outline-none focus:border-sky-600 focus:bg-white focus:ring-2 focus:ring-sky-100 transition"
                   />
                 </div>
-              ) : null}
 
-              {error ? (
-                <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-2.5 text-xs text-red-700 font-medium space-y-1.5">
-                  <p>{error}</p>
-                  {authMode === "register" && error.toLowerCase().includes("already exists") && (
+                <div>
+                  <div className="flex justify-between items-center mb-1">
+                    <label htmlFor="password" className="block text-[10.5px] font-semibold uppercase tracking-wider text-slate-700">
+                      Password
+                    </label>
+                    {authMode === "login" && (
+                      <Link href="/forgot-password" className="text-[10.5px] text-sky-600 hover:underline font-semibold">
+                        Forgot password?
+                      </Link>
+                    )}
+                  </div>
+                  <div className="flex rounded-xl border border-slate-300 bg-slate-50/50 focus-within:border-sky-600 focus-within:bg-white focus-within:ring-2 focus-within:ring-sky-100 transition">
+                    <input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      required
+                      minLength={authMode === "register" ? 8 : undefined}
+                      placeholder="••••••••••••"
+                      value={password}
+                      onChange={(event) => setPassword(event.target.value)}
+                      className="min-w-0 flex-1 rounded-l-xl bg-transparent px-3 py-1.5 text-xs text-slate-900 placeholder:text-slate-400 outline-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((visible) => !visible)}
+                      className="rounded-r-xl px-2.5 text-[10px] font-mono font-semibold text-slate-500 hover:text-slate-800 cursor-pointer"
+                    >
+                      {showPassword ? "HIDE" : "SHOW"}
+                    </button>
+                  </div>
+                  {authMode === "register" ? (
+                    <div className="mt-1 flex items-center justify-between text-[10.5px]">
+                      <span className={password.length >= 8 ? "text-emerald-700 font-medium flex items-center gap-1" : "text-slate-500"}>
+                        {password.length >= 8 && <span className="css-icon-check text-emerald-700"></span>}
+                        {password.length >= 8 ? "Minimum 8 characters met" : "Requires minimum 8 characters"}
+                      </span>
+                      <span className="font-mono text-slate-400">{password.length}/8+</span>
+                    </div>
+                  ) : null}
+                </div>
+
+                {authMode === "register" ? (
+                  <div>
+                    <label htmlFor="confirm-password" className="block text-[10.5px] font-semibold uppercase tracking-wider text-slate-700 mb-1">
+                      Confirm Password
+                    </label>
+                    <input
+                      id="confirm-password"
+                      type={showPassword ? "text" : "password"}
+                      required
+                      minLength={8}
+                      placeholder="••••••••••••"
+                      value={confirmPassword}
+                      onChange={(event) => setConfirmPassword(event.target.value)}
+                      className="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-3 py-1.5 text-xs text-slate-900 placeholder:text-slate-400 outline-none focus:border-sky-600 focus:bg-white focus:ring-2 focus:ring-sky-100 transition"
+                    />
+                  </div>
+                ) : null}
+
+                {error ? (
+                  <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-2 text-xs text-red-700 font-medium space-y-1">
+                    <p>{error}</p>
+                    {authMode === "register" && error.toLowerCase().includes("already exists") && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAuthMode("login");
+                          setError("");
+                        }}
+                        className="text-sky-700 font-bold underline hover:text-sky-900 cursor-pointer block text-[11px]"
+                      >
+                        Sign In to this workspace &rarr;
+                      </button>
+                    )}
+                  </div>
+                ) : null}
+
+                <button
+                  type="submit"
+                  disabled={busy}
+                  className="w-full rounded-xl bg-sky-600 hover:bg-sky-500 py-2.5 text-xs font-bold uppercase tracking-wider text-white shadow-md shadow-sky-600/20 transition disabled:opacity-60 cursor-pointer font-humanist mt-1"
+                >
+                  {busy ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <span className="inline-block w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin"></span>
+                      <span>Authenticating Workspace…</span>
+                    </span>
+                  ) : authMode === "register" ? (
+                    "Create Workspace & Launch Console →"
+                  ) : (
+                    "Sign In to Console →"
+                  )}
+                </button>
+
+                {busy && (
+                  <div className="text-center pt-0.5">
+                    <button
+                      type="button"
+                      onClick={() => setBusy(false)}
+                      className="text-[10.5px] text-slate-400 hover:text-slate-600 underline font-medium cursor-pointer"
+                    >
+                      Cancel authentication
+                    </button>
+                  </div>
+                )}
+              </form>
+
+              <div className="mt-3 border-t border-slate-100 pt-2.5 text-center text-xs text-slate-500">
+                {authMode === "register" ? (
+                  <span>
+                    Already have an enterprise tenant?{" "}
                     <button
                       type="button"
                       onClick={() => {
                         setAuthMode("login");
                         setError("");
+                        setPassword("");
+                        setConfirmPassword("");
                       }}
-                      className="text-sky-700 font-bold underline hover:text-sky-900 cursor-pointer block text-[11px]"
+                      className="font-bold text-sky-600 hover:underline cursor-pointer"
                     >
-                      Sign In to this workspace &rarr;
+                      Sign In
                     </button>
-                  )}
-                </div>
-              ) : null}
-
-              <button
-                type="submit"
-                disabled={busy}
-                className="w-full rounded-xl bg-sky-600 hover:bg-sky-500 py-2.5 text-xs font-bold uppercase tracking-wider text-white shadow-md shadow-sky-600/20 transition disabled:opacity-60 cursor-pointer font-humanist"
-              >
-                {busy ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <span className="inline-block w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin"></span>
-                    <span>Authenticating Workspace…</span>
                   </span>
-                ) : authMode === "register" ? (
-                  "Create Workspace & Launch Console →"
                 ) : (
-                  "Sign In to Console →"
+                  <span>
+                    Need a new organization workspace?{" "}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAuthMode("register");
+                        setError("");
+                        setPassword("");
+                        setConfirmPassword("");
+                      }}
+                      className="font-bold text-sky-600 hover:underline cursor-pointer"
+                    >
+                      Create Workspace
+                    </button>
+                  </span>
                 )}
-              </button>
-
-              {busy && (
-                <div className="text-center pt-1">
-                  <button
-                    type="button"
-                    onClick={() => setBusy(false)}
-                    className="text-[11px] text-slate-400 hover:text-slate-600 underline font-medium cursor-pointer"
-                  >
-                    Cancel authentication
-                  </button>
-                </div>
-              )}
-            </form>
-
-            <div className="mt-3.5 border-t border-slate-100 pt-3 text-center text-xs text-slate-500">
-              {authMode === "register" ? (
-                <span>
-                  Already have an enterprise tenant?{" "}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setAuthMode("login");
-                      setError("");
-                      setPassword("");
-                      setConfirmPassword("");
-                    }}
-                    className="font-bold text-sky-600 hover:underline cursor-pointer"
-                  >
-                    Sign In
-                  </button>
-                </span>
-              ) : (
-                <span>
-                  Need a new organization workspace?{" "}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setAuthMode("register");
-                      setError("");
-                      setPassword("");
-                      setConfirmPassword("");
-                    }}
-                    className="font-bold text-sky-600 hover:underline cursor-pointer"
-                  >
-                    Create Workspace
-                  </button>
-                </span>
-              )}
+              </div>
             </div>
           </div>
         </div>
