@@ -1,26 +1,21 @@
 import { NextResponse } from "next/server";
 import { sendDemoRequestNotification } from "@/lib/email";
+import { validateDemoRequest } from "@/lib/validation";
+import { captureTelemetry } from "@/lib/telemetry";
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    const { name, email, company, companySize, industry, useCase } = body;
+    const rawBody = await request.json().catch(() => null);
+    const validation = validateDemoRequest(rawBody);
 
-    if (!name || !email || !company) {
+    if (!validation.success || !validation.data) {
       return NextResponse.json(
-        { success: false, error: "Missing required fields (name, email, company are mandatory)." },
+        { success: false, errors: validation.errors },
         { status: 400 }
       );
     }
 
-    // Email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return NextResponse.json(
-        { success: false, error: "Please enter a valid business email address." },
-        { status: 400 }
-      );
-    }
+    const { name, email, company, companySize, industry, useCase } = validation.data;
 
     // Dispatch real transactional notification via Resend / Dev console fallback
     await sendDemoRequestNotification({
@@ -32,7 +27,11 @@ export async function POST(request: Request) {
       useCase,
     });
 
-    console.info(`[Demo Request Registered] ${name} (${email}) for ${company}`);
+    await captureTelemetry({
+      level: "INFO",
+      message: `Demo Request Registered: ${company} (${industry})`,
+      context: { name, email, company, companySize, industry },
+    });
 
     return NextResponse.json(
       {
@@ -42,7 +41,12 @@ export async function POST(request: Request) {
       { status: 201 }
     );
   } catch (error) {
-    console.error("[Demo Request API Error]:", error);
+    await captureTelemetry({
+      level: "ERROR",
+      message: "Internal server error while processing demo request",
+      error,
+    });
+
     return NextResponse.json(
       { success: false, error: "Internal server error while processing demo request." },
       { status: 500 }

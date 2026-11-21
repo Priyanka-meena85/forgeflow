@@ -227,15 +227,15 @@ export default function PricingPage() {
           <div className="pt-4 flex flex-wrap items-center justify-center gap-2 text-[11px] font-mono text-slate-600">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-              SOC2 Type II Certified
+              Net-30 Corporate Invoicing (ACH / Wire)
             </span>
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
               <span className="w-1.5 h-1.5 rounded-full bg-sky-500"></span>
-              99.9% Uptime SLA Guarantee
+              Dedicated Solution Architect Onboarding Included
             </span>
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
               <span className="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
-              Okta SAML 2.0 &amp; SCIM 2.0
+              Reverse-IP Buyer Deanonymization
             </span>
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
