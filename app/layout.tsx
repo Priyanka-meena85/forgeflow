@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { CookieConsentBanner } from "@/components/CookieConsentBanner";
+import { AnalyticsScript } from "@/components/AnalyticsScript";
 
 export const metadata: Metadata = {
   title: "ForgeFlow | Enterprise Industrial SEO & AEO Content Engine",
@@ -24,6 +26,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="min-h-full flex flex-col font-humanist bg-[#fafaf9] text-stone-900 selection:bg-sky-100 selection:text-sky-900">
         {children}
+        <CookieConsentBanner />
+        <AnalyticsScript />
       </body>
     </html>
   );

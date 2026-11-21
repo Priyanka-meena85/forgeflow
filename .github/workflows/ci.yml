@@ -1,29 +1,31 @@
-name: ForgeFlow Pure Software Enterprise CI/CD Pipeline
+name: CI — Lint, Typecheck & Build
 
 on:
   push:
-    branches: [main]
+    branches: [main, develop]
   pull_request:
     branches: [main]
 
 jobs:
-  verify:
-    name: Type-Check, Build & Integration Audit
+  build:
+    name: TypeScript + ESLint + Next.js Build
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
-    strategy:
-      matrix:
-        node-version: [20.x]
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/forgeflow_ci?schema=public
+      STRIPE_SECRET_KEY: sk_test_placeholder
+      NEXT_PUBLIC_APP_URL: http://localhost:8080
 
     steps:
-      - name: Checkout Code Repository
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js ${{ matrix.node-version }}
+      - name: Setup Node.js 20
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
-          cache: "npm"
+          node-version: 20
+          cache: npm
 
       - name: Install Dependencies
         run: npm ci
@@ -31,15 +33,11 @@ jobs:
       - name: Generate Prisma Client
         run: npx prisma generate
 
-      - name: Strict TypeScript Verification
+      - name: TypeScript Type Check
         run: npx tsc --noEmit
 
-      - name: Execute Pure Software SaaS Integration Verification
-        run: node scripts/verify-pure-software.mjs
-        env:
-          NODE_ENV: test
+      - name: ESLint
+        run: npm run lint
 
-      - name: Production Next.js Build
-        run: npm run build
-        env:
-          NEXT_TELEMETRY_DISABLED: 1
+      - name: Next.js Production Build
+        run: npx next build

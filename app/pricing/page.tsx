@@ -4,6 +4,7 @@ import { useState, Fragment } from "react";
 import Link from "next/link";
 import { PublicNavbar } from "@/components/PublicNavbar";
 import { PublicFooter } from "@/components/PublicFooter";
+import { PricingCTAButton } from "@/components/PricingCTAButton";
 
 export default function PricingPage() {
   const [billingCycle, setBillingCycle] = useState<"annual" | "monthly">("annual");
@@ -22,21 +23,22 @@ export default function PricingPage() {
   const pricingTiers = [
     {
       name: "Industrial Pilot",
-      badge: "Regional Specialists",
+      badge: "Regional Specialists & OEMs",
       highlight: false,
-      description: "For specialized regional equipment manufacturers, distributors, and precision job shops entering AEO.",
-      annualPrice: 199,
-      monthlyPrice: 249,
-      annualTotal: "$2,388 billed annually",
+      description: "For regional equipment manufacturers, distributors, and precision job shops modernizing their technical catalog with dedicated onboarding.",
+      annualPrice: 799,
+      monthlyPrice: 999,
+      annualTotal: "$9,588 billed annually (Includes Assisted Onboarding)",
       monthlyTotal: "billed month-to-month",
       features: [
-        "30 verified technical pages / month",
-        "1 pre-built vertical taxonomy (HVAC, Sanitary, etc.)",
+        "50 verified technical pages / month",
+        "1 pre-built vertical taxonomy (HVAC, Sanitary, Tooling, etc.)",
         "Deterministic QA Studio (spec & fluff check)",
         "JSON-LD TechArticle & FAQPage schema generator",
         "Export clean HTML, Markdown & JSON-LD",
-        "3 team member seats (Reviewer & Author)",
-        "Standard email & ticket support (24h SLA)",
+        "Dedicated Solution Architect onboarding session",
+        "5 team member seats (Reviewer & Author)",
+        "Standard email & ticket support (12h SLA)",
       ],
       notIncluded: [
         "Interactive 3D CAD Component Inspector",
@@ -51,13 +53,13 @@ export default function PricingPage() {
       name: "Growth OEM / Tier-1",
       badge: "Most Popular",
       highlight: true,
-      description: "For mid-market machinery manufacturers, Tier-1 automotive suppliers, and national equipment brands.",
-      annualPrice: 479,
-      monthlyPrice: 599,
-      annualTotal: "$5,748 billed annually (Save $1,440)",
+      description: "For mid-market machinery manufacturers, Tier-1 automotive suppliers, and national equipment brands displacing competitor PDFs.",
+      annualPrice: 1499,
+      monthlyPrice: 1799,
+      annualTotal: "$17,988 billed annually (Save $3,600)",
       monthlyTotal: "billed month-to-month",
       features: [
-        "100 verified technical pages / month",
+        "200 verified technical pages / month",
         "3 pre-built industrial vertical taxonomies",
         "Live AI Search Engine Simulator (Google SGE & Perplexity)",
         "Interactive 3D CAD Tolerance Inspector (WebGL 360°)",
@@ -66,7 +68,7 @@ export default function PricingPage() {
         "Multi-lingual DIN / JIS / ASTM Standards Crosswalk",
         "Reverse-IP Buyer Intent & PE Contact Discovery",
         "Slack Review Bot & Human-in-the-Loop Kanban",
-        "10 team member seats with role-based permissions",
+        "15 team member seats with role-based permissions",
         "Priority engineering support (4h SLA)",
       ],
       notIncluded: [
@@ -81,9 +83,9 @@ export default function PricingPage() {
       badge: "Multinational OEMs",
       highlight: false,
       description: "For global conglomerate OEMs, multi-brand holding corporations, and worldwide distributor dealer networks.",
-      annualPrice: 1199,
-      monthlyPrice: 1499,
-      annualTotal: "$14,388 billed annually (Save $3,600)",
+      annualPrice: 3499,
+      monthlyPrice: 3999,
+      annualTotal: "$41,988 billed annually (Dedicated Support & SLA)",
       monthlyTotal: "billed month-to-month",
       features: [
         "Unlimited verified technical pages / month",
@@ -308,15 +310,19 @@ export default function PricingPage() {
                 </div>
 
                 <div className="pt-8 mt-6 border-t border-slate-100">
-                  <Link
-                    href={`/?mode=${tier.ctaMode}`}
-                    className={`block w-full py-3 rounded-xl text-center text-xs font-bold uppercase tracking-wider transition-all shadow-xs cursor-pointer ${tier.highlight
-                      ? "bg-sky-600 hover:bg-sky-500 text-white shadow-sky-600/20"
-                      : "bg-slate-900 hover:bg-slate-800 text-white"
-                      }`}
-                  >
-                    {tier.ctaText}
-                  </Link>
+                  <PricingCTAButton
+                    planName={tier.name}
+                    priceId={
+                      tier.name === "Industrial Pilot"
+                        ? (billingCycle === "annual" ? "price_starter_annual" : "price_starter_monthly")
+                        : tier.name === "Growth OEM / Tier-1"
+                        ? (billingCycle === "annual" ? "price_growth_annual" : "price_growth_monthly")
+                        : "enterprise"
+                    }
+                    label={tier.ctaText}
+                    billingCycle={billingCycle}
+                    highlight={tier.highlight}
+                  />
                   <p className="text-[10.5px] text-center text-slate-400 mt-2 font-mono">
                     14-day free pilot • No credit card required
                   </p>

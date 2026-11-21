@@ -488,3 +488,109 @@ export async function sendPublishedAlert({
   const text = `ForgeFlow - Article Published to ${cmsType}\n\n"${draftTitle}" is now live at: ${publishedUrl}`;
   return sendEmail({ to, subject, html, text });
 }
+
+/**
+ * 7. Send Demo Request Notifications (Internal Alert + Customer Confirmation)
+ */
+export async function sendDemoRequestNotification({
+  name,
+  email,
+  company,
+  companySize,
+  industry,
+  useCase,
+}: {
+  name: string;
+  email: string;
+  company: string;
+  companySize?: string;
+  industry?: string;
+  useCase?: string;
+}): Promise<EmailResult> {
+  const adminEmail = process.env.ADMIN_EMAIL?.trim() || "sales@forgeflow.ai";
+
+  // 1. Internal Team Alert
+  const adminSubject = `[New Demo Lead] ${name} from ${company} (${industry || "Industrial"})`;
+  const adminHtml = `
+<!DOCTYPE html>
+<html>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f8fafc; padding: 30px; color: #1e293b;">
+  <div style="max-width: 580px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 28px;">
+    <h2 style="font-size: 18px; font-weight: 700; color: #0284c7; margin-top: 0;">New Industrial Demo Request</h2>
+    <table style="width: 100%; border-collapse: collapse; font-size: 13px; line-height: 1.8;">
+      <tr><td style="color: #64748b; width: 140px;">Contact Name:</td><td><strong>${name}</strong></td></tr>
+      <tr><td style="color: #64748b;">Work Email:</td><td><a href="mailto:${email}" style="color: #0284c7;">${email}</a></td></tr>
+      <tr><td style="color: #64748b;">Company:</td><td><strong>${company}</strong></td></tr>
+      <tr><td style="color: #64748b;">Company Size:</td><td>${companySize || "Not specified"}</td></tr>
+      <tr><td style="color: #64748b;">Industry Vertical:</td><td><span style="background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 4px; font-weight: 600;">${industry || "General"}</span></td></tr>
+      <tr><td style="color: #64748b;">Technical Scope:</td><td>${useCase || "Standard AEO catalog evaluation"}</td></tr>
+    </table>
+  </div>
+</body>
+</html>
+  `.trim();
+
+  const adminText = `New Demo Request\nName: ${name}\nEmail: ${email}\nCompany: ${company}\nVertical: ${industry}\nSize: ${companySize}\nUse Case: ${useCase}`;
+  await sendEmail({ to: adminEmail, subject: adminSubject, html: adminHtml, text: adminText });
+
+  // 2. Customer Confirmation Email
+  const customerSubject = `Confirmation: Your ForgeFlow Technical Architecture Session for ${company}`;
+  const customerHtml = `
+<!DOCTYPE html>
+<html>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f8fafc; padding: 30px; color: #1e293b;">
+  <div style="max-width: 580px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 28px;">
+    <h2 style="font-size: 18px; font-weight: 700; color: #0284c7; margin-top: 0;">Demo Request Received</h2>
+    <p style="font-size: 14px; line-height: 1.6; color: #475569;">
+      Hello ${name},<br><br>
+      Thank you for requesting an architecture session with ForgeFlow Systems. We have pre-loaded industrial search taxonomies for <strong>${industry || company}</strong>.
+    </p>
+    <p style="font-size: 14px; line-height: 1.6; color: #475569;">
+      Our industrial solution architects will review your high-margin catalog parts and email you with calendar options for your live session.
+    </p>
+    <div style="margin: 20px 0; padding: 16px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; font-size: 13px; color: #166534;">
+      <strong>What to prepare:</strong> 1 or 2 sample STEP/PDF technical spec sheets for live AEO citation benchmarking.
+    </div>
+  </div>
+</body>
+</html>
+  `.trim();
+
+  const customerText = `Hello ${name},\n\nWe received your request for ${company}. Our solution architects will review your industry domain and contact you shortly with calendar details.\n\nForgeFlow Systems Inc.`;
+  return sendEmail({ to: email, subject: customerSubject, html: customerHtml, text: customerText });
+}
+
+/**
+ * 8. Send Contact Sales Notification
+ */
+export async function sendContactSalesNotification({
+  name,
+  email,
+  company,
+  message,
+}: {
+  name: string;
+  email: string;
+  company: string;
+  message?: string;
+}): Promise<EmailResult> {
+  const adminEmail = process.env.ADMIN_EMAIL?.trim() || "sales@forgeflow.ai";
+  const subject = `[Enterprise Sales Inquiry] ${name} from ${company}`;
+  const html = `
+<!DOCTYPE html>
+<html>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f8fafc; padding: 30px;">
+  <div style="max-width: 580px; margin: 0 auto; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 28px;">
+    <h2 style="font-size: 18px; color: #0284c7;">Enterprise Sales Inquiry</h2>
+    <p><strong>Name:</strong> ${name}</p>
+    <p><strong>Email:</strong> ${email}</p>
+    <p><strong>Company:</strong> ${company}</p>
+    <p><strong>Message:</strong> ${message || "N/A"}</p>
+  </div>
+</body>
+</html>
+  `.trim();
+
+  const text = `Sales Inquiry\nName: ${name}\nEmail: ${email}\nCompany: ${company}\nMessage: ${message}`;
+  return sendEmail({ to: adminEmail, subject, html, text });
+}

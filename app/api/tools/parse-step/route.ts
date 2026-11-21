@@ -17,6 +17,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "STEP/CAD content text is required." }, { status: 400 });
     }
 
+    // Safety boundary for in-memory string parsing (5MB max)
+    if (stepContent.length > 5 * 1024 * 1024) {
+      return NextResponse.json({
+        error: "STEP file content exceeds maximum allowable direct payload size (5MB). For large assembly models, please use direct S3/R2 presigned storage ingestion.",
+      }, { status: 413 });
+    }
+
     const parsed = parseStepFileContent(stepContent, partName || "Servo Stamping Progressive Die Assembly");
 
     const orgId = session.user.organizationId || "seed-org-industrial";

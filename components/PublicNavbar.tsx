@@ -55,9 +55,8 @@ export function PublicNavbar({ onOpenAuth, onOpenDemo, activeNav = "home" }: Pub
           >
             <Link
               href="/features"
-              className={`flex items-center gap-1.5 py-2 hover:text-sky-600 transition cursor-pointer ${
-                activeNav === "features" || activeDropdown === "features" ? "text-sky-600 font-bold" : ""
-              }`}
+              className={`flex items-center gap-1.5 py-2 hover:text-sky-600 transition cursor-pointer ${activeNav === "features" || activeDropdown === "features" ? "text-sky-600 font-bold" : ""
+                }`}
             >
               <span>Platform Features</span>
               <span aria-hidden="true" className="text-[10px] text-slate-400">⌄</span>
@@ -271,9 +270,8 @@ export function PublicNavbar({ onOpenAuth, onOpenDemo, activeNav = "home" }: Pub
           >
             <Link
               href="/industries"
-              className={`flex items-center gap-1.5 py-2 hover:text-sky-600 transition cursor-pointer ${
-                activeNav === "industries" || activeDropdown === "industries" ? "text-sky-600 font-bold" : ""
-              }`}
+              className={`flex items-center gap-1.5 py-2 hover:text-sky-600 transition cursor-pointer ${activeNav === "industries" || activeDropdown === "industries" ? "text-sky-600 font-bold" : ""
+                }`}
             >
               <span>Industries &amp; Verticals</span>
               <span aria-hidden="true" className="text-[10px] text-slate-400">⌄</span>
@@ -442,9 +440,8 @@ export function PublicNavbar({ onOpenAuth, onOpenDemo, activeNav = "home" }: Pub
           {/* 3. Direct Link to Dedicated Integrations Page */}
           <Link
             href="/integrations"
-            className={`py-2 hover:text-sky-600 transition cursor-pointer ${
-              activeNav === "integrations" ? "text-sky-600 font-bold" : ""
-            }`}
+            className={`py-2 hover:text-sky-600 transition cursor-pointer ${activeNav === "integrations" ? "text-sky-600 font-bold" : ""
+              }`}
           >
             Integrations
           </Link>
@@ -452,9 +449,8 @@ export function PublicNavbar({ onOpenAuth, onOpenDemo, activeNav = "home" }: Pub
           {/* 4. Direct Link to Dedicated Pricing Page (User specifically requested separate page!) */}
           <Link
             href="/pricing"
-            className={`py-2 hover:text-sky-600 transition cursor-pointer ${
-              activeNav === "pricing" ? "text-sky-600 font-bold" : ""
-            }`}
+            className={`py-2 hover:text-sky-600 transition cursor-pointer ${activeNav === "pricing" ? "text-sky-600 font-bold" : ""
+              }`}
           >
             Pricing
           </Link>
@@ -463,7 +459,7 @@ export function PublicNavbar({ onOpenAuth, onOpenDemo, activeNav = "home" }: Pub
         {/* Right Action Buttons */}
         <div className="hidden lg:flex items-center gap-3">
           {/* Quick Demo Access Button */}
-          {onOpenDemo && (
+          {onOpenDemo ? (
             <button
               type="button"
               onClick={onOpenDemo}
@@ -471,6 +467,13 @@ export function PublicNavbar({ onOpenAuth, onOpenDemo, activeNav = "home" }: Pub
             >
               Book A Demo
             </button>
+          ) : (
+            <Link
+              href="/demo"
+              className="px-3 py-1.5 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-100 hover:text-slate-900 text-xs font-bold transition cursor-pointer"
+            >
+              Book A Demo
+            </Link>
           )}
 
           {/* Sign In Button */}
@@ -581,7 +584,7 @@ export function PublicNavbar({ onOpenAuth, onOpenDemo, activeNav = "home" }: Pub
           </nav>
 
           <div className="pt-3 border-t border-slate-100 space-y-2">
-            {onOpenDemo && (
+            {onOpenDemo ? (
               <button
                 type="button"
                 onClick={() => {
@@ -592,6 +595,14 @@ export function PublicNavbar({ onOpenAuth, onOpenDemo, activeNav = "home" }: Pub
               >
                 Book A Demo
               </button>
+            ) : (
+              <Link
+                href="/demo"
+                onClick={() => setMobileMenuOpen(false)}
+                className="w-full py-2.5 rounded-xl border border-slate-300 text-slate-800 font-bold text-xs cursor-pointer hover:bg-slate-50 transition block text-center"
+              >
+                Book A Demo
+              </Link>
             )}
             {onOpenAuth ? (
               <button
