@@ -55,6 +55,16 @@ const BrandVoiceKnowledgeBase = dynamic(() => import("@/components/BrandVoiceKno
 const RegionalLanguageStudio = dynamic(() => import("@/components/RegionalLanguageStudio").then((m) => m.RegionalLanguageStudio), { loading: TabLoadingSkeleton, ssr: false });
 const LeadAttributionDashboard = dynamic(() => import("@/components/LeadAttributionDashboard").then((m) => m.LeadAttributionDashboard), { loading: TabLoadingSkeleton, ssr: false });
 const AeoPromptTester = dynamic(() => import("@/components/AeoPromptTester").then((m) => m.AeoPromptTester), { loading: TabLoadingSkeleton, ssr: false });
+const ScheduledPublishQueue = dynamic(() => import("@/components/ScheduledPublishQueue").then((m) => m.ScheduledPublishQueue), { loading: TabLoadingSkeleton, ssr: false });
+const WhiteLabelConfig = dynamic(() => import("@/components/WhiteLabelConfig").then((m) => m.WhiteLabelConfig), { loading: TabLoadingSkeleton, ssr: false });
+const CompetitorUrlGapAnalysis = dynamic(() => import("@/components/CompetitorUrlGapAnalysis").then((m) => m.CompetitorUrlGapAnalysis), { loading: TabLoadingSkeleton, ssr: false });
+const SeoToolsConnector = dynamic(() => import("@/components/SeoToolsConnector").then((m) => m.SeoToolsConnector), { loading: TabLoadingSkeleton, ssr: false });
+const ClientRoiReportPdfExport = dynamic(() => import("@/components/ClientRoiReportPdfExport").then((m) => m.ClientRoiReportPdfExport), { loading: TabLoadingSkeleton, ssr: false });
+const UsageQuotaMeter = dynamic(() => import("@/components/UsageQuotaMeter").then((m) => m.UsageQuotaMeter), { loading: TabLoadingSkeleton, ssr: false });
+const SelfServeTaxonomyExpander = dynamic(() => import("@/components/SelfServeTaxonomyExpander").then((m) => m.SelfServeTaxonomyExpander), { loading: TabLoadingSkeleton, ssr: false });
+const MobileReviewSwipeApp = dynamic(() => import("@/components/MobileReviewSwipeApp").then((m) => m.MobileReviewSwipeApp), { loading: TabLoadingSkeleton, ssr: false });
+const SectionRegeneratorStudio = dynamic(() => import("@/components/SectionRegeneratorStudio").then((m) => m.SectionRegeneratorStudio), { loading: TabLoadingSkeleton, ssr: false });
+const AbHeadlineTester = dynamic(() => import("@/components/AbHeadlineTester").then((m) => m.AbHeadlineTester), { loading: TabLoadingSkeleton, ssr: false });
 
 type TabKey =
   | "Mission Control"
@@ -89,7 +99,17 @@ type TabKey =
   | "Brand Voice"
   | "Regional Languages"
   | "Lead Attribution"
-  | "AEO Prompt Tester";
+  | "AEO Prompt Tester"
+  | "Scheduled Queue"
+  | "White-Label Mode"
+  | "Competitor URL Gaps"
+  | "Ahrefs & SEMrush"
+  | "Client ROI Report"
+  | "Usage & Quotas"
+  | "Taxonomy Expander"
+  | "Mobile Review App"
+  | "Section Regenerator"
+  | "A/B Headlines";
 
 type QAStatus = "Pass" | "Review" | "Fail";
 
@@ -175,6 +195,16 @@ const navItems: Array<{ label: TabKey; badge?: string; iconClass: string }> = [
   { label: "Regional Languages", iconClass: "css-icon-gear", badge: "Hindi / Gu / Mr" },
   { label: "Lead Attribution", iconClass: "css-icon-chart", badge: "RFQ Source" },
   { label: "AEO Prompt Tester", iconClass: "css-icon-search", badge: "Citation Test" },
+  { label: "Scheduled Queue", iconClass: "css-icon-launch", badge: "Auto-Publish" },
+  { label: "White-Label Mode", iconClass: "css-icon-gear", badge: "Agency" },
+  { label: "Competitor URL Gaps", iconClass: "css-icon-bolt", badge: "Gap Analysis" },
+  { label: "Ahrefs & SEMrush", iconClass: "css-icon-chart", badge: "Keywords" },
+  { label: "Client ROI Report", iconClass: "css-icon-doc", badge: "PDF Export" },
+  { label: "Usage & Quotas", iconClass: "css-icon-card", badge: "Meter" },
+  { label: "Taxonomy Expander", iconClass: "css-icon-grid", badge: "Sub-Niche" },
+  { label: "Mobile Review App", iconClass: "css-icon-shield", badge: "Swipe QA" },
+  { label: "Section Regenerator", iconClass: "css-icon-bolt", badge: "Delta" },
+  { label: "A/B Headlines", iconClass: "css-icon-chart", badge: "CTR" },
   { label: "Workspace & Rules", iconClass: "css-icon-gear" },
   { label: "Billing & Quotas", iconClass: "css-icon-card" },
 ];
@@ -187,6 +217,7 @@ const ADMIN_ONLY_TABS: TabKey[] = [
   "OEM MDF Billing",
   "Workspace & Rules",
   "Billing & Quotas",
+  "White-Label Mode",
 ];
 
 const navSections: Array<{
@@ -198,8 +229,12 @@ const navSections: Array<{
     items: [
       { label: "Mission Control", iconClass: "css-icon-bolt" },
       { label: "Taxonomy Matrix", iconClass: "css-icon-grid" },
+      { label: "Taxonomy Expander", iconClass: "css-icon-grid", badge: "Niche" },
       { label: "QA Review Studio", iconClass: "css-icon-shield" },
+      { label: "Mobile Review App", iconClass: "css-icon-shield", badge: "Swipe" },
+      { label: "Section Regenerator", iconClass: "css-icon-bolt", badge: "Delta" },
       { label: "Publishing Pipeline", iconClass: "css-icon-launch" },
+      { label: "Scheduled Queue", iconClass: "css-icon-launch", badge: "Queue" },
       { label: "Internal Linking", iconClass: "css-icon-grid", badge: "Cluster" },
       { label: "Content Decay Alerts", iconClass: "css-icon-alert", badge: "Refresh" },
       { label: "Programmatic Matrix", iconClass: "css-icon-grid", badge: "Matrix" },
@@ -212,9 +247,12 @@ const navSections: Array<{
     items: [
       { label: "AEO Schema Hub", iconClass: "css-icon-gear", badge: "Live" },
       { label: "Competitor Displacer", iconClass: "css-icon-bolt" },
+      { label: "Competitor URL Gaps", iconClass: "css-icon-bolt", badge: "Gaps" },
       { label: "GSC Performance", iconClass: "css-icon-chart" },
+      { label: "Ahrefs & SEMrush", iconClass: "css-icon-chart", badge: "Ahrefs" },
       { label: "AI Share of Voice", iconClass: "css-icon-search", badge: "GEO" },
       { label: "AEO Prompt Tester", iconClass: "css-icon-search", badge: "Citation Test" },
+      { label: "A/B Headlines", iconClass: "css-icon-chart", badge: "A/B" },
     ],
   },
   {
@@ -239,6 +277,9 @@ const navSections: Array<{
       { label: "AI COGS & Router", iconClass: "css-icon-bolt", adminOnly: true },
       { label: "CRM Pipeline ROI", iconClass: "css-icon-chart" },
       { label: "Lead Attribution", iconClass: "css-icon-chart", badge: "RFQ Source" },
+      { label: "Client ROI Report", iconClass: "css-icon-doc", badge: "PDF" },
+      { label: "White-Label Mode", iconClass: "css-icon-gear", badge: "Agency", adminOnly: true },
+      { label: "Usage & Quotas", iconClass: "css-icon-card", badge: "Meter" },
       { label: "OEM MDF Billing", iconClass: "css-icon-card", adminOnly: true },
       { label: "Risk & Compliance", iconClass: "css-icon-alert" },
       { label: "Industrial Analytics", iconClass: "css-icon-chart" },
@@ -4959,6 +5000,76 @@ function ForgeFlowWorkspace() {
         {activeTab === "AEO Prompt Tester" && (
           <div className="p-6 space-y-6 max-w-7xl animate-fade-in">
             <AeoPromptTester />
+          </div>
+        )}
+
+        {/* TAB: SCHEDULED PUBLISH QUEUE */}
+        {activeTab === "Scheduled Queue" && (
+          <div className="p-6 space-y-6 max-w-7xl animate-fade-in">
+            <ScheduledPublishQueue />
+          </div>
+        )}
+
+        {/* TAB: WHITE-LABEL MODE */}
+        {activeTab === "White-Label Mode" && (
+          <div className="p-6 space-y-6 max-w-7xl animate-fade-in">
+            <WhiteLabelConfig />
+          </div>
+        )}
+
+        {/* TAB: COMPETITOR URL GAP ANALYSIS */}
+        {activeTab === "Competitor URL Gaps" && (
+          <div className="p-6 space-y-6 max-w-7xl animate-fade-in">
+            <CompetitorUrlGapAnalysis />
+          </div>
+        )}
+
+        {/* TAB: AHREFS & SEMRUSH CONNECTOR */}
+        {activeTab === "Ahrefs & SEMrush" && (
+          <div className="p-6 space-y-6 max-w-7xl animate-fade-in">
+            <SeoToolsConnector />
+          </div>
+        )}
+
+        {/* TAB: CLIENT ROI REPORT PDF EXPORT */}
+        {activeTab === "Client ROI Report" && (
+          <div className="p-6 space-y-6 max-w-7xl animate-fade-in">
+            <ClientRoiReportPdfExport />
+          </div>
+        )}
+
+        {/* TAB: USAGE & PLAN QUOTA METER */}
+        {activeTab === "Usage & Quotas" && (
+          <div className="p-6 space-y-6 max-w-7xl animate-fade-in">
+            <UsageQuotaMeter />
+          </div>
+        )}
+
+        {/* TAB: SELF-SERVE TAXONOMY EXPANDER */}
+        {activeTab === "Taxonomy Expander" && (
+          <div className="p-6 space-y-6 max-w-7xl animate-fade-in">
+            <SelfServeTaxonomyExpander />
+          </div>
+        )}
+
+        {/* TAB: MOBILE REVIEW SWIPE APP */}
+        {activeTab === "Mobile Review App" && (
+          <div className="p-6 space-y-6 max-w-7xl animate-fade-in">
+            <MobileReviewSwipeApp />
+          </div>
+        )}
+
+        {/* TAB: SURGICAL SECTION REGENERATOR */}
+        {activeTab === "Section Regenerator" && (
+          <div className="p-6 space-y-6 max-w-7xl animate-fade-in">
+            <SectionRegeneratorStudio />
+          </div>
+        )}
+
+        {/* TAB: AUTONOMOUS A/B HEADLINE TESTER */}
+        {activeTab === "A/B Headlines" && (
+          <div className="p-6 space-y-6 max-w-7xl animate-fade-in">
+            <AbHeadlineTester />
           </div>
         )}
 
