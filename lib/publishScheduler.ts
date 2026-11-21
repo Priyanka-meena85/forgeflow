@@ -1,8 +1,7 @@
 // lib/publishScheduler.ts
-// Scheduled publish queue with filesystem persistence
+// Scheduled publish queue with cloud persistence
 
-import fs from "fs";
-import path from "path";
+import { loadCloudCollection, saveCloudCollection } from "@/lib/cloudPersistence";
 
 export type ScheduledStatus = "PENDING" | "PUBLISHING" | "PUBLISHED" | "FAILED" | "CANCELLED";
 
@@ -20,8 +19,6 @@ export interface ScheduledPage {
   createdAt: string;
   updatedAt: string;
 }
-
-const STORAGE_FILE = path.join(process.cwd(), "data", "scheduled-publish.json");
 
 const DEFAULT_QUEUE: ScheduledPage[] = [
   {
@@ -50,27 +47,15 @@ const DEFAULT_QUEUE: ScheduledPage[] = [
   },
 ];
 
-function loadQueue(): ScheduledPage[] {
-  try {
-    if (fs.existsSync(STORAGE_FILE)) {
-      const raw = fs.readFileSync(STORAGE_FILE, "utf-8");
-      return JSON.parse(raw);
+let queue: ScheduledPage[] = [...DEFAULT_QUEUE];
+
+loadCloudCollection<ScheduledPage>("scheduled-publish", DEFAULT_QUEUE)
+  .then((data) => {
+    if (data && data.length > 0) {
+      queue = data;
     }
-  } catch (err) {
-    console.warn("[PublishScheduler] Storage load error; using default fallback:", err);
-  }
-  return [...DEFAULT_QUEUE];
-}
-
-function saveQueue(q: ScheduledPage[]) {
-  try {
-    fs.writeFileSync(STORAGE_FILE, JSON.stringify(q, null, 2), "utf-8");
-  } catch (err) {
-    console.warn("[PublishScheduler] Storage write error:", err);
-  }
-}
-
-let queue: ScheduledPage[] = loadQueue();
+  })
+  .catch(() => {});
 
 export function listScheduledPages(): ScheduledPage[] {
   return [...queue].sort(
@@ -89,7 +74,7 @@ export function schedulePageForPublish(
     updatedAt: new Date().toISOString(),
   };
   queue.push(item);
-  saveQueue(queue);
+  saveCloudCollection("scheduled-publish", queue).catch(() => {});
   return item;
 }
 
@@ -98,7 +83,7 @@ export function cancelScheduledPage(id: string): boolean {
   if (!item || item.status !== "PENDING") return false;
   item.status = "CANCELLED";
   item.updatedAt = new Date().toISOString();
-  saveQueue(queue);
+  saveCloudCollection("scheduled-publish", queue).catch(() => {});
   return true;
 }
 
@@ -108,7 +93,7 @@ export function markPublished(id: string, publishedUrl: string): void {
   item.status = "PUBLISHED";
   item.publishedUrl = publishedUrl;
   item.updatedAt = new Date().toISOString();
-  saveQueue(queue);
+  saveCloudCollection("scheduled-publish", queue).catch(() => {});
 }
 
 export function markFailed(id: string, reason: string): void {
@@ -117,7 +102,7 @@ export function markFailed(id: string, reason: string): void {
   item.status = "FAILED";
   item.failureReason = reason;
   item.updatedAt = new Date().toISOString();
-  saveQueue(queue);
+  saveCloudCollection("scheduled-publish", queue).catch(() => {});
 }
 
 /** Sitemap entry */

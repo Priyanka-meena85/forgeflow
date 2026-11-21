@@ -1,7 +1,6 @@
 "use server";
 
-import fs from "fs";
-import path from "path";
+import { loadCloudCollection, saveCloudCollection } from "@/lib/cloudPersistence";
 
 export interface BrandVoiceProfile {
   id: string;
@@ -16,8 +15,6 @@ export interface BrandVoiceProfile {
   createdAt: string;
   updatedAt: string;
 }
-
-const STORAGE_FILE = path.join(process.cwd(), "data", "brand-voice.json");
 
 const DEFAULT_PROFILES: BrandVoiceProfile[] = [
   {
@@ -43,27 +40,15 @@ const DEFAULT_PROFILES: BrandVoiceProfile[] = [
   },
 ];
 
-function loadProfiles(): BrandVoiceProfile[] {
-  try {
-    if (fs.existsSync(STORAGE_FILE)) {
-      const raw = fs.readFileSync(STORAGE_FILE, "utf-8");
-      return JSON.parse(raw);
+let profileStore: BrandVoiceProfile[] = [...DEFAULT_PROFILES];
+
+loadCloudCollection<BrandVoiceProfile>("brand-voice", DEFAULT_PROFILES)
+  .then((data) => {
+    if (data && data.length > 0) {
+      profileStore = data;
     }
-  } catch (err) {
-    console.warn("[BrandVoice Engine] Storage read error; using default fallback:", err);
-  }
-  return [...DEFAULT_PROFILES];
-}
-
-function saveProfiles(profiles: BrandVoiceProfile[]) {
-  try {
-    fs.writeFileSync(STORAGE_FILE, JSON.stringify(profiles, null, 2), "utf-8");
-  } catch (err) {
-    console.warn("[BrandVoice Engine] Storage write error:", err);
-  }
-}
-
-let profileStore: BrandVoiceProfile[] = loadProfiles();
+  })
+  .catch(() => {});
 
 export async function getBrandVoiceProfiles(orgId: string): Promise<BrandVoiceProfile[]> {
   return profileStore.filter((p) => p.orgId === orgId);
@@ -81,7 +66,7 @@ export async function saveBrandVoiceProfile(
   );
   if (existing) {
     Object.assign(existing, { ...profile, updatedAt: new Date().toISOString() });
-    saveProfiles(profileStore);
+    saveCloudCollection("brand-voice", profileStore).catch(() => {});
     return existing;
   }
   const newProfile: BrandVoiceProfile = {
@@ -91,7 +76,7 @@ export async function saveBrandVoiceProfile(
     updatedAt: new Date().toISOString(),
   };
   profileStore.push(newProfile);
-  saveProfiles(profileStore);
+  saveCloudCollection("brand-voice", profileStore).catch(() => {});
   return newProfile;
 }
 
@@ -99,7 +84,7 @@ export async function deleteBrandVoiceProfile(id: string): Promise<boolean> {
   const idx = profileStore.findIndex((p) => p.id === id);
   if (idx === -1) return false;
   profileStore.splice(idx, 1);
-  saveProfiles(profileStore);
+  saveCloudCollection("brand-voice", profileStore).catch(() => {});
   return true;
 }
 

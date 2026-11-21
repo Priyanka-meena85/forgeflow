@@ -54,8 +54,23 @@ export function TeamManager({ currentUserRole = UserRole.OWNER, onActionMessage 
   }, []);
 
   useEffect(() => {
-    fetchTeam();
-  }, [fetchTeam]);
+    let isMounted = true;
+    fetch("/api/team")
+      .then((res) => res.json())
+      .then((data) => {
+        if (isMounted && data.success) {
+          setMembers(data.members || []);
+          setInvitations(data.invitations || []);
+        }
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (isMounted) setLoading(false);
+      });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const handleSendInvite = async (e: React.FormEvent) => {
     e.preventDefault();

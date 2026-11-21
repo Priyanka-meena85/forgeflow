@@ -65,626 +65,16 @@ const SelfServeTaxonomyExpander = dynamic(() => import("@/components/SelfServeTa
 const MobileReviewSwipeApp = dynamic(() => import("@/components/MobileReviewSwipeApp").then((m) => m.MobileReviewSwipeApp), { loading: TabLoadingSkeleton, ssr: false });
 const SectionRegeneratorStudio = dynamic(() => import("@/components/SectionRegeneratorStudio").then((m) => m.SectionRegeneratorStudio), { loading: TabLoadingSkeleton, ssr: false });
 const AbHeadlineTester = dynamic(() => import("@/components/AbHeadlineTester").then((m) => m.AbHeadlineTester), { loading: TabLoadingSkeleton, ssr: false });
+const ErpStockBadgeWidget = dynamic(() => import("@/components/ErpStockBadgeWidget").then((m) => m.ErpStockBadgeWidget), { loading: TabLoadingSkeleton, ssr: false });
 
-type TabKey =
-  | "Mission Control"
-  | "Taxonomy Matrix"
-  | "QA Review Studio"
-  | "Risk & Compliance"
-  | "AEO Schema Hub"
-  | "Publishing Pipeline"
-  | "Competitor Displacer"
-  | "GSC Performance"
-  | "Global Standardizer"
-  | "3D CAD Inspector"
-  | "STEP CAD Extractor"
-  | "Standards Localization"
-  | "Enterprise SSO"
-  | "Buyer Intent"
-  | "Distributor Co-Marketing"
-  | "Developer API"
-  | "AI COGS & Router"
-  | "Engineering Whitepapers"
-  | "CRM Pipeline ROI"
-  | "OEM MDF Billing"
-  | "AI Share of Voice"
-  | "Industrial Analytics"
-  | "Workspace & Rules"
-  | "Billing & Quotas"
-  | "Internal Linking"
-  | "Content Decay Alerts"
-  | "Standards Fact-Checker"
-  | "Programmatic Matrix"
-  | "Claim Guardrails"
-  | "Brand Voice"
-  | "Regional Languages"
-  | "Lead Attribution"
-  | "AEO Prompt Tester"
-  | "Scheduled Queue"
-  | "White-Label Mode"
-  | "Competitor URL Gaps"
-  | "Ahrefs & SEMrush"
-  | "Client ROI Report"
-  | "Usage & Quotas"
-  | "Taxonomy Expander"
-  | "Mobile Review App"
-  | "Section Regenerator"
-  | "A/B Headlines";
+import type { TabKey, QAStatus, ExpertReviewer, PageReview, Draft, NavItem, NavSection } from "@/types/dashboard";
+export type { TabKey, QAStatus, ExpertReviewer, PageReview, Draft, NavItem, NavSection };
 
-type QAStatus = "Pass" | "Review" | "Fail";
+import { navItems, ADMIN_ONLY_TABS, navSections, executiveNavSections } from "@/config/dashboardNavigation";
 
-export type ExpertReviewer = {
-  id: string;
-  name: string;
-  jobTitle: string;
-  credentials: string;
-  yearsOfExperience: number;
-  linkedInUrl?: string | null;
-  photoUrl?: string | null;
-  bio?: string | null;
-};
+import { verticalTaxonomies, defaultForm } from "@/config/verticalTaxonomies";
 
-export type PageReview = {
-  id?: string;
-  draftId?: string;
-  reviewerId: string;
-  status: "PENDING" | "APPROVED" | "CHANGES_REQUESTED";
-  reviewDate: string;
-  reviewerNotes?: string | null;
-  verificationItems: string[];
-  reviewer?: ExpertReviewer | null;
-};
-
-type Draft = {
-  id: string | number;
-  title: string;
-  stage: "Suggested" | "Approved" | "In Review" | "Changes requested" | "Rejected" | "Published";
-  keyword: string;
-  qa: {
-    wordCount: QAStatus;
-    faqCount: QAStatus;
-    ctaCount: QAStatus;
-    linkAllowlist: QAStatus;
-    uniqueness: QAStatus;
-    fluffFilter: QAStatus;
-    aeoCapsule: QAStatus;
-    riskScore: QAStatus;
-  };
-  summary: string;
-  sections: Array<{ heading: string; body: string }>;
-  faqs: Array<{ q: string; a: string }>;
-  schema: string;
-  pageReview?: PageReview | null;
-  createdAt?: string;
-  updatedAt?: string;
-  vertical?: string;
-  equipment?: string;
-  standard?: string;
-  publishedUrl?: string | null;
-};
-
-const navItems: Array<{ label: TabKey; badge?: string; iconClass: string }> = [
-  { label: "Mission Control", iconClass: "css-icon-bolt" },
-  { label: "Taxonomy Matrix", iconClass: "css-icon-grid", badge: "7 Verticals" },
-  { label: "QA Review Studio", iconClass: "css-icon-shield", badge: "Split-View" },
-  { label: "Risk & Compliance", iconClass: "css-icon-alert", badge: "Low Risk" },
-  { label: "AEO Schema Hub", iconClass: "css-icon-gear", badge: "JSON-LD" },
-  { label: "Publishing Pipeline", iconClass: "css-icon-launch" },
-  { label: "Competitor Displacer", iconClass: "css-icon-bolt", badge: "Steal Matrix" },
-  { label: "GSC Performance", iconClass: "css-icon-chart", badge: "Live Sync" },
-  { label: "Global Standardizer", iconClass: "css-icon-gear", badge: "ISO / DIN" },
-  { label: "3D CAD Inspector", iconClass: "css-icon-box", badge: "Exploded View" },
-  { label: "STEP CAD Extractor", iconClass: "css-icon-box", badge: "CAD to Schema" },
-  { label: "Standards Localization", iconClass: "css-icon-gear", badge: "DIN / JIS" },
-  { label: "Enterprise SSO", iconClass: "css-icon-shield", badge: "SAML 2.0" },
-  { label: "Buyer Intent", iconClass: "css-icon-search", badge: "Reverse-IP" },
-  { label: "Distributor Co-Marketing", iconClass: "css-icon-launch", badge: "Channel" },
-  { label: "Developer API", iconClass: "css-icon-gear", badge: "REST & Webhooks" },
-  { label: "AI COGS & Router", iconClass: "css-icon-bolt", badge: "Tri-Model" },
-  { label: "Engineering Whitepapers", iconClass: "css-icon-doc", badge: "PDF Gen" },
-  { label: "CRM Pipeline ROI", iconClass: "css-icon-chart", badge: "Attribution" },
-  { label: "OEM MDF Billing", iconClass: "css-icon-card", badge: "Dealer Funds" },
-  { label: "AI Share of Voice", iconClass: "css-icon-search", badge: "GEO Tracker" },
-  { label: "Industrial Analytics", iconClass: "css-icon-chart", badge: "Charts" },
-  { label: "Internal Linking", iconClass: "css-icon-grid", badge: "Auto-Cluster" },
-  { label: "Content Decay Alerts", iconClass: "css-icon-alert", badge: "Refresh" },
-  { label: "Standards Fact-Checker", iconClass: "css-icon-shield", badge: "ISO / ASME / IS" },
-  { label: "Programmatic Matrix", iconClass: "css-icon-grid", badge: "Long-Tail" },
-  { label: "Claim Guardrails", iconClass: "css-icon-alert", badge: "Pre-Publish" },
-  { label: "Brand Voice", iconClass: "css-icon-doc", badge: "Knowledge Base" },
-  { label: "Regional Languages", iconClass: "css-icon-gear", badge: "Hindi / Gu / Mr" },
-  { label: "Lead Attribution", iconClass: "css-icon-chart", badge: "RFQ Source" },
-  { label: "AEO Prompt Tester", iconClass: "css-icon-search", badge: "Citation Test" },
-  { label: "Scheduled Queue", iconClass: "css-icon-launch", badge: "Auto-Publish" },
-  { label: "White-Label Mode", iconClass: "css-icon-gear", badge: "Agency" },
-  { label: "Competitor URL Gaps", iconClass: "css-icon-bolt", badge: "Gap Analysis" },
-  { label: "Ahrefs & SEMrush", iconClass: "css-icon-chart", badge: "Keywords" },
-  { label: "Client ROI Report", iconClass: "css-icon-doc", badge: "PDF Export" },
-  { label: "Usage & Quotas", iconClass: "css-icon-card", badge: "Meter" },
-  { label: "Taxonomy Expander", iconClass: "css-icon-grid", badge: "Sub-Niche" },
-  { label: "Mobile Review App", iconClass: "css-icon-shield", badge: "Swipe QA" },
-  { label: "Section Regenerator", iconClass: "css-icon-bolt", badge: "Delta" },
-  { label: "A/B Headlines", iconClass: "css-icon-chart", badge: "CTR" },
-  { label: "Workspace & Rules", iconClass: "css-icon-gear" },
-  { label: "Billing & Quotas", iconClass: "css-icon-card" },
-];
-
-const ADMIN_ONLY_TABS: TabKey[] = [
-  "Distributor Co-Marketing",
-  "Developer API",
-  "Enterprise SSO",
-  "AI COGS & Router",
-  "OEM MDF Billing",
-  "Workspace & Rules",
-  "Billing & Quotas",
-  "White-Label Mode",
-];
-
-const navSections: Array<{
-  title: string;
-  items: Array<{ label: TabKey; badge?: string; iconClass: string; adminOnly?: boolean }>;
-}> = [
-  {
-    title: "Core Workflow",
-    items: [
-      { label: "Mission Control", iconClass: "css-icon-bolt" },
-      { label: "Taxonomy Matrix", iconClass: "css-icon-grid" },
-      { label: "Taxonomy Expander", iconClass: "css-icon-grid", badge: "Niche" },
-      { label: "QA Review Studio", iconClass: "css-icon-shield" },
-      { label: "Mobile Review App", iconClass: "css-icon-shield", badge: "Swipe" },
-      { label: "Section Regenerator", iconClass: "css-icon-bolt", badge: "Delta" },
-      { label: "Publishing Pipeline", iconClass: "css-icon-launch" },
-      { label: "Scheduled Queue", iconClass: "css-icon-launch", badge: "Queue" },
-      { label: "Internal Linking", iconClass: "css-icon-grid", badge: "Cluster" },
-      { label: "Content Decay Alerts", iconClass: "css-icon-alert", badge: "Refresh" },
-      { label: "Programmatic Matrix", iconClass: "css-icon-grid", badge: "Matrix" },
-      { label: "Brand Voice", iconClass: "css-icon-doc", badge: "KB" },
-      { label: "Regional Languages", iconClass: "css-icon-gear", badge: "Hindi/Gu/Mr" },
-    ],
-  },
-  {
-    title: "AI Search & SERP",
-    items: [
-      { label: "AEO Schema Hub", iconClass: "css-icon-gear", badge: "Live" },
-      { label: "Competitor Displacer", iconClass: "css-icon-bolt" },
-      { label: "Competitor URL Gaps", iconClass: "css-icon-bolt", badge: "Gaps" },
-      { label: "GSC Performance", iconClass: "css-icon-chart" },
-      { label: "Ahrefs & SEMrush", iconClass: "css-icon-chart", badge: "Ahrefs" },
-      { label: "AI Share of Voice", iconClass: "css-icon-search", badge: "GEO" },
-      { label: "AEO Prompt Tester", iconClass: "css-icon-search", badge: "Citation Test" },
-      { label: "A/B Headlines", iconClass: "css-icon-chart", badge: "A/B" },
-    ],
-  },
-  {
-    title: "3D CAD & Standards",
-    items: [
-      { label: "3D CAD Inspector", iconClass: "css-icon-box", badge: "360°" },
-      { label: "Standards Localization", iconClass: "css-icon-gear", badge: "DIN/JIS" },
-      { label: "Global Standardizer", iconClass: "css-icon-gear" },
-      { label: "STEP CAD Extractor", iconClass: "css-icon-box" },
-      { label: "Standards Fact-Checker", iconClass: "css-icon-shield", badge: "Fact-Check" },
-      { label: "Claim Guardrails", iconClass: "css-icon-alert", badge: "Guardrails" },
-      { label: "Engineering Whitepapers", iconClass: "css-icon-doc" },
-    ],
-  },
-  {
-    title: "Enterprise Hub",
-    items: [
-      { label: "Buyer Intent", iconClass: "css-icon-search" },
-      { label: "Distributor Co-Marketing", iconClass: "css-icon-launch", adminOnly: true },
-      { label: "Developer API", iconClass: "css-icon-gear", adminOnly: true },
-      { label: "Enterprise SSO", iconClass: "css-icon-shield", badge: "SAML", adminOnly: true },
-      { label: "AI COGS & Router", iconClass: "css-icon-bolt", adminOnly: true },
-      { label: "CRM Pipeline ROI", iconClass: "css-icon-chart" },
-      { label: "Lead Attribution", iconClass: "css-icon-chart", badge: "RFQ Source" },
-      { label: "Client ROI Report", iconClass: "css-icon-doc", badge: "PDF" },
-      { label: "White-Label Mode", iconClass: "css-icon-gear", badge: "Agency", adminOnly: true },
-      { label: "Usage & Quotas", iconClass: "css-icon-card", badge: "Meter" },
-      { label: "OEM MDF Billing", iconClass: "css-icon-card", adminOnly: true },
-      { label: "Risk & Compliance", iconClass: "css-icon-alert" },
-      { label: "Industrial Analytics", iconClass: "css-icon-chart" },
-    ],
-  },
-];
-
-const verticalTaxonomies: Record<
-  string,
-  {
-    name: string;
-    equipment: string[];
-    failureModes: string[];
-    standards: string[];
-    sampleTitle: string;
-    acv: string;
-    capsuleText: string;
-    riskLevel: string;
-  }
-> = {
-  "Food & beverage manufacturing": {
-    name: "Food & Beverage (Pump/Conveyor PdM, CIP Downtime & OEE)",
-    equipment: ["Sanitary Rotary Lobe Pump", "CIP Spray Ball Skid", "Modular Belt Sanitary Conveyor", "Plate Heat Exchanger"],
-    failureModes: [
-      "Pump & Conveyor Predictive Maintenance",
-      "CIP Washdown Unplanned Downtime",
-      "Packaging & Bottling Line OEE Loss",
-      "Pasteurization Plate Bio-Fouling",
-    ],
-    standards: ["3-A Sanitary Standard 02-12", "FDA 21 CFR Part 110", "EHEDG Document 8"],
-    sampleTitle: "Eliminating CIP Unplanned Downtime and Elastomer Seal Swelling in Rotary Lobe Pumps (3-A SOP)",
-    acv: "$85,000 - $220,000",
-    capsuleText:
-      "Elastomer seal swelling in sanitary rotary lobe pumps is primarily caused by chemical incompatibility between EPDM elastomers and aggressive caustic wash formulations (>2.5% NaOH at >80°C). Remediation requires transitioning to FDA-compliant FKM or encapsulated FFKM compounds certified under 3-A Sanitary Standard 02-12.",
-    riskLevel: "1.2% (Very Low)",
-  },
-  "Steel and metals processing": {
-    name: "Steel (EAF Energy, Continuous Casting & PdM)",
-    equipment: ["Electric Arc Furnace (EAF)", "Continuous Caster Mold", "Hydraulic Work Roll Descaler", "Ladle Metallurgy Furnace (LMF)"],
-    failureModes: [
-      "EAF Energy Consumption Spikes",
-      "Continuous Casting Breakout Risk",
-      "Rolling Mill Predictive Maintenance",
-      "Hot Strip Mill Descaler Nozzle Clogging",
-    ],
-    standards: ["ASTM A6/A6M Tolerances", "AISE Technical Report No. 9", "ISO 4950 Structural Steels"],
-    sampleTitle: "Optimizing EAF Energy Consumption and Continuous Casting Quality Monitoring in Steel Plants",
-    acv: "$250,000 - $1,400,000",
-    capsuleText:
-      "Descaler nozzle clogging in hot strip mills stems from recirculated scale particulates exceeding 50 microns bypassing secondary hydrocyclone filters. Immediate intervention entails pressure drop instrumentation across the manifold and upgrading to tungsten-carbide insert tips compliant with AISE Report No. 9.",
-    riskLevel: "2.1% (Low)",
-  },
-  "Automotive & stamping": {
-    name: "Automotive (Stamping, Paint Defect, Weld Inspection & IATF)",
-    equipment: ["Servo Transfer Stamping Press", "Automotive Paint Defect Inspection", "Robotic Spot Welding Cell", "Hemming Assembly Line"],
-    failureModes: [
-      "Stamping Die Tonnage Imbalance & Galling",
-      "Automotive Paint Defect & Orange Peel",
-      "Weld Inspection Expulsion & Shunting",
-      "IATF Compliance & APQP Phase Drift",
-    ],
-    standards: ["IATF 16949 Automotive Quality", "AIAG APQP Standards", "AWS D8.1M Automotive Spot Weld"],
-    sampleTitle: "Root Cause Protocol: Stamping Die Galling & Weld Inspection Defects in IATF 16949 Assembly Lines",
-    acv: "$150,000 - $600,000",
-    capsuleText:
-      "Edge galling and tonnage imbalance in servo transfer presses typically result from lubricating film breakdown under high contact velocity and slide parallelism drift exceeding 0.05 mm/m. Remediation requires synthetic ester lubricants with extreme pressure additives and real-time piezoelectric load cell balancing.",
-    riskLevel: "1.7% (Low)",
-  },
-  "Industrial HVAC & chillers": {
-    name: "HVAC (FDD, RTU Failure Prediction & Smart Building AI)",
-    equipment: ["Commercial Rooftop Unit (RTU)", "Centrifugal Water-Cooled Chiller", "Variable Air Volume (VAV) Box", "Cooling Tower Fan"],
-    failureModes: [
-      "Fault Detection & Diagnostics (FDD) False Triggers",
-      "Rooftop Unit (RTU) Failure Prediction",
-      "Smart Building AI Temperature Drift",
-      "Low Delta-T Chilled Water Loop Syndrome",
-    ],
-    standards: ["AHRI Standard 550/590", "ASHRAE Standard 90.1-2025", "BACnet / ASHRAE 135"],
-    sampleTitle: "Automating Fault Detection & Diagnostics (FDD) to Prevent Commercial RTU Compressor Failure",
-    acv: "$95,000 - $380,000",
-    capsuleText:
-      "Low Delta-T syndrome occurs when chilled water loops return to central chillers with insufficient temperature rise (<5°C differential), forcing extra chillers online at partial loads. Rectification requires two-way pressure-independent control valves (PICVs) and reset coils recalibrated to ASHRAE 90.1 standards.",
-    riskLevel: "1.4% (Very Low)",
-  },
-  "SCADA & automation": {
-    name: "SCADA & Automation (PLC/MES/ERP Integration, OPC UA, UNS)",
-    equipment: ["Unified Namespace (UNS) Broker", "Programmable Automation Controller (PAC)", "Remote Terminal Unit (RTU)", "Industrial Edge Gateway"],
-    failureModes: [
-      "PLC / MES / ERP Integration Latency",
-      "OPC UA PubSub Packet Loss & Latency",
-      "Unified Namespace (UNS) Schema Drift",
-      "OT Zero-Day Exploit Lateral Movement",
-    ],
-    standards: ["ISA/IEC 62443 Industrial Security", "OPC Unified Architecture (IEC 62541)", "ISA-95 Enterprise-Control"],
-    sampleTitle: "Architecting a Unified Namespace (UNS) with OPC UA to Eliminate PLC-to-MES Data Silos",
-    acv: "$120,000 - $500,000",
-    capsuleText:
-      "Modbus packet drops over industrial Ethernet links typically stem from RS-485 serial gateway buffer saturation and baud rate mismatch under high polling frequencies (>10Hz). Upgrading to deterministic OPC-UA PubSub over TSN compliant with IEC 62443 resolves transmission collisions.",
-    riskLevel: "0.9% (Minimal)",
-  },
-  "Cement & bulk material handling": {
-    name: "Cement (Kiln Efficiency & Downtime Tracking)",
-    equipment: ["Rotary Clinker Kiln", "Vertical Roller Mill (VRM)", "Clinker Grate Cooler", "Pulse-Jet Baghouse Dust Collector"],
-    failureModes: [
-      "Kiln Thermal Efficiency & Fuel Waste",
-      "Cement Plant Unplanned Downtime Tracking",
-      "Kiln Tire Slippage & Shell Ovality",
-      "Vertical Roller Mill Table Spalling",
-    ],
-    standards: ["EN 197-1 Cement Specifications", "MSHA 30 CFR Safety", "EPA NESHAP Subpart LLL"],
-    sampleTitle: "Tracking Unplanned Downtime and Calculating Rotary Kiln Tire Slippage to Prevent Refractory Collapse",
-    acv: "$300,000 - $2,000,000",
-    capsuleText:
-      "Rotary kiln tire slippage is the relative circumference movement between the shell and riding ring. Target slippage is 12 to 20 mm per revolution. Exceeding 25 mm accelerates refractory brick pinch spalling and causes shell ovality exceeding 0.3%, demanding immediate shim re-profiling.",
-    riskLevel: "2.4% (Low)",
-  },
-  "Textile & fiber processing": {
-    name: "Textile (Yarn Breakage, Fabric Waste & Cutting Room KPIs)",
-    equipment: ["High-Speed Rapier Loom", "Air-Jet Spinning Machine", "Automated Fabric Cutting Table", "Continuous Stenter Frame"],
-    failureModes: [
-      "High Yarn Breakage & Tension Spikes",
-      "Cutting Room Fabric Waste & Scrap",
-      "Cutting Room KPI Drift & Throughput Loss",
-      "Weft Insertion Timing Desynchronization",
-    ],
-    standards: ["ISO 139 Textile Standards", "OEKO-TEX Standard 100", "AATCC Test Methods"],
-    sampleTitle: "Eliminating High Yarn Breakage and Cutting Room Fabric Scrap in Technical Textile Plants",
-    acv: "$75,000 - $280,000",
-    capsuleText:
-      "Weft insertion desynchronization in high-speed air-jet looms occurs when main nozzle relay pressure drops below 0.35 MPa during relay solenoid firing. Real-time digital pressure transducers and automated solenoid cycle tuning eliminate trailing yarn kinks and stop-mark defects.",
-    riskLevel: "1.1% (Very Low)",
-  },
-};
-
-const defaultForm = {
-  companyName: "",
-  website: "",
-  productDescription: "",
-  industry: "Food & beverage manufacturing",
-  keywords: "",
-  voiceRegister: "Plant-Floor Pragmatic",
-  fluffSanitizer: true,
-  answerCapsuleDefault: true,
-  allowlistOnly: true,
-  allowedDomains: "3-a.org, fda.gov, asme.org, acmeindustrialtech.com",
-  bannedWords: "game-changer, revolutionary, delve into, in today's fast-paced world, skyrocket",
-  modelBackend: "DeepSeek-V3 (Industrial Spec)",
-};
-
-const demoReviewDrafts: Draft[] = [
-  {
-    id: "fr-draft-001",
-    title: "Preventing Elastomer Seal Swelling in Rotary Lobe Pumps During Caustic CIP Washdown (3-A SOP)",
-    stage: "In Review",
-    keyword: "rotary lobe pump seal swelling CIP",
-    vertical: "Food & beverage manufacturing",
-    equipment: "Rotary Lobe Pump",
-    standard: "3-A Sanitary Standard 02-12",
-    createdAt: new Date(Date.now() - 1 * 86400000).toISOString(),
-    qa: {
-      wordCount: "Pass",
-      faqCount: "Pass",
-      ctaCount: "Fail",
-      linkAllowlist: "Pass",
-      uniqueness: "Pass",
-      fluffFilter: "Fail",
-      aeoCapsule: "Pass",
-      riskScore: "Review",
-    },
-    summary:
-      "A deterministic engineering guide for plant reliability managers preventing chemical elastomer failure during caustic Clean-inPlace cycles in food processing.",
-    sections: [
-      {
-        heading: "Root Cause of Elastomer Degradation Under Caustic Exposure",
-        body: "Rotary lobe pumps operating in continuous dairy and beverage lines rely on wetted elastomers to maintain sanitary isolation. When exposed to caustic washes exceeding 2.5% NaOH at temperatures above 80°C, generic EPDM compounds experience severe cross-link degradation, leading to swelling, increased frictional torque, and premature mechanical seal blow-out.",
-      },
-      {
-        heading: "Material Selection Matrix: EPDM vs. FKM vs. FFKM",
-        body: "Reliability teams must specify elastomer compounds engineered for extreme alkaline resistance. While standard EPDM offers superior resistance to steam, fluorocarbon (FKM) and perfluoroelastomer (FFKM) provide complete volumetric stability in caustic environments up to 130°C.",
-      },
-      {
-        heading: "Standard Operating Procedure: 3-A Sanitary Verification",
-        body: "Inspect mechanical seal face clearance every 2,500 run hours. If radial expansion exceeds 0.15mm, purge line pressure, remove the rotor housing, and replace elastomer O-rings with FDA 21 CFR Part 110 certified components.",
-      },
-    ],
-    faqs: [
-      {
-        q: "Why do EPDM seals swell during caustic CIP cycles in rotary lobe pumps?",
-        a: "EPDM seals swell when exposed to alkaline wash concentrations exceeding 3% sodium hydroxide at temperatures above 85°C. Chemical attack breaks down polymer cross-links, requiring an upgrade to fluorocarbon (FKM) or perfluoroelastomer (FFKM) compounds conforming to 3-A Sanitary Standard 02-12.",
-      },
-      {
-        q: "What is the certified inspection interval for sanitary lobe pump seals?",
-        a: "In continuous 24/7 food processing lines undergoing daily CIP washdowns, mechanical face seals should be inspected every 2,500 run hours and proactively replaced every 5,000 run hours to eliminate micro-leakage risks.",
-      },
-      {
-        q: "Does 3-A Sanitary Standard 02-12 allow standard industrial Viton?",
-        a: "No. Standard industrial fluoroelastomers often contain metal oxide curing agents that do not meet FDA 21 CFR 177.2600 extractable limits. Only food-grade, post-cured FKM or FFKM is approved for direct product contact.",
-      },
-      {
-        q: "What is the recommended maximum CIP fluid velocity across sanitary seal faces?",
-        a: "Fluid velocity should remain between 1.5 to 2.1 m/s during washdown cycles to prevent hydraulic shock, seal face hydro-planing, and micro-cavitation.",
-      },
-      {
-        q: "How does 3-A Sanitary Standard define dead-leg piping limits for pump skids?",
-        a: "3-A and EHEDG guidelines recommend an L/D ratio of less than 1.5 to eliminate stagnant zones where caustic fluids fail to flush and bacteria can harbor.",
-      },
-    ],
-    schema: JSON.stringify(
-      {
-        "@context": "https://schema.org",
-        "@type": "FAQPage",
-        mainEntity: [
-          {
-            "@type": "Question",
-            name: "Why do EPDM seals swell during caustic CIP cycles in rotary lobe pumps?",
-            acceptedAnswer: {
-              "@type": "Answer",
-              text: "EPDM seals swell when exposed to alkaline wash concentrations exceeding 3% sodium hydroxide at temperatures above 85°C. Upgrading to FKM or FFKM per 3-A 02-12 resolves swelling.",
-            },
-          },
-        ],
-      },
-      null,
-      2,
-    ),
-  },
-  {
-    id: "fr-draft-002",
-    title: "Diagnosing Hydraulic Descaler Nozzle Clogging and Strip Temperature Drop in Continuous Hot Strip Mills",
-    stage: "Approved",
-    keyword: "hot strip mill descaler nozzle clogging",
-    vertical: "Steel and metals processing",
-    equipment: "Hydraulic Work Roll Descaler",
-    standard: "AISE Technical Report No. 9",
-    createdAt: new Date(Date.now() - 2 * 86400000).toISOString(),
-    qa: {
-      wordCount: "Pass",
-      faqCount: "Pass",
-      ctaCount: "Pass",
-      linkAllowlist: "Pass",
-      uniqueness: "Pass",
-      fluffFilter: "Pass",
-      aeoCapsule: "Pass",
-      riskScore: "Pass",
-    },
-    summary:
-      "A technical reference for metallurgical process engineers maintaining uniform strip exit temperature and scale-free surface quality in continuous hot strip mills.",
-    sections: [
-      {
-        heading: "Impact of High-Pressure Nozzle Fouling on Slab Heat Uniformity",
-        body: "Descaling headers operating at 180 to 240 bar must deliver a sharp, flat-spray knife pattern to crack primary oxide scale. When particulate scale jams nozzle orifices, spray force collapses, leaving residual scale patches that cause surface defect rejections under ASTM A6 standards.",
-      },
-      {
-        heading: "Manifold Pressure Drop Diagnostic Protocol",
-        body: "Install differential pressure transducers across the primary descaling header. A drop of 15 bar across the manifold indicates localized clogging in more than 3 adjacent nozzles.",
-      },
-    ],
-    faqs: [
-      {
-        q: "What spray angle is recommended for hot strip mill descaling nozzles?",
-        a: "A 26-degree spray angle with a 15-degree offset to the strip axis prevents adjacent spray interference while delivering maximum impact pressure.",
-      },
-    ],
-    schema: JSON.stringify(
-      {
-        "@context": "https://schema.org",
-        "@type": "HowTo",
-        name: "Descaler Nozzle Inspection Protocol",
-        step: [
-          { "@type": "HowToStep", text: "De-energize high-pressure pump skid and lock out header valve." },
-          { "@type": "HowToStep", text: "Inspect tungsten carbide nozzle tips for erosion using optical comparator." },
-        ],
-      },
-      null,
-      2,
-    ),
-    pageReview: {
-      reviewerId: "rev_marcus_vance",
-      status: "APPROVED",
-      reviewDate: new Date(Date.now() - 1 * 86400000).toISOString(),
-      reviewerNotes: "Verified tungsten carbide nozzle erosion tolerances and 180-240 bar header pressure differentials per AISE Report No. 9.",
-      verificationItems: [
-        "Spec Accuracy: Verified 180-240 bar descaler pressure envelope against OEM manual.",
-        "Standards Referenced: Cross-referenced with AISE Technical Report No. 9 and ASTM A6.",
-        "Operating Tolerances: Confirmed 15 bar delta-P manifold trip threshold.",
-        "AEO Schema Validity: Validated HowTo & TechArticle structured JSON-LD graphs.",
-      ],
-      reviewer: {
-        id: "rev_marcus_vance",
-        name: "Dr. Marcus Vance, PE",
-        jobTitle: "Lead Thermal & Mechanical Applications Engineer",
-        credentials: "PE, ASHRAE Fellow, MS Mechanical Engineering",
-        yearsOfExperience: 18,
-        linkedInUrl: "https://www.linkedin.com/in/marcus-vance-pe-industrial",
-        photoUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80",
-        bio: "Specializing in high-temperature fluid machinery diagnostics and industrial standards compliance.",
-      },
-    },
-  },
-  {
-    id: "fr-draft-003",
-    title: "Root Cause Protocol: Stamping Die Galling & Weld Inspection Defects in IATF 16949 Assembly Lines",
-    stage: "Published",
-    keyword: "stamping die galling IATF 16949 weld inspection",
-    vertical: "Automotive & stamping",
-    equipment: "Servo Transfer Stamping Press",
-    standard: "IATF 16949 Automotive Quality",
-    createdAt: new Date(Date.now() - 3 * 86400000).toISOString(),
-    qa: {
-      wordCount: "Pass",
-      faqCount: "Pass",
-      ctaCount: "Pass",
-      linkAllowlist: "Pass",
-      uniqueness: "Pass",
-      fluffFilter: "Pass",
-      aeoCapsule: "Pass",
-      riskScore: "Pass",
-    },
-    summary:
-      "Deterministic root-cause protocols for automotive stamping engineers resolving tonnage imbalance and expulsion defects.",
-    sections: [
-      {
-        heading: "Slide Parallelism Drift in High-Tonnage Servo Presses",
-        body: "Edge galling and tonnage imbalance in servo transfer presses typically result from lubricating film breakdown under high contact velocity and slide parallelism drift exceeding 0.05 mm/m. Remediation requires synthetic ester lubricants with extreme pressure additives.",
-      },
-    ],
-    faqs: [
-      {
-        q: "How to prevent stamping die galling under IATF 16949 tolerances?",
-        a: "Maintain slide parallelism under 0.05 mm/m and utilize synthetic ester lubricants with piezoelectric load cell balancing.",
-      },
-    ],
-    schema: JSON.stringify({ "@context": "https://schema.org", "@type": "TechArticle", name: "Stamping Die Galling Protocol" }, null, 2),
-  },
-  {
-    id: "fr-draft-004",
-    title: "Automating Fault Detection & Diagnostics (FDD) to Prevent Commercial RTU Compressor Failure",
-    stage: "In Review",
-    keyword: "commercial RTU FDD fault detection chiller",
-    vertical: "Industrial HVAC & chillers",
-    equipment: "Commercial Rooftop Unit (RTU)",
-    standard: "AHRI Standard 550/590",
-    createdAt: new Date().toISOString(),
-    qa: {
-      wordCount: "Pass",
-      faqCount: "Pass",
-      ctaCount: "Pass",
-      linkAllowlist: "Pass",
-      uniqueness: "Pass",
-      fluffFilter: "Pass",
-      aeoCapsule: "Pass",
-      riskScore: "Pass",
-    },
-    summary:
-      "Engineering framework for commercial facility managers deploying automated fault detection and diagnostics across RTU fleets.",
-    sections: [
-      {
-        heading: "Root Cause of RTU Low Delta-T Syndrome",
-        body: "Low Delta-T syndrome occurs when chilled water loops return to central chillers with insufficient temperature rise (<5°C differential), forcing extra chillers online at partial loads.",
-      },
-    ],
-    faqs: [
-      {
-        q: "What causes commercial RTU compressor floodback?",
-        a: "Thermostatic expansion valve hunting or low evaporator airflow leads to unevaporated liquid entering the compressor suction line.",
-      },
-    ],
-    schema: JSON.stringify({ "@context": "https://schema.org", "@type": "HowTo", name: "RTU FDD Diagnostic Procedure" }, null, 2),
-  },
-  {
-    id: "fr-draft-005",
-    title: "Architecting a Unified Namespace (UNS) with OPC UA to Eliminate PLC-to-MES Data Silos",
-    stage: "Approved",
-    keyword: "unified namespace UNS OPC UA MQTT sparkplug",
-    vertical: "SCADA & automation",
-    equipment: "Unified Namespace (UNS) Broker",
-    standard: "ISA/IEC 62443 Industrial Security",
-    createdAt: new Date(Date.now() - 4 * 86400000).toISOString(),
-    qa: {
-      wordCount: "Pass",
-      faqCount: "Pass",
-      ctaCount: "Pass",
-      linkAllowlist: "Pass",
-      uniqueness: "Pass",
-      fluffFilter: "Pass",
-      aeoCapsule: "Pass",
-      riskScore: "Pass",
-    },
-    summary:
-      "Industrial automation guide for SCADA engineers transitioning from point-to-point Modbus polling to event-driven Unified Namespace architectures.",
-    sections: [
-      {
-        heading: "Eliminating Gateway Buffer Saturation in OT Networks",
-        body: "Modbus packet drops over industrial Ethernet links typically stem from RS-485 serial gateway buffer saturation and baud rate mismatch under high polling frequencies (>10Hz). Upgrading to deterministic OPC-UA PubSub over TSN compliant with IEC 62443 resolves transmission collisions.",
-      },
-    ],
-    faqs: [
-      {
-        q: "How does a Unified Namespace (UNS) improve MES data latency?",
-        a: "By decoupling data producers from consumers via MQTT Sparkplug B brokers, reducing query latency from seconds to under 20ms.",
-      },
-    ],
-    schema: JSON.stringify({ "@context": "https://schema.org", "@type": "TechArticle", name: "UNS Architecture Specification" }, null, 2),
-  },
-];
+import { demoReviewDrafts } from "@/config/demoDrafts";
 
 function AnimatedCounter({ value, prefix = "", suffix = "" }: { value: number; prefix?: string; suffix?: string }) {
   const [displayValue, setDisplayValue] = useState(value);
@@ -769,6 +159,7 @@ function ForgeFlowWorkspace() {
   const isReviewer = userRole === "REVIEWER";
   const isAuthor = userRole === "AUTHOR" || userRole === "MEMBER";
 
+  const [viewMode, setViewMode] = useState<"EXECUTIVE" | "POWER_STUDIO">("POWER_STUDIO");
   const [activeTab, setActiveTab] = useState<TabKey>("Mission Control");
   const [selectedVertical, setSelectedVertical] = useState<string>("Food & beverage manufacturing");
   const [form, setForm] = useState(() => {
@@ -2245,11 +1636,41 @@ function ForgeFlowWorkspace() {
                 + Palette
               </button>
             </div>
+            {/* View Mode Toggle: Executive View (5 tabs) vs Power Studio (All tabs) */}
+            <div className="grid grid-cols-2 p-1 rounded-xl bg-slate-100 border border-slate-200/80 text-[11px] font-bold">
+              <button
+                type="button"
+                onClick={() => {
+                  setViewMode("EXECUTIVE");
+                  if (!["Mission Control", "QA Review Studio", "Lead Attribution", "Client ROI Report", "GSC Performance", "ERP Stock Router"].includes(activeTab)) {
+                    setActiveTab("Mission Control");
+                  }
+                }}
+                className={`py-1 rounded-lg transition-all text-center ${
+                  viewMode === "EXECUTIVE"
+                    ? "bg-white text-indigo-700 shadow-2xs font-extrabold"
+                    : "text-slate-500 hover:text-slate-800"
+                }`}
+              >
+                👔 Executive
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode("POWER_STUDIO")}
+                className={`py-1 rounded-lg transition-all text-center ${
+                  viewMode === "POWER_STUDIO"
+                    ? "bg-white text-indigo-700 shadow-2xs font-extrabold"
+                    : "text-slate-500 hover:text-slate-800"
+                }`}
+              >
+                🛠️ Studio
+              </button>
+            </div>
           </div>
 
           {/* Categorized Navigation Suite (Linear/Stripe Grouped Hierarchy with RBAC) */}
           <div className="flex-1 overflow-y-auto space-y-4 pr-1 scrollbar-thin">
-            {navSections.map((sec) => {
+            {(viewMode === "EXECUTIVE" ? executiveNavSections : navSections).map((sec) => {
               const visibleItems = sec.items.filter((item) => !item.adminOnly || isAdmin);
               if (visibleItems.length === 0) return null;
               return (
@@ -2542,9 +1963,40 @@ function ForgeFlowWorkspace() {
                 </span>
               </button>
 
+              {/* View Mode Toggle: Executive View (5 tabs) vs Power Studio (All tabs) */}
+              <div className="grid grid-cols-2 p-1 rounded-xl bg-slate-100 border border-slate-200/80 text-[11px] font-bold">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setViewMode("EXECUTIVE");
+                    if (!["Mission Control", "QA Review Studio", "Lead Attribution", "Client ROI Report", "GSC Performance", "ERP Stock Router"].includes(activeTab)) {
+                      setActiveTab("Mission Control");
+                    }
+                  }}
+                  className={`py-1 rounded-lg transition-all text-center ${
+                    viewMode === "EXECUTIVE"
+                      ? "bg-white text-indigo-700 shadow-2xs font-extrabold"
+                      : "text-slate-500 hover:text-slate-800"
+                  }`}
+                >
+                  👔 Executive
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setViewMode("POWER_STUDIO")}
+                  className={`py-1 rounded-lg transition-all text-center ${
+                    viewMode === "POWER_STUDIO"
+                      ? "bg-white text-indigo-700 shadow-2xs font-extrabold"
+                      : "text-slate-500 hover:text-slate-800"
+                  }`}
+                >
+                  🛠️ Studio
+                </button>
+              </div>
+
               {/* Navigation Items Grouped by Category with RBAC Filter */}
               <div className="space-y-3 pt-1 max-h-[55vh] overflow-y-auto pr-1">
-                {navSections.map((sec) => {
+                {(viewMode === "EXECUTIVE" ? executiveNavSections : navSections).map((sec) => {
                   const visibleItems = sec.items.filter((item) => !item.adminOnly || isAdmin);
                   if (visibleItems.length === 0) return null;
                   return (
@@ -5070,6 +4522,13 @@ function ForgeFlowWorkspace() {
         {activeTab === "A/B Headlines" && (
           <div className="p-6 space-y-6 max-w-7xl animate-fade-in">
             <AbHeadlineTester />
+          </div>
+        )}
+
+        {/* TAB: LIVE ERP DISTRIBUTOR STOCK ROUTER */}
+        {activeTab === "ERP Stock Router" && (
+          <div className="p-6 space-y-6 max-w-7xl animate-fade-in">
+            <ErpStockBadgeWidget />
           </div>
         )}
 

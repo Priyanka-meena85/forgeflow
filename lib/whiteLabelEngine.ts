@@ -1,8 +1,7 @@
 // lib/whiteLabelEngine.ts
-// White-label config per workspace — agencies resell under their own brand with filesystem persistence
+// White-label config per workspace — agencies resell under their own brand with cloud persistence
 
-import fs from "fs";
-import path from "path";
+import { loadCloudCollection, saveCloudCollection } from "@/lib/cloudPersistence";
 
 export interface WhiteLabelConfig {
   orgId: string;
@@ -21,8 +20,6 @@ export interface WhiteLabelConfig {
   updatedAt: string;
 }
 
-const STORAGE_FILE = path.join(process.cwd(), "data", "white-label.json");
-
 const DEFAULT_CONFIG: WhiteLabelConfig = {
   orgId: "org_demo",
   enabled: false,
@@ -40,33 +37,17 @@ const DEFAULT_CONFIG: WhiteLabelConfig = {
   updatedAt: new Date().toISOString(),
 };
 
-function loadStorage(): Map<string, WhiteLabelConfig> {
-  const map = new Map<string, WhiteLabelConfig>();
-  map.set("org_demo", DEFAULT_CONFIG);
-  try {
-    if (fs.existsSync(STORAGE_FILE)) {
-      const raw = fs.readFileSync(STORAGE_FILE, "utf-8");
-      const list = JSON.parse(raw) as WhiteLabelConfig[];
-      for (const item of list) {
-        map.set(item.orgId, item);
-      }
+const configs = new Map<string, WhiteLabelConfig>();
+configs.set("org_demo", DEFAULT_CONFIG);
+
+// Hydrate cloud persistence asynchronously
+loadCloudCollection<WhiteLabelConfig>("white-label", [DEFAULT_CONFIG])
+  .then((list) => {
+    for (const item of list) {
+      configs.set(item.orgId, item);
     }
-  } catch (err) {
-    console.warn("[WhiteLabel Engine] Storage read error; using memory fallback:", err);
-  }
-  return map;
-}
-
-function saveStorage(map: Map<string, WhiteLabelConfig>) {
-  try {
-    const list = Array.from(map.values());
-    fs.writeFileSync(STORAGE_FILE, JSON.stringify(list, null, 2), "utf-8");
-  } catch (err) {
-    console.warn("[WhiteLabel Engine] Storage write error:", err);
-  }
-}
-
-const configs = loadStorage();
+  })
+  .catch(() => {});
 
 export function getWhiteLabelConfig(orgId: string): WhiteLabelConfig | null {
   return configs.get(orgId) ?? null;
@@ -75,7 +56,7 @@ export function getWhiteLabelConfig(orgId: string): WhiteLabelConfig | null {
 export function saveWhiteLabelConfig(config: WhiteLabelConfig): WhiteLabelConfig {
   config.updatedAt = new Date().toISOString();
   configs.set(config.orgId, config);
-  saveStorage(configs);
+  saveCloudCollection("white-label", Array.from(configs.values())).catch(() => {});
   return config;
 }
 

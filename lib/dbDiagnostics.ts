@@ -22,7 +22,7 @@ export async function checkDatabaseHealth(): Promise<DatabaseHealthStatus> {
   const hasPgBouncer = rawUrl.includes("pgbouncer=true");
   const isPostgres = rawUrl.startsWith("postgresql://");
 
-  let connectionMode: DatabaseHealthStatus["connectionMode"] = isPostgres
+  const connectionMode: DatabaseHealthStatus["connectionMode"] = isPostgres
     ? hasPgBouncer
       ? "PGBOUNCER_POOL"
       : "POSTGRESQL_DIRECT"
