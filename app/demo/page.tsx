@@ -110,7 +110,15 @@ export default function DemoPage() {
                 </li>
               </ul>
 
-              <div className="pt-4 border-t border-slate-800">
+              <div className="pt-4 border-t border-slate-800 space-y-3">
+                <div className="p-4 rounded-xl bg-cyan-950/40 border border-cyan-800/60 space-y-1.5">
+                  <span className="text-[10px] font-mono font-bold uppercase text-cyan-400 tracking-wider">
+                    White-Glove Assisted Ingestion Included
+                  </span>
+                  <p className="text-xs text-slate-300 leading-relaxed">
+                    Have messy 100-page legacy PDFs or complex STEP models? Our certified industrial engineers will normalize your alloy crosswalks and ingest your catalog within 48 hours as part of your onboarding.
+                  </p>
+                </div>
                 <div className="text-xs text-slate-400 font-mono">
                   Enterprise-grade security • SAML 2.0 / Okta Ready • Zero Hardware
                 </div>

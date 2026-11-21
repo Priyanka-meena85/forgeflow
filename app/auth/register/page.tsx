@@ -44,9 +44,9 @@ export default function RegisterPage() {
         throw new Error(data.error || "Registration failed. Please check your details.");
       }
 
-      setSuccessMessage("Workspace created successfully! Redirecting to console...");
+      setSuccessMessage("Workspace created successfully! Redirecting to dashboard...");
       setTimeout(() => {
-        router.push("/");
+        router.push("/dashboard");
         router.refresh();
       }, 1000);
     } catch (err: unknown) {

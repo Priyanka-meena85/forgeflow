@@ -28,8 +28,8 @@ export default function LoginPage() {
         throw new Error(data.error || "Authentication failed. Please verify your credentials.");
       }
 
-      // Successful login - redirect to root console
-      router.push("/");
+      // Successful login - redirect to dashboard console
+      router.push("/dashboard");
       router.refresh();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Authentication failed. Please check your credentials.");

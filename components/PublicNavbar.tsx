@@ -487,7 +487,7 @@ export function PublicNavbar({ onOpenAuth, onOpenDemo, activeNav = "home" }: Pub
             </button>
           ) : (
             <Link
-              href="/?mode=login"
+              href="/auth/login"
               className="px-3.5 py-1.5 rounded-xl text-slate-700 hover:text-slate-900 text-xs font-bold transition inline-block"
             >
               Sign In
@@ -505,7 +505,7 @@ export function PublicNavbar({ onOpenAuth, onOpenDemo, activeNav = "home" }: Pub
             </button>
           ) : (
             <Link
-              href="/?mode=register"
+              href="/dashboard"
               className="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold tracking-tight shadow-md shadow-sky-600/20 transition inline-block"
             >
               Launch Console &rarr;
@@ -617,7 +617,7 @@ export function PublicNavbar({ onOpenAuth, onOpenDemo, activeNav = "home" }: Pub
               </button>
             ) : (
               <Link
-                href="/?mode=register"
+                href="/dashboard"
                 onClick={() => setMobileMenuOpen(false)}
                 className="block text-center w-full py-2.5 rounded-xl bg-sky-600 text-white font-bold text-xs shadow-xs hover:bg-sky-500 transition"
               >
