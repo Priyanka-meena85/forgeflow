@@ -71,10 +71,12 @@ import type { TabKey, QAStatus, ExpertReviewer, PageReview, Draft, NavItem, NavS
 export type { TabKey, QAStatus, ExpertReviewer, PageReview, Draft, NavItem, NavSection };
 
 import { navItems, ADMIN_ONLY_TABS, navSections, executiveNavSections } from "@/config/dashboardNavigation";
-
 import { verticalTaxonomies, defaultForm } from "@/config/verticalTaxonomies";
-
 import { demoReviewDrafts } from "@/config/demoDrafts";
+import { CommandPaletteModal } from "@/components/CommandPaletteModal";
+import { OnboardingChecklistWidget } from "@/components/OnboardingChecklistWidget";
+import { UnsavedChangesGuardModal } from "@/components/UnsavedChangesGuardModal";
+import { ToastNotificationHost, type ToastItem } from "@/components/ToastNotificationHost";
 
 function AnimatedCounter({ value, prefix = "", suffix = "" }: { value: number; prefix?: string; suffix?: string }) {
   const [displayValue, setDisplayValue] = useState(value);
@@ -187,6 +189,21 @@ function ForgeFlowWorkspace() {
   const [reviewDrafts, setReviewDrafts] = useState<Draft[]>([]);
   const [selectedDraftId, setSelectedDraftId] = useState<string | number>("");
   const [actionMessage, setActionMessage] = useState("");
+
+  // Modern Floating Toast Notification System
+  const [toasts, setToasts] = useState<ToastItem[]>([]);
+  const addToast = useCallback((message: string, type: "success" | "error" | "info" = "info", title?: string) => {
+    const id = `toast-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+    setToasts((prev) => [...prev.slice(-3), { id, message, type, title }]);
+  }, []);
+  const handleDismissToast = useCallback((id: string) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  }, []);
+
+  // Universal Command Palette (Cmd+K) & Unsaved Form Guard
+  const [showCommandPalette, setShowCommandPalette] = useState(false);
+  const [pendingTabSwitch, setPendingTabSwitch] = useState<TabKey | null>(null);
+  const [showUnsavedGuard, setShowUnsavedGuard] = useState(false);
   const [isPatching, setIsPatching] = useState(false);
   const [patchStep, setPatchStep] = useState(0);
   const [generationBusy, setGenerationBusy] = useState(false);
@@ -374,6 +391,57 @@ function ForgeFlowWorkspace() {
     organizationName && organizationName !== "Industrial Reliability Corp"
       ? organizationName
       : "JRS Innovation";
+
+  // Global Keyboard Shortcuts (Cmd+K / Ctrl+K)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setShowCommandPalette((prev) => !prev);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  // Guard against accidental browser exit/refresh when editing
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isEditingDraft) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [isEditingDraft]);
+
+  // Tab switch guard (Prevents discarding unsaved edits)
+  const handleRequestTabSwitch = useCallback(
+    (targetTab: TabKey) => {
+      if (isEditingDraft && targetTab !== activeTab) {
+        setPendingTabSwitch(targetTab);
+        setShowUnsavedGuard(true);
+        return;
+      }
+      setActiveTab(targetTab);
+    },
+    [isEditingDraft, activeTab]
+  );
+
+  const handleConfirmDiscardTabSwitch = useCallback(() => {
+    setIsEditingDraft(false);
+    setShowUnsavedGuard(false);
+    if (pendingTabSwitch) {
+      setActiveTab(pendingTabSwitch);
+      setPendingTabSwitch(null);
+    }
+  }, [pendingTabSwitch]);
+
+  const handleCancelTabSwitch = useCallback(() => {
+    setShowUnsavedGuard(false);
+    setPendingTabSwitch(null);
+  }, []);
 
   const loadWorkspaceTeam = useCallback(async () => {
     try {
@@ -1652,7 +1720,7 @@ function ForgeFlowWorkspace() {
                     : "text-slate-500 hover:text-slate-800"
                 }`}
               >
-                👔 Executive
+                <span className="css-icon-chart shrink-0"></span> Executive
               </button>
               <button
                 type="button"
@@ -1663,7 +1731,7 @@ function ForgeFlowWorkspace() {
                     : "text-slate-500 hover:text-slate-800"
                 }`}
               >
-                🛠️ Studio
+                <span className="css-icon-gear shrink-0"></span> Studio
               </button>
             </div>
           </div>
@@ -1690,7 +1758,7 @@ function ForgeFlowWorkspace() {
                         <button
                           key={item.label}
                           type="button"
-                          onClick={() => setActiveTab(item.label)}
+                          onClick={() => handleRequestTabSwitch(item.label)}
                           className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs transition cursor-pointer ${
                             isActive
                               ? "bg-sky-50 text-sky-700 font-bold border border-sky-200 shadow-2xs"
@@ -1802,7 +1870,7 @@ function ForgeFlowWorkspace() {
                     {userDisplayName}
                   </div>
                   <div className="text-[10px] font-mono truncate text-slate-500 flex items-center gap-1">
-                    <span className="font-bold text-slate-700">{isAdmin ? "👑 Admin" : isReviewer ? "🛡️ Reviewer" : "✍️ Author"}</span>
+                    <span className="font-bold text-slate-700">{isAdmin ? "Admin" : isReviewer ? "Reviewer" : "Author"}</span>
                     <span>&bull;</span>
                     <span className="truncate">{userDisplayOrg}</span>
                   </div>
@@ -1844,7 +1912,7 @@ function ForgeFlowWorkspace() {
                         isAdmin ? "bg-purple-600 text-white shadow-2xs" : "bg-slate-100 text-slate-700 hover:bg-slate-200"
                       }`}
                     >
-                      👑 Admin
+                      Admin
                     </button>
                     <button
                       type="button"
@@ -1857,7 +1925,7 @@ function ForgeFlowWorkspace() {
                         isReviewer ? "bg-emerald-600 text-white shadow-2xs" : "bg-slate-100 text-slate-700 hover:bg-slate-200"
                       }`}
                     >
-                      🛡️ Reviewer
+                      Reviewer
                     </button>
                     <button
                       type="button"
@@ -1870,7 +1938,7 @@ function ForgeFlowWorkspace() {
                         isAuthor ? "bg-sky-600 text-white shadow-2xs" : "bg-slate-100 text-slate-700 hover:bg-slate-200"
                       }`}
                     >
-                      ✍️ Author
+                      Author
                     </button>
                   </div>
                 </div>
@@ -1979,7 +2047,7 @@ function ForgeFlowWorkspace() {
                       : "text-slate-500 hover:text-slate-800"
                   }`}
                 >
-                  👔 Executive
+                  <span className="css-icon-chart shrink-0"></span> Executive
                 </button>
                 <button
                   type="button"
@@ -1990,7 +2058,7 @@ function ForgeFlowWorkspace() {
                       : "text-slate-500 hover:text-slate-800"
                   }`}
                 >
-                  🛠️ Studio
+                  <span className="css-icon-gear shrink-0"></span> Studio
                 </button>
               </div>
 
@@ -2012,7 +2080,7 @@ function ForgeFlowWorkspace() {
                               key={item.label}
                               type="button"
                               onClick={() => {
-                                setActiveTab(item.label);
+                                handleRequestTabSwitch(item.label);
                                 setMobileMenuOpen(false);
                               }}
                               className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs transition cursor-pointer ${
@@ -2148,7 +2216,7 @@ function ForgeFlowWorkspace() {
                 ? "bg-emerald-50 text-emerald-700 border-emerald-200"
                 : "bg-sky-50 text-sky-700 border-sky-200"
             }`}>
-              <span>{isAdmin ? "👑 Administrator" : isReviewer ? "🛡️ Reviewer" : "✍️ Author"}</span>
+              <span>{isAdmin ? "Administrator" : isReviewer ? "Reviewer" : "Author"}</span>
             </span>
           </div>
 
@@ -2161,6 +2229,18 @@ function ForgeFlowWorkspace() {
               <span className="font-mono text-xs hidden sm:inline">{workspaceLoading ? "Loading workspace" : "Workspace active"}</span>
               <span className="font-mono text-xs sm:hidden">{workspaceLoading ? "Syncing" : "Active"}</span>
             </div>
+
+            {/* Cmd+K Command Palette Trigger Button */}
+            <button
+              type="button"
+              onClick={() => setShowCommandPalette(true)}
+              title="Open Command Palette (Ctrl+K)"
+              className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-500 hover:text-slate-800 text-xs font-mono transition cursor-pointer"
+            >
+              <span className="css-icon-search text-slate-400"></span>
+              <span className="text-slate-500">Search...</span>
+              <span className="text-[9px] font-bold text-slate-400 bg-white px-1.5 py-0.5 rounded border border-slate-200 ml-1">⌘K</span>
+            </button>
 
             <button
               type="button"
@@ -2187,7 +2267,7 @@ function ForgeFlowWorkspace() {
             <button
               key={item.label}
               type="button"
-              onClick={() => setActiveTab(item.label)}
+              onClick={() => handleRequestTabSwitch(item.label)}
               aria-current={activeTab === item.label ? "page" : undefined}
               className={`shrink-0 rounded-lg px-2.5 py-1.5 text-xs font-semibold transition ${
                 activeTab === item.label ? "bg-sky-50 text-sky-700 border border-sky-200/80 shadow-2xs" : "text-slate-600 hover:bg-slate-50"
@@ -2218,7 +2298,7 @@ function ForgeFlowWorkspace() {
           </div>
         )}
 
-        {/* Global Feedback Banner */}
+        {/* Legacy action message kept for backward compat — fires toast on mount */}
         {actionMessage ? (
           <div className="mx-6 mt-4 p-3.5 rounded-xl border border-sky-200 bg-sky-50 text-xs text-sky-900 flex items-center justify-between shadow-xs animate-fade-in">
             <div className="flex items-center gap-2">
@@ -2228,6 +2308,17 @@ function ForgeFlowWorkspace() {
             <button type="button" aria-label="Dismiss message" onClick={() => setActionMessage("")} className="text-sky-600 hover:text-sky-900 font-bold"><span className="css-icon-cross"></span></button>
           </div>
         ) : null}
+
+        {/* Onboarding Checklist (Mission Control only — collapses after first completion) */}
+        {activeTab === "Mission Control" && (
+          <div className="px-6 pt-5">
+            <OnboardingChecklistWidget
+              onNavigateTab={(tab) => handleRequestTabSwitch(tab)}
+              drafts={reviewDrafts}
+              selectedVertical={selectedVertical}
+            />
+          </div>
+        )}
 
         {/* SOC2 / ISO 27001 ROLE-BASED ACCESS CONTROL GUARD FOR ADMIN MODULES */}
         {ADMIN_ONLY_TABS.includes(activeTab) && !isAdmin && (
@@ -2247,7 +2338,7 @@ function ForgeFlowWorkspace() {
             <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono text-slate-600 flex items-center justify-between max-w-md mx-auto">
               <span>Your Active Session:</span>
               <span className="font-bold text-slate-900 bg-white px-2 py-0.5 rounded border border-slate-200">
-                {isReviewer ? "🛡️ Engineer Reviewer" : "✍️ Content Author (Staff)"}
+                {isReviewer ? "Engineer Reviewer" : "Content Author (Staff)"}
               </span>
             </div>
             <div className="pt-2 flex items-center justify-center gap-3">
@@ -6093,6 +6184,38 @@ function ForgeFlowWorkspace() {
         isOpen={showExecutiveBoardAuditModal}
         onClose={() => setShowExecutiveBoardAuditModal(false)}
       />
+
+      {/* Universal Command Palette — Cmd+K / Ctrl+K */}
+      <CommandPaletteModal
+        isOpen={showCommandPalette}
+        onClose={() => setShowCommandPalette(false)}
+        onNavigateTab={(tab) => { handleRequestTabSwitch(tab); setShowCommandPalette(false); }}
+        drafts={reviewDrafts}
+        onSelectDraft={(id) => { setSelectedDraftId(id); setActiveTab("QA Review Studio"); }}
+        onTriggerAction={(actionId) => {
+          if (actionId === "compliance") { void handleRunComplianceAudit(); }
+          else if (actionId === "ingest-modal") { setShowIngestModal(true); }
+          else if (actionId === "aeo-sim") { void runAeoSimulation(); }
+        }}
+        isAdmin={isAdmin}
+      />
+
+      {/* Unsaved Changes Guard Modal */}
+      <UnsavedChangesGuardModal
+        isOpen={showUnsavedGuard}
+        onStay={handleCancelTabSwitch}
+        onDiscard={handleConfirmDiscardTabSwitch}
+        targetTabName={pendingTabSwitch ?? undefined}
+      />
+
+      {/* Global Floating Toast Notification Host */}
+      <ToastNotificationHost toasts={toasts} onDismiss={handleDismissToast} />
+
+      {/* Cmd+K Trigger Hint (bottom-left) */}
+      <div className="fixed bottom-5 left-5 z-40 hidden lg:flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-slate-900/80 border border-slate-700 text-[10px] font-mono text-slate-400 backdrop-blur-sm shadow-xl pointer-events-none select-none">
+        <span className="text-slate-300 font-bold">⌘K</span>
+        <span>Command Palette</span>
+      </div>
     </div>
   );
 }
