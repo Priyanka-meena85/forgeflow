@@ -229,6 +229,9 @@ export function PublicFooter() {
             <Link href="/integrations" className="hover:text-slate-800 transition">
               Integrations
             </Link>
+            <Link href="/trust" className="hover:text-slate-800 transition font-medium text-slate-700">
+              Trust &amp; Security
+            </Link>
             <span>&bull;</span>
             <span className="text-[11px] font-mono text-slate-400">Pure Software SaaS • Zero Hardware</span>
           </div>

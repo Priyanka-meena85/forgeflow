@@ -82,7 +82,17 @@ export default function TermsPage() {
             </section>
 
             <section className="space-y-3">
-              <h2 className="text-lg font-bold text-white border-b border-slate-800 pb-2">8. Governing Law &amp; Jurisdiction</h2>
+              <h2 className="text-lg font-bold text-white border-b border-slate-800 pb-2">8. ITAR, EAR &amp; Military Defense Export Control Compliance</h2>
+              <p>
+                <strong className="text-white">Strict Non-Military Data Policy:</strong> Customer expressly covenants and warrants that it shall not upload, ingest, or process any technical data, CAD models, drawings, or engineering specifications that are controlled under the International Traffic in Arms Regulations (ITAR, 22 CFR 120-130) or the Export Administration Regulations (EAR, 15 CFR 730-774) with a restricted Export Control Classification Number (ECCN) without an executed Enterprise Air-Gapped Dedicated Infrastructure Addendum.
+              </p>
+              <p>
+                <strong className="text-white">Ephemeral Processing &amp; Zero Retention:</strong> Customer acknowledges that ForgeFlow operates under a cryptographic zero-retention policy for 3D CAD/STEP geometries, wherein raw vertex and surface coordinate definitions are sanitized and purged from volatile RAM upon generation of public Schema.org semantic metadata.
+              </p>
+            </section>
+
+            <section className="space-y-3">
+              <h2 className="text-lg font-bold text-white border-b border-slate-800 pb-2">9. Governing Law &amp; Jurisdiction</h2>
               <p>
                 These Terms shall be governed by and construed in accordance with the laws of the State of Delaware, without regard to conflict of law principles.
               </p>

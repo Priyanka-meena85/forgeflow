@@ -594,3 +594,69 @@ export async function sendContactSalesNotification({
   const text = `Sales Inquiry\nName: ${name}\nEmail: ${email}\nCompany: ${company}\nMessage: ${message}`;
   return sendEmail({ to: adminEmail, subject, html, text });
 }
+
+/**
+ * 9. Send Weekly C-Suite Executive Digest Email
+ */
+export async function sendExecutiveWeeklyDigestEmail({
+  to,
+  organizationName,
+  aeoScore,
+  primaryCitationsCount,
+  topAccounts,
+  influencedRevenue,
+}: {
+  to: string;
+  organizationName: string;
+  aeoScore: number;
+  primaryCitationsCount: number;
+  topAccounts: string[];
+  influencedRevenue: string;
+}): Promise<EmailResult> {
+  const subject = `[Weekly Executive Digest] ${organizationName} — ${influencedRevenue} Influenced AEO Pipeline`;
+  const html = `
+<!DOCTYPE html>
+<html>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #09090b; color: #f4f4f5; padding: 30px;">
+  <div style="max-width: 600px; margin: 0 auto; background: #18181b; border: 1px solid #27272a; border-radius: 12px; padding: 32px;">
+    <span style="font-family: monospace; font-size: 11px; background: #312e81; color: #a5b4fc; padding: 4px 8px; border-radius: 4px; text-transform: uppercase;">
+      Weekly Board Intelligence Digest
+    </span>
+    <h2 style="font-size: 20px; font-weight: 700; color: #ffffff; margin-top: 12px; margin-bottom: 4px;">
+      ${organizationName} — AEO Performance Report
+    </h2>
+    <p style="font-size: 13px; color: #a1a1aa; margin-top: 0;">
+      Synthesized across ChatGPT Search, Perplexity Pro, and Google SGE citations.
+    </p>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 24px 0;">
+      <div style="background: #27272a; padding: 16px; border-radius: 8px;">
+        <span style="font-size: 11px; color: #71717a; text-transform: uppercase; font-family: monospace;">AEO Health Score</span>
+        <div style="font-size: 28px; font-weight: 800; color: #34d399; margin-top: 4px;">${aeoScore}/100</div>
+      </div>
+      <div style="background: #27272a; padding: 16px; border-radius: 8px;">
+        <span style="font-size: 11px; color: #71717a; text-transform: uppercase; font-family: monospace;">Influenced Pipeline</span>
+        <div style="font-size: 28px; font-weight: 800; color: #818cf8; margin-top: 4px;">${influencedRevenue}</div>
+      </div>
+    </div>
+
+    <div style="background: #27272a; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
+      <h4 style="font-size: 12px; font-family: monospace; text-transform: uppercase; color: #a1a1aa; margin-top: 0; margin-bottom: 8px;">
+        Reverse-IP High Intent Manufacturing Accounts
+      </h4>
+      <ul style="margin: 0; padding-left: 20px; font-size: 13px; color: #e4e4e7; line-height: 1.6;">
+        ${topAccounts.map((acc) => `<li><strong>${acc}</strong></li>`).join("")}
+      </ul>
+    </div>
+
+    <p style="font-size: 12px; color: #71717a; margin-top: 24px; border-top: 1px solid #27272a; padding-top: 16px;">
+      Generated automatically by ForgeFlow Industrial AEO Engine.
+    </p>
+  </div>
+</body>
+</html>
+  `.trim();
+
+  const text = `Weekly Executive Digest for ${organizationName}\nAEO Score: ${aeoScore}/100\nInfluenced Revenue: ${influencedRevenue}\nPrimary Citations: ${primaryCitationsCount}\nTop Accounts: ${topAccounts.join(", ")}`;
+  return sendEmail({ to, subject, html, text });
+}

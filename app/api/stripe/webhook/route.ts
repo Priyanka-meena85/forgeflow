@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { db } from "@/lib/db";
 import { getPlanConfig } from "@/lib/billing";
+import { checkIdempotency, recordIdempotency } from "@/lib/idempotency";
 
 export async function POST(request: Request) {
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -21,6 +22,14 @@ export async function POST(request: Request) {
     }
 
     const event = stripe.webhooks.constructEvent(rawBody, signature, webhookSecret);
+
+    // Idempotency shield to prevent double-crediting on network retries
+    const idempotencyKey = `stripe_evt_${event.id}`;
+    const { isDuplicate } = await checkIdempotency(idempotencyKey);
+    if (isDuplicate) {
+      console.info(`[Stripe Webhook] Duplicate event ${event.id} ignored via idempotency shield.`);
+      return NextResponse.json({ received: true, duplicate: true });
+    }
 
     switch (event.type) {
       case "checkout.session.completed": {
@@ -128,6 +137,8 @@ export async function POST(request: Request) {
       default:
         console.info(`[Stripe Webhook] Event received: ${event.type}`);
     }
+
+    await recordIdempotency(idempotencyKey, 200, { eventType: event.type });
 
     return NextResponse.json({ received: true });
   } catch (error) {

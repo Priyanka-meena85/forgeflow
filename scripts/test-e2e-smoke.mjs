@@ -62,11 +62,19 @@ async function main() {
     assert(html.includes("799") || html.includes("1,499") || html.includes("3,499"), "Expected enterprise pricing tiers");
   });
 
-  await runTest("Terms page (/terms) includes Section 7 GD&T Limitation of Liability", async () => {
+  await runTest("Terms page (/terms) includes Section 7 GD&T & Section 8 ITAR Compliance", async () => {
     const res = await fetch(`${BASE_URL}/terms`);
     assert(res.status === 200, `Expected 200, got ${res.status}`);
     const html = await res.text();
     assert(html.includes("GD&T") || html.includes("Limitation of Liability"), "Expected GD&T liability disclaimer");
+    assert(html.includes("ITAR") || html.includes("Export Control"), "Expected ITAR compliance section");
+  });
+
+  await runTest("Trust Center (/trust) renders enterprise compliance portal", async () => {
+    const res = await fetch(`${BASE_URL}/trust`);
+    assert(res.status === 200, `Expected 200, got ${res.status}`);
+    const html = await res.text();
+    assert(html.includes("SOC 2") && html.includes("CAD Data Sovereignty"), "Expected Trust Center content");
   });
 
   // -----------------------------------------------------------------------------
