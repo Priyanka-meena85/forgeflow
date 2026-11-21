@@ -46,6 +46,15 @@ const CrmPipelineAttribution = dynamic(() => import("@/components/CrmPipelineAtt
 const MdfCoOpBilling = dynamic(() => import("@/components/MdfCoOpBilling").then((m) => m.MdfCoOpBilling), { loading: TabLoadingSkeleton, ssr: false });
 const GeoShareOfVoiceTracker = dynamic(() => import("@/components/GeoShareOfVoiceTracker").then((m) => m.GeoShareOfVoiceTracker), { loading: TabLoadingSkeleton, ssr: false });
 const LiveAiAnswerEngineSimulator = dynamic(() => import("@/components/LiveAiAnswerEngineSimulator").then((m) => m.LiveAiAnswerEngineSimulator), { loading: TabLoadingSkeleton, ssr: false });
+const InternalLinkingStudio = dynamic(() => import("@/components/InternalLinkingStudio").then((m) => m.InternalLinkingStudio), { loading: TabLoadingSkeleton, ssr: false });
+const ContentDecayAlerts = dynamic(() => import("@/components/ContentDecayAlerts").then((m) => m.ContentDecayAlerts), { loading: TabLoadingSkeleton, ssr: false });
+const StandardsComplianceChecker = dynamic(() => import("@/components/StandardsComplianceChecker").then((m) => m.StandardsComplianceChecker), { loading: TabLoadingSkeleton, ssr: false });
+const ProgrammaticMatrixGenerator = dynamic(() => import("@/components/ProgrammaticMatrixGenerator").then((m) => m.ProgrammaticMatrixGenerator), { loading: TabLoadingSkeleton, ssr: false });
+const ClientClaimGuardrails = dynamic(() => import("@/components/ClientClaimGuardrails").then((m) => m.ClientClaimGuardrails), { loading: TabLoadingSkeleton, ssr: false });
+const BrandVoiceKnowledgeBase = dynamic(() => import("@/components/BrandVoiceKnowledgeBase").then((m) => m.BrandVoiceKnowledgeBase), { loading: TabLoadingSkeleton, ssr: false });
+const RegionalLanguageStudio = dynamic(() => import("@/components/RegionalLanguageStudio").then((m) => m.RegionalLanguageStudio), { loading: TabLoadingSkeleton, ssr: false });
+const LeadAttributionDashboard = dynamic(() => import("@/components/LeadAttributionDashboard").then((m) => m.LeadAttributionDashboard), { loading: TabLoadingSkeleton, ssr: false });
+const AeoPromptTester = dynamic(() => import("@/components/AeoPromptTester").then((m) => m.AeoPromptTester), { loading: TabLoadingSkeleton, ssr: false });
 
 type TabKey =
   | "Mission Control"
@@ -71,7 +80,16 @@ type TabKey =
   | "AI Share of Voice"
   | "Industrial Analytics"
   | "Workspace & Rules"
-  | "Billing & Quotas";
+  | "Billing & Quotas"
+  | "Internal Linking"
+  | "Content Decay Alerts"
+  | "Standards Fact-Checker"
+  | "Programmatic Matrix"
+  | "Claim Guardrails"
+  | "Brand Voice"
+  | "Regional Languages"
+  | "Lead Attribution"
+  | "AEO Prompt Tester";
 
 type QAStatus = "Pass" | "Review" | "Fail";
 
@@ -148,6 +166,15 @@ const navItems: Array<{ label: TabKey; badge?: string; iconClass: string }> = [
   { label: "OEM MDF Billing", iconClass: "css-icon-card", badge: "Dealer Funds" },
   { label: "AI Share of Voice", iconClass: "css-icon-search", badge: "GEO Tracker" },
   { label: "Industrial Analytics", iconClass: "css-icon-chart", badge: "Charts" },
+  { label: "Internal Linking", iconClass: "css-icon-grid", badge: "Auto-Cluster" },
+  { label: "Content Decay Alerts", iconClass: "css-icon-alert", badge: "Refresh" },
+  { label: "Standards Fact-Checker", iconClass: "css-icon-shield", badge: "ISO / ASME / IS" },
+  { label: "Programmatic Matrix", iconClass: "css-icon-grid", badge: "Long-Tail" },
+  { label: "Claim Guardrails", iconClass: "css-icon-alert", badge: "Pre-Publish" },
+  { label: "Brand Voice", iconClass: "css-icon-doc", badge: "Knowledge Base" },
+  { label: "Regional Languages", iconClass: "css-icon-gear", badge: "Hindi / Gu / Mr" },
+  { label: "Lead Attribution", iconClass: "css-icon-chart", badge: "RFQ Source" },
+  { label: "AEO Prompt Tester", iconClass: "css-icon-search", badge: "Citation Test" },
   { label: "Workspace & Rules", iconClass: "css-icon-gear" },
   { label: "Billing & Quotas", iconClass: "css-icon-card" },
 ];
@@ -173,6 +200,11 @@ const navSections: Array<{
       { label: "Taxonomy Matrix", iconClass: "css-icon-grid" },
       { label: "QA Review Studio", iconClass: "css-icon-shield" },
       { label: "Publishing Pipeline", iconClass: "css-icon-launch" },
+      { label: "Internal Linking", iconClass: "css-icon-grid", badge: "Cluster" },
+      { label: "Content Decay Alerts", iconClass: "css-icon-alert", badge: "Refresh" },
+      { label: "Programmatic Matrix", iconClass: "css-icon-grid", badge: "Matrix" },
+      { label: "Brand Voice", iconClass: "css-icon-doc", badge: "KB" },
+      { label: "Regional Languages", iconClass: "css-icon-gear", badge: "Hindi/Gu/Mr" },
     ],
   },
   {
@@ -182,6 +214,7 @@ const navSections: Array<{
       { label: "Competitor Displacer", iconClass: "css-icon-bolt" },
       { label: "GSC Performance", iconClass: "css-icon-chart" },
       { label: "AI Share of Voice", iconClass: "css-icon-search", badge: "GEO" },
+      { label: "AEO Prompt Tester", iconClass: "css-icon-search", badge: "Citation Test" },
     ],
   },
   {
@@ -191,6 +224,8 @@ const navSections: Array<{
       { label: "Standards Localization", iconClass: "css-icon-gear", badge: "DIN/JIS" },
       { label: "Global Standardizer", iconClass: "css-icon-gear" },
       { label: "STEP CAD Extractor", iconClass: "css-icon-box" },
+      { label: "Standards Fact-Checker", iconClass: "css-icon-shield", badge: "Fact-Check" },
+      { label: "Claim Guardrails", iconClass: "css-icon-alert", badge: "Guardrails" },
       { label: "Engineering Whitepapers", iconClass: "css-icon-doc" },
     ],
   },
@@ -203,6 +238,7 @@ const navSections: Array<{
       { label: "Enterprise SSO", iconClass: "css-icon-shield", badge: "SAML", adminOnly: true },
       { label: "AI COGS & Router", iconClass: "css-icon-bolt", adminOnly: true },
       { label: "CRM Pipeline ROI", iconClass: "css-icon-chart" },
+      { label: "Lead Attribution", iconClass: "css-icon-chart", badge: "RFQ Source" },
       { label: "OEM MDF Billing", iconClass: "css-icon-card", adminOnly: true },
       { label: "Risk & Compliance", iconClass: "css-icon-alert" },
       { label: "Industrial Analytics", iconClass: "css-icon-chart" },
@@ -4860,6 +4896,69 @@ function ForgeFlowWorkspace() {
         {activeTab === "GSC Performance" && (
           <div className="p-6 space-y-6 max-w-7xl animate-fade-in">
             <GoogleSearchConsoleSync />
+          </div>
+        )}
+
+        {/* TAB: AUTONOMOUS INTERNAL LINKING CLUSTER */}
+        {activeTab === "Internal Linking" && (
+          <div className="p-6 space-y-6 max-w-7xl animate-fade-in">
+            <InternalLinkingStudio />
+          </div>
+        )}
+
+        {/* TAB: CONTENT REFRESH & DECAY ALERTS */}
+        {activeTab === "Content Decay Alerts" && (
+          <div className="p-6 space-y-6 max-w-7xl animate-fade-in">
+            <ContentDecayAlerts />
+          </div>
+        )}
+
+        {/* TAB: PROGRAMMATIC MATRIX GENERATOR */}
+        {activeTab === "Programmatic Matrix" && (
+          <div className="p-6 space-y-6 max-w-7xl animate-fade-in">
+            <ProgrammaticMatrixGenerator />
+          </div>
+        )}
+
+        {/* TAB: STANDARDS & COMPLIANCE FACT-CHECKER */}
+        {activeTab === "Standards Fact-Checker" && (
+          <div className="p-6 space-y-6 max-w-7xl animate-fade-in">
+            <StandardsComplianceChecker />
+          </div>
+        )}
+
+        {/* TAB: CLIENT CLAIM GUARDRAILS */}
+        {activeTab === "Claim Guardrails" && (
+          <div className="p-6 space-y-6 max-w-7xl animate-fade-in">
+            <ClientClaimGuardrails />
+          </div>
+        )}
+
+        {/* TAB: BRAND VOICE & KNOWLEDGE BASE */}
+        {activeTab === "Brand Voice" && (
+          <div className="p-6 space-y-6 max-w-7xl animate-fade-in">
+            <BrandVoiceKnowledgeBase />
+          </div>
+        )}
+
+        {/* TAB: REGIONAL LANGUAGE STUDIO */}
+        {activeTab === "Regional Languages" && (
+          <div className="p-6 space-y-6 max-w-7xl animate-fade-in">
+            <RegionalLanguageStudio />
+          </div>
+        )}
+
+        {/* TAB: LEAD ATTRIBUTION DASHBOARD */}
+        {activeTab === "Lead Attribution" && (
+          <div className="p-6 space-y-6 max-w-7xl animate-fade-in">
+            <LeadAttributionDashboard />
+          </div>
+        )}
+
+        {/* TAB: AEO PROMPT TESTER */}
+        {activeTab === "AEO Prompt Tester" && (
+          <div className="p-6 space-y-6 max-w-7xl animate-fade-in">
+            <AeoPromptTester />
           </div>
         )}
 
