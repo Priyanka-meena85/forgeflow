@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { parseStepFileContent } from "@/lib/cadStepParser";
 import { recordAuditLog } from "@/lib/audit";
+import { sanitizeCadContent, type CadSecurityPolicy } from "@/lib/cadSecurityPolicy";
 
 export async function POST(req: NextRequest) {
   try {
@@ -11,7 +12,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { stepContent, partName } = body;
+    const { stepContent, partName, securityPolicy } = body;
 
     if (!stepContent || typeof stepContent !== "string") {
       return NextResponse.json({ error: "STEP/CAD content text is required." }, { status: 400 });
@@ -24,7 +25,15 @@ export async function POST(req: NextRequest) {
       }, { status: 413 });
     }
 
-    const parsed = parseStepFileContent(stepContent, partName || "Servo Stamping Progressive Die Assembly");
+    // Apply enterprise CAD IP sanitization & zero-retention policy
+    const policyOptions: Partial<CadSecurityPolicy> = securityPolicy || {};
+    const { certificate, safePartName } = sanitizeCadContent(
+      stepContent,
+      partName || "Servo Stamping Progressive Die Assembly",
+      policyOptions
+    );
+
+    const parsed = parseStepFileContent(stepContent, safePartName);
 
     const orgId = session.user.organizationId || "seed-org-industrial";
     await recordAuditLog({
@@ -34,13 +43,20 @@ export async function POST(req: NextRequest) {
       action: "CAD_STEP_PARSED_TO_SCHEMA",
       resourceType: "CAD_ENGINE",
       resourceId: parsed.partNumber,
-      metadata: { partName: parsed.partName, cadStandard: parsed.cadStandard },
-      details: { summary: `Extracted ${parsed.operatingTolerances.length} tolerance nodes and Schema.org graph from 3D CAD definition.` },
+      metadata: {
+        partName: parsed.partName,
+        cadStandard: parsed.cadStandard,
+        sanitizationCertificateId: certificate.certificateId,
+      },
+      details: {
+        summary: `Extracted ${parsed.operatingTolerances.length} tolerance nodes and Schema.org graph. Purged raw CAD geometry under ITAR/ISO 27001 zero-retention policy.`,
+      },
     });
 
     return NextResponse.json({
       success: true,
       parsed,
+      securityCertificate: certificate,
     });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Internal server error";

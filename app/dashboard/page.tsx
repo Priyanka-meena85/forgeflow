@@ -2,34 +2,50 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
+import dynamic from "next/dynamic";
 import { AuthProvider, useAuth } from "@/components/AuthProvider";
-import { OemRagManager, type OemDoc } from "@/components/OemRagManager";
-import { InteractiveDiagnosticStudio } from "@/components/InteractiveDiagnosticStudio";
-import { AeoCitationMonitor, type AeoQuery } from "@/components/AeoCitationMonitor";
-import { CmsPublishingManager, type CmsIntegration } from "@/components/CmsPublishingManager";
-import { EnterpriseInvoicingManager, type InvoiceItem } from "@/components/EnterpriseInvoicingManager";
-import { TeamManager } from "@/components/TeamManager";
-import { ExecutiveRoiModal } from "@/components/ExecutiveRoiModal";
-import { RfqLeadManager } from "@/components/RfqLeadManager";
-import { SlackReviewBotConfig } from "@/components/SlackReviewBotConfig";
-import { CompetitorAeoDisplacer } from "@/components/CompetitorAeoDisplacer";
-import { GoogleSearchConsoleSync } from "@/components/GoogleSearchConsoleSync";
-import { UnitStandardConverter } from "@/components/UnitStandardConverter";
-import { EnterpriseSsoConfig } from "@/components/EnterpriseSsoConfig";
-import { EnterpriseScimProvisioning } from "@/components/EnterpriseScimProvisioning";
-import { CadExplodedViewStudio } from "@/components/CadExplodedViewStudio";
-import { BuyerIntentDiscovery } from "@/components/BuyerIntentDiscovery";
-import { DeveloperApiPortal } from "@/components/DeveloperApiPortal";
-import { DistributorSyndication } from "@/components/DistributorSyndication";
-import { MultiBrandDomainManager } from "@/components/MultiBrandDomainManager";
-import { TechnicalWhitepaperGenerator } from "@/components/TechnicalWhitepaperGenerator";
-import { AiRouterCogsMonitor } from "@/components/AiRouterCogsMonitor";
-import { StepCadSchemaExtractor } from "@/components/StepCadSchemaExtractor";
-import { IndustrialLocalizationStudio } from "@/components/IndustrialLocalizationStudio";
-import { CrmPipelineAttribution } from "@/components/CrmPipelineAttribution";
-import { MdfCoOpBilling } from "@/components/MdfCoOpBilling";
-import { GeoShareOfVoiceTracker } from "@/components/GeoShareOfVoiceTracker";
-import { LiveAiAnswerEngineSimulator } from "@/components/LiveAiAnswerEngineSimulator";
+import type { OemDoc } from "@/components/OemRagManager";
+import type { AeoQuery } from "@/components/AeoCitationMonitor";
+import type { CmsIntegration } from "@/components/CmsPublishingManager";
+import type { InvoiceItem } from "@/components/EnterpriseInvoicingManager";
+import { ExecutiveAuditReportModal } from "@/components/ExecutiveAuditReportModal";
+
+const TabLoadingSkeleton = () => (
+  <div className="flex items-center justify-center p-16 text-zinc-500 font-mono text-xs">
+    <div className="flex items-center gap-3">
+      <div className="w-4 h-4 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+      <span>Loading isolated industrial module...</span>
+    </div>
+  </div>
+);
+
+const OemRagManager = dynamic(() => import("@/components/OemRagManager").then((m) => m.OemRagManager), { loading: TabLoadingSkeleton, ssr: false });
+const InteractiveDiagnosticStudio = dynamic(() => import("@/components/InteractiveDiagnosticStudio").then((m) => m.InteractiveDiagnosticStudio), { loading: TabLoadingSkeleton, ssr: false });
+const AeoCitationMonitor = dynamic(() => import("@/components/AeoCitationMonitor").then((m) => m.AeoCitationMonitor), { loading: TabLoadingSkeleton, ssr: false });
+const CmsPublishingManager = dynamic(() => import("@/components/CmsPublishingManager").then((m) => m.CmsPublishingManager), { loading: TabLoadingSkeleton, ssr: false });
+const EnterpriseInvoicingManager = dynamic(() => import("@/components/EnterpriseInvoicingManager").then((m) => m.EnterpriseInvoicingManager), { loading: TabLoadingSkeleton, ssr: false });
+const TeamManager = dynamic(() => import("@/components/TeamManager").then((m) => m.TeamManager), { loading: TabLoadingSkeleton, ssr: false });
+const ExecutiveRoiModal = dynamic(() => import("@/components/ExecutiveRoiModal").then((m) => m.ExecutiveRoiModal), { ssr: false });
+const RfqLeadManager = dynamic(() => import("@/components/RfqLeadManager").then((m) => m.RfqLeadManager), { loading: TabLoadingSkeleton, ssr: false });
+const SlackReviewBotConfig = dynamic(() => import("@/components/SlackReviewBotConfig").then((m) => m.SlackReviewBotConfig), { loading: TabLoadingSkeleton, ssr: false });
+const CompetitorAeoDisplacer = dynamic(() => import("@/components/CompetitorAeoDisplacer").then((m) => m.CompetitorAeoDisplacer), { loading: TabLoadingSkeleton, ssr: false });
+const GoogleSearchConsoleSync = dynamic(() => import("@/components/GoogleSearchConsoleSync").then((m) => m.GoogleSearchConsoleSync), { loading: TabLoadingSkeleton, ssr: false });
+const UnitStandardConverter = dynamic(() => import("@/components/UnitStandardConverter").then((m) => m.UnitStandardConverter), { loading: TabLoadingSkeleton, ssr: false });
+const EnterpriseSsoConfig = dynamic(() => import("@/components/EnterpriseSsoConfig").then((m) => m.EnterpriseSsoConfig), { loading: TabLoadingSkeleton, ssr: false });
+const EnterpriseScimProvisioning = dynamic(() => import("@/components/EnterpriseScimProvisioning").then((m) => m.EnterpriseScimProvisioning), { loading: TabLoadingSkeleton, ssr: false });
+const CadExplodedViewStudio = dynamic(() => import("@/components/CadExplodedViewStudio").then((m) => m.CadExplodedViewStudio), { loading: TabLoadingSkeleton, ssr: false });
+const BuyerIntentDiscovery = dynamic(() => import("@/components/BuyerIntentDiscovery").then((m) => m.BuyerIntentDiscovery), { loading: TabLoadingSkeleton, ssr: false });
+const DeveloperApiPortal = dynamic(() => import("@/components/DeveloperApiPortal").then((m) => m.DeveloperApiPortal), { loading: TabLoadingSkeleton, ssr: false });
+const DistributorSyndication = dynamic(() => import("@/components/DistributorSyndication").then((m) => m.DistributorSyndication), { loading: TabLoadingSkeleton, ssr: false });
+const MultiBrandDomainManager = dynamic(() => import("@/components/MultiBrandDomainManager").then((m) => m.MultiBrandDomainManager), { loading: TabLoadingSkeleton, ssr: false });
+const TechnicalWhitepaperGenerator = dynamic(() => import("@/components/TechnicalWhitepaperGenerator").then((m) => m.TechnicalWhitepaperGenerator), { loading: TabLoadingSkeleton, ssr: false });
+const AiRouterCogsMonitor = dynamic(() => import("@/components/AiRouterCogsMonitor").then((m) => m.AiRouterCogsMonitor), { loading: TabLoadingSkeleton, ssr: false });
+const StepCadSchemaExtractor = dynamic(() => import("@/components/StepCadSchemaExtractor").then((m) => m.StepCadSchemaExtractor), { loading: TabLoadingSkeleton, ssr: false });
+const IndustrialLocalizationStudio = dynamic(() => import("@/components/IndustrialLocalizationStudio").then((m) => m.IndustrialLocalizationStudio), { loading: TabLoadingSkeleton, ssr: false });
+const CrmPipelineAttribution = dynamic(() => import("@/components/CrmPipelineAttribution").then((m) => m.CrmPipelineAttribution), { loading: TabLoadingSkeleton, ssr: false });
+const MdfCoOpBilling = dynamic(() => import("@/components/MdfCoOpBilling").then((m) => m.MdfCoOpBilling), { loading: TabLoadingSkeleton, ssr: false });
+const GeoShareOfVoiceTracker = dynamic(() => import("@/components/GeoShareOfVoiceTracker").then((m) => m.GeoShareOfVoiceTracker), { loading: TabLoadingSkeleton, ssr: false });
+const LiveAiAnswerEngineSimulator = dynamic(() => import("@/components/LiveAiAnswerEngineSimulator").then((m) => m.LiveAiAnswerEngineSimulator), { loading: TabLoadingSkeleton, ssr: false });
 
 type TabKey =
   | "Mission Control"
@@ -976,6 +992,7 @@ function ForgeFlowWorkspace() {
   const [aeoQueries, setAeoQueries] = useState<AeoQuery[]>([]);
   const [invoiceRequests, setInvoiceRequests] = useState<InvoiceItem[]>([]);
   const [showExecutiveRoiModal, setShowExecutiveRoiModal] = useState(false);
+  const [showExecutiveBoardAuditModal, setShowExecutiveBoardAuditModal] = useState(false);
 
   const refreshOemDocuments = useCallback(async () => {
     try {
@@ -4441,6 +4458,13 @@ function ForgeFlowWorkspace() {
               <div className="flex items-center gap-2">
                 <button
                   type="button"
+                  onClick={() => setShowExecutiveBoardAuditModal(true)}
+                  className="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white shadow-xs flex items-center gap-1.5 transition cursor-pointer"
+                >
+                  <span className="css-icon-chart"></span><span>Board Audit Report (PDF)</span>
+                </button>
+                <button
+                  type="button"
                   onClick={() => setShowExecutiveRoiModal(true)}
                   className="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-xs flex items-center gap-1.5 transition cursor-pointer"
                 >
@@ -6393,6 +6417,12 @@ function ForgeFlowWorkspace() {
       <ExecutiveRoiModal
         isOpen={showExecutiveRoiModal}
         onClose={() => setShowExecutiveRoiModal(false)}
+      />
+
+      {/* C-Suite Board Audit Report Modal */}
+      <ExecutiveAuditReportModal
+        isOpen={showExecutiveBoardAuditModal}
+        onClose={() => setShowExecutiveBoardAuditModal(false)}
       />
     </div>
   );
