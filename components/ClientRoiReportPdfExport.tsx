@@ -75,6 +75,8 @@ const DEFAULT_ROI_DATA: ClientRoiData = {
 export function ClientRoiReportPdfExport() {
   const [data, setData] = useState<ClientRoiData>(DEFAULT_ROI_DATA);
   const [isExporting, setIsExporting] = useState(false);
+  const [isEditingClient, setIsEditingClient] = useState(false);
+  const [tempClientName, setTempClientName] = useState(DEFAULT_ROI_DATA.clientName);
   const printAreaRef = useRef<HTMLDivElement>(null);
 
   const handlePrint = () => {
@@ -83,6 +85,13 @@ export function ClientRoiReportPdfExport() {
       window.print();
       setIsExporting(false);
     }, 300);
+  };
+
+  const handleSaveClientName = () => {
+    if (tempClientName.trim()) {
+      setData((prev) => ({ ...prev, clientName: tempClientName.trim() }));
+    }
+    setIsEditingClient(false);
   };
 
   return (
@@ -104,15 +113,33 @@ export function ClientRoiReportPdfExport() {
         </div>
 
         <div className="flex items-center gap-3">
-          <button
-            onClick={() => {
-              const client = prompt("Enter Client Name:", data.clientName);
-              if (client) setData((prev) => ({ ...prev, clientName: client }));
-            }}
-            className="px-4 py-2 text-xs font-semibold rounded-xl border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
-          >
-            Edit Client Name
-          </button>
+          {isEditingClient ? (
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                value={tempClientName}
+                onChange={(e) => setTempClientName(e.target.value)}
+                className="px-3 py-1.5 text-xs rounded-lg border border-slate-300 bg-white"
+                placeholder="Client name"
+              />
+              <button
+                onClick={handleSaveClientName}
+                className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-indigo-600 text-white"
+              >
+                Save
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => {
+                setTempClientName(data.clientName);
+                setIsEditingClient(true);
+              }}
+              className="px-4 py-2 text-xs font-semibold rounded-xl border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
+            >
+              Edit Client: {data.clientName}
+            </button>
+          )}
           <button
             onClick={handlePrint}
             disabled={isExporting}

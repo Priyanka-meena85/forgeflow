@@ -4,21 +4,29 @@ import { executeResilientChatCompletion, type ChatMessage } from "@/lib/multiAge
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { messages, model, temperature } = body as {
+    const { messages, prompt, model, temperature } = body as {
       messages?: ChatMessage[];
+      prompt?: string;
       model?: string;
       temperature?: number;
     };
 
-    if (!Array.isArray(messages) || messages.length === 0) {
+    const resolvedMessages: ChatMessage[] =
+      Array.isArray(messages) && messages.length > 0
+        ? messages
+        : typeof prompt === "string" && prompt.trim()
+        ? [{ role: "user", content: prompt.trim() }]
+        : [];
+
+    if (resolvedMessages.length === 0) {
       return NextResponse.json(
-        { error: "messages array is required." },
+        { error: "messages array or prompt string is required." },
         { status: 400 }
       );
     }
 
     const completion = await executeResilientChatCompletion({
-      messages,
+      messages: resolvedMessages,
       model,
       temperature,
     });

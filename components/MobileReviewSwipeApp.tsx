@@ -54,6 +54,8 @@ export function MobileReviewSwipeApp() {
   const [queue, setQueue] = useState<MobileReviewDraft[]>(MOCK_MOBILE_QUEUE);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [lastAction, setLastAction] = useState<string | null>(null);
+  const [isEditingNote, setIsEditingNote] = useState(false);
+  const [revisionNote, setRevisionNote] = useState("Verify torque rating and ASME code citation");
 
   const currentItem = queue[currentIndex];
 
@@ -63,18 +65,22 @@ export function MobileReviewSwipeApp() {
     setCurrentIndex((prev) => prev + 1);
   };
 
-  const handleReject = () => {
+  const handleStartReject = () => {
     if (!currentItem) return;
-    const reason = prompt("Enter revision note for technical team:", "Verify torque rating on page 3");
-    if (reason) {
-      setLastAction(`CHANGES REQUESTED: "${reason}"`);
-      setCurrentIndex((prev) => prev + 1);
-    }
+    setIsEditingNote(true);
+  };
+
+  const handleConfirmReject = () => {
+    if (!currentItem) return;
+    setLastAction(`CHANGES REQUESTED: "${revisionNote}"`);
+    setIsEditingNote(false);
+    setCurrentIndex((prev) => prev + 1);
   };
 
   const handleReset = () => {
     setCurrentIndex(0);
     setLastAction(null);
+    setIsEditingNote(false);
   };
 
   return (
@@ -162,7 +168,7 @@ export function MobileReviewSwipeApp() {
             {/* Actions: Swipe Left (Reject) vs Swipe Right (Approve) */}
             <div className="grid grid-cols-2 gap-3 pt-3">
               <button
-                onClick={handleReject}
+                onClick={handleStartReject}
                 className="w-full py-3 rounded-2xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors"
               >
                 <span>✕ Request Edit</span>
@@ -174,6 +180,35 @@ export function MobileReviewSwipeApp() {
                 <span>✓ Approve &amp; Push</span>
               </button>
             </div>
+
+            {/* Revision Note Inline Drawer */}
+            {isEditingNote && (
+              <div className="p-4 rounded-2xl border border-rose-200 bg-rose-50/50 space-y-3 animate-fade-in">
+                <label className="text-xs font-bold text-rose-900 block">
+                  Field Revision Feedback for Technical Team:
+                </label>
+                <input
+                  type="text"
+                  value={revisionNote}
+                  onChange={(e) => setRevisionNote(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl border border-rose-200 text-xs bg-white text-slate-800 focus:outline-none"
+                />
+                <div className="flex justify-end gap-2">
+                  <button
+                    onClick={() => setIsEditingNote(false)}
+                    className="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-500 hover:bg-slate-100"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleConfirmReject}
+                    className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-rose-600 text-white hover:bg-rose-700"
+                  >
+                    Submit Revision Request
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         ) : (
           <div className="rounded-3xl border border-slate-200 bg-white p-12 text-center shadow-xs space-y-3">

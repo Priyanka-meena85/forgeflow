@@ -80,6 +80,7 @@ export function AbHeadlineTester() {
   const [tests, setTests] = useState<AbTestTopic[]>(DEFAULT_AB_TESTS);
   const [newTopicKeyword, setNewTopicKeyword] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
+  const [winnerBanner, setWinnerBanner] = useState<string | null>(null);
 
   const handleGenerateVariants = () => {
     if (!newTopicKeyword.trim()) return;
@@ -123,7 +124,8 @@ export function AbHeadlineTester() {
       prev.map((t) => {
         if (t.id === testId) {
           const chosen = variantKey === "A" ? t.variantA : t.variantB;
-          alert(`Promoted "${chosen.headline}" as the permanent canonical title in CMS and GSC sitemap!`);
+          setWinnerBanner(`Promoted "${chosen.headline}" as canonical title in CMS and GSC sitemap.`);
+          setTimeout(() => setWinnerBanner(null), 5000);
           return {
             ...t,
             status: "Concluded",
@@ -153,6 +155,13 @@ export function AbHeadlineTester() {
           </p>
         </div>
       </div>
+
+      {winnerBanner && (
+        <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs font-semibold text-emerald-800 animate-fade-in flex items-center gap-2">
+          <span>✓</span>
+          <span>{winnerBanner}</span>
+        </div>
+      )}
 
       {/* Generator Form */}
       <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs flex flex-wrap items-center gap-3">

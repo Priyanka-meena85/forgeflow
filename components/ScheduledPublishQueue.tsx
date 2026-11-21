@@ -39,6 +39,7 @@ export function ScheduledPublishQueue() {
     new Date(Date.now() + 3600_000).toISOString().slice(0, 16)
   );
   const [sitemapXml, setSitemapXml] = useState("");
+  const [xmlCopied, setXmlCopied] = useState(false);
   const [msg, setMsg] = useState("");
 
   const refresh = () => setPages(listScheduledPages());
@@ -273,11 +274,19 @@ export function ScheduledPublishQueue() {
             <h3 className="text-sm font-semibold text-slate-700">sitemap.xml (live preview)</h3>
             <button
               onClick={() => {
-                navigator.clipboard.writeText(sitemapXml);
+                if (navigator.clipboard) {
+                  navigator.clipboard
+                    .writeText(sitemapXml)
+                    .then(() => {
+                      setXmlCopied(true);
+                      setTimeout(() => setXmlCopied(false), 2000);
+                    })
+                    .catch(() => {});
+                }
               }}
               className="text-xs text-indigo-600 hover:text-indigo-800 font-medium"
             >
-              Copy XML
+              {xmlCopied ? "Copied to clipboard!" : "Copy XML"}
             </button>
           </div>
           <pre className="rounded-lg bg-slate-900 p-4 text-xs font-mono text-green-400 overflow-x-auto max-h-64 whitespace-pre-wrap">

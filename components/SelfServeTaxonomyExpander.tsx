@@ -25,11 +25,13 @@ export function SelfServeTaxonomyExpander() {
   const [isExpanding, setIsExpanding] = useState(false);
   const [proposal, setProposal] = useState<SubNicheProposal | null>(null);
   const [ingested, setIngested] = useState(false);
+  const [ingestMsg, setIngestMsg] = useState<string | null>(null);
 
   const handleExpand = () => {
     if (!subNicheInput.trim()) return;
     setIsExpanding(true);
     setIngested(false);
+    setIngestMsg(null);
 
     setTimeout(() => {
       setProposal({
@@ -79,7 +81,7 @@ export function SelfServeTaxonomyExpander() {
 
   const handleIngest = () => {
     setIngested(true);
-    alert(`Successfully ingested "${proposal?.nicheName}" into the production Taxonomy Matrix! 16 programmatic topics queued.`);
+    setIngestMsg(`Successfully ingested "${proposal?.nicheName}" into the production Taxonomy Matrix! 16 programmatic topics queued.`);
   };
 
   return (
@@ -100,6 +102,13 @@ export function SelfServeTaxonomyExpander() {
           </p>
         </div>
       </div>
+
+      {ingestMsg && (
+        <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs font-semibold text-emerald-800 animate-fade-in flex items-center gap-2">
+          <span>✓</span>
+          <span>{ingestMsg}</span>
+        </div>
+      )}
 
       {/* Input Form */}
       <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-4">

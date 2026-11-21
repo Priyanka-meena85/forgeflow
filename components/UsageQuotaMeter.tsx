@@ -69,6 +69,17 @@ const DEFAULT_METRICS: QuotaMetric[] = [
 export function UsageQuotaMeter() {
   const [metrics] = useState<QuotaMetric[]>(DEFAULT_METRICS);
   const [daysRemaining] = useState(9);
+  const [quotaBanner, setQuotaBanner] = useState<string | null>(null);
+
+  const handleUpgradeClick = () => {
+    setQuotaBanner("Redirecting to Stripe Billing Portal to scale plan limits...");
+    setTimeout(() => setQuotaBanner(null), 4000);
+  };
+
+  const handleManageOverage = () => {
+    setQuotaBanner("Soft-limit auto-expansion guardrails verified. High-priority publishing protected.");
+    setTimeout(() => setQuotaBanner(null), 4000);
+  };
 
   return (
     <div className="space-y-6 font-humanist">
@@ -94,13 +105,20 @@ export function UsageQuotaMeter() {
             <p className="text-sm font-bold text-slate-800">{daysRemaining} Days Remaining</p>
           </div>
           <button
-            onClick={() => alert("Redirecting to Stripe Billing Portal to scale plan limits.")}
+            onClick={handleUpgradeClick}
             className="px-4 py-2 text-xs font-semibold rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white transition-colors shadow-xs"
           >
             Upgrade Plan &amp; Add Capacity
           </button>
         </div>
       </div>
+
+      {quotaBanner && (
+        <div className="p-3.5 rounded-xl bg-indigo-50 border border-indigo-200 text-xs font-semibold text-indigo-800 animate-fade-in flex items-center gap-2">
+          <span>ℹ️</span>
+          <span>{quotaBanner}</span>
+        </div>
+      )}
 
       {/* Quota Progress Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -185,7 +203,7 @@ export function UsageQuotaMeter() {
           </p>
         </div>
         <button
-          onClick={() => alert("Overage limits configuration saved.")}
+          onClick={handleManageOverage}
           className="px-3.5 py-1.5 rounded-xl border border-indigo-200 bg-white text-indigo-700 hover:bg-indigo-50 text-xs font-semibold"
         >
           Manage Overage Rules

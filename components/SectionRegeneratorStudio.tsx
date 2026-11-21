@@ -44,6 +44,7 @@ export function SectionRegeneratorStudio() {
   );
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [proposedContent, setProposedContent] = useState<string | null>(null);
+  const [commitMsg, setCommitMsg] = useState<string | null>(null);
 
   const activeSection = sections.find((s) => s.id === selectedSectionId);
 
@@ -51,6 +52,7 @@ export function SectionRegeneratorStudio() {
     if (!activeSection) return;
     setIsRegenerating(true);
     setProposedContent(null);
+    setCommitMsg(null);
 
     setTimeout(() => {
       setProposedContent(
@@ -74,7 +76,8 @@ export function SectionRegeneratorStudio() {
       )
     );
     setProposedContent(null);
-    alert("Section updated successfully without altering the rest of your 2,500-word draft!");
+    setCommitMsg("Section merged successfully into canonical draft! Contextual continuity preserved.");
+    setTimeout(() => setCommitMsg(null), 4000);
   };
 
   return (
@@ -95,6 +98,13 @@ export function SectionRegeneratorStudio() {
           </p>
         </div>
       </div>
+
+      {commitMsg && (
+        <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs font-semibold text-emerald-800 animate-fade-in flex items-center gap-2">
+          <span>✓</span>
+          <span>{commitMsg}</span>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left: Section Selector List */}
