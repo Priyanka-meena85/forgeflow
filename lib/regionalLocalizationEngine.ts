@@ -145,6 +145,38 @@ const PHRASE_MAP: Record<SupportedLocale, Record<string, string>> = {
   },
 };
 
+export async function translateTextAsync(text: string, locale: SupportedLocale): Promise<string> {
+  if (locale === "en-IN") return text;
+
+  // 1. Check if Google Cloud Translation API is configured
+  const googleKey = process.env.GOOGLE_TRANSLATE_API_KEY;
+  if (googleKey) {
+    try {
+      const targetLang = locale;
+      const res = await fetch(`https://translation.googleapis.com/language/translate/v2?key=${googleKey}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          q: text,
+          target: targetLang,
+          format: "text",
+        }),
+        signal: AbortSignal.timeout(3000),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const translated = data?.data?.translations?.[0]?.translatedText;
+        if (translated) return translated;
+      }
+    } catch (err) {
+      console.warn("[Regional Engine] Live translation API fallback triggered:", err);
+    }
+  }
+
+  // 2. Deterministic Industrial Technical Translation Engine
+  return pseudoTranslate(text, locale);
+}
+
 function pseudoTranslate(text: string, locale: SupportedLocale): string {
   if (locale === "en-IN") return text; // keep English, just swap key phrases
   let result = text;

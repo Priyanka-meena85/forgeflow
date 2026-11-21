@@ -1,5 +1,8 @@
 "use server";
 
+import fs from "fs";
+import path from "path";
+
 export interface BrandVoiceProfile {
   id: string;
   orgId: string;
@@ -9,13 +12,14 @@ export interface BrandVoiceProfile {
   preferredTerms: Record<string, string>; // e.g. { "pump": "rotary lobe pump" }
   personaInstructions: string;     // freeform prose fed to AI
   uploadedDocNames: string[];      // names of uploaded PDFs / DOCX
-  vectorChunks: string[];          // extracted text chunks (naive in-memory store)
+  vectorChunks: string[];          // extracted text chunks
   createdAt: string;
   updatedAt: string;
 }
 
-/** In-memory store — replace with DB in production */
-const profileStore: BrandVoiceProfile[] = [
+const STORAGE_FILE = path.join(process.cwd(), "data", "brand-voice.json");
+
+const DEFAULT_PROFILES: BrandVoiceProfile[] = [
   {
     id: "bvp_default",
     orgId: "org_demo",
@@ -39,6 +43,28 @@ const profileStore: BrandVoiceProfile[] = [
   },
 ];
 
+function loadProfiles(): BrandVoiceProfile[] {
+  try {
+    if (fs.existsSync(STORAGE_FILE)) {
+      const raw = fs.readFileSync(STORAGE_FILE, "utf-8");
+      return JSON.parse(raw);
+    }
+  } catch (err) {
+    console.warn("[BrandVoice Engine] Storage read error; using default fallback:", err);
+  }
+  return [...DEFAULT_PROFILES];
+}
+
+function saveProfiles(profiles: BrandVoiceProfile[]) {
+  try {
+    fs.writeFileSync(STORAGE_FILE, JSON.stringify(profiles, null, 2), "utf-8");
+  } catch (err) {
+    console.warn("[BrandVoice Engine] Storage write error:", err);
+  }
+}
+
+let profileStore: BrandVoiceProfile[] = loadProfiles();
+
 export async function getBrandVoiceProfiles(orgId: string): Promise<BrandVoiceProfile[]> {
   return profileStore.filter((p) => p.orgId === orgId);
 }
@@ -55,6 +81,7 @@ export async function saveBrandVoiceProfile(
   );
   if (existing) {
     Object.assign(existing, { ...profile, updatedAt: new Date().toISOString() });
+    saveProfiles(profileStore);
     return existing;
   }
   const newProfile: BrandVoiceProfile = {
@@ -64,6 +91,7 @@ export async function saveBrandVoiceProfile(
     updatedAt: new Date().toISOString(),
   };
   profileStore.push(newProfile);
+  saveProfiles(profileStore);
   return newProfile;
 }
 
@@ -71,6 +99,7 @@ export async function deleteBrandVoiceProfile(id: string): Promise<boolean> {
   const idx = profileStore.findIndex((p) => p.id === id);
   if (idx === -1) return false;
   profileStore.splice(idx, 1);
+  saveProfiles(profileStore);
   return true;
 }
 
