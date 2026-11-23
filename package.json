@@ -39,5 +39,10 @@
   },
   "overrides": {
     "deepmerge-ts": "^8.0.0"
+  },
+  "allowScripts": {
+    "@prisma/client": true,
+    "@prisma/engines": true,
+    "prisma": true
   }
 }
