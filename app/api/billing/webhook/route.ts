@@ -4,9 +4,6 @@ import { errorResponse } from "@/lib/http";
 import { getPlanConfig } from "@/lib/billing";
 import { logAuditEvent } from "@/lib/audit";
 
-// Replay defense and idempotency cache
-const processedEventIds = new Set<string>();
-
 export async function POST(request: Request) {
   const secretKey = process.env.STRIPE_SECRET_KEY;
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -33,16 +30,21 @@ export async function POST(request: Request) {
     return errorResponse("Webhook replay threshold exceeded (300s window).", 400);
   }
 
-  // 2. Event Deduplication (Idempotency)
-  if (processedEventIds.has(event.id)) {
-    return Response.json({ received: true, deduplicated: true });
-  }
-  processedEventIds.add(event.id);
-  if (processedEventIds.size > 2000) {
-    const first = processedEventIds.values().next().value;
-    if (first) processedEventIds.delete(first);
+  // 2. Serverless Durable Deduplication (PostgreSQL-backed Idempotency)
+  try {
+    const existingEvent = await db.auditLog.findFirst({
+      where: {
+        action: `STRIPE_EVENT_PROCESSED:${event.id}`,
+      },
+    });
+    if (existingEvent) {
+      return Response.json({ received: true, deduplicated: true });
+    }
+  } catch (dedupErr) {
+    console.warn("[Stripe Webhook] DB dedup check fallback:", dedupErr);
   }
 
+  // Process the webhook events
   if (event.type === "checkout.session.completed") {
     const session = event.data.object;
     const organizationId = session.metadata?.organizationId ?? session.client_reference_id;
@@ -76,11 +78,11 @@ export async function POST(request: Request) {
     event.type === "customer.subscription.deleted"
   ) {
     const subscription = event.data.object;
-    const organizationId = subscription.metadata.organizationId;
+    const organizationId = subscription.metadata?.organizationId;
     if (organizationId) {
       const isDeleted = event.type === "customer.subscription.deleted";
       const isActive = !isDeleted && subscription.status === "active";
-      const targetPlan = isActive ? (subscription.metadata.plan ?? "pilot") : "free";
+      const targetPlan = isActive ? (subscription.metadata?.plan ?? "pilot") : "free";
       const config = getPlanConfig(targetPlan);
 
       await db.organization.update({
@@ -113,6 +115,25 @@ export async function POST(request: Request) {
         });
       }
     }
+  }
+
+  // 3. Mark event as processed in durable database
+  try {
+    const org = await db.organization.findFirst({ select: { id: true } });
+    if (org) {
+      await db.auditLog.create({
+        data: {
+          organizationId: org.id,
+          action: `STRIPE_EVENT_PROCESSED:${event.id}`,
+          resourceType: "STRIPE_WEBHOOK",
+          resourceId: event.id,
+          diffJson: JSON.stringify({ type: event.type, created: event.created }),
+          ipAddress: "stripe-webhook",
+        },
+      });
+    }
+  } catch (markErr) {
+    console.warn("[Stripe Webhook] Failed to mark event processed in DB:", markErr);
   }
 
   return Response.json({ received: true });

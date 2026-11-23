@@ -1,6 +1,10 @@
 export interface ClaimGuardrailRule {
   id: string;
-  category: "FORBIDDEN_COMPETITOR" | "UNVERIFIED_CERTIFICATION" | "ABSOLUTE_ENGINEERING_CLAIM";
+  category:
+    | "FORBIDDEN_COMPETITOR"
+    | "UNVERIFIED_CERTIFICATION"
+    | "ABSOLUTE_ENGINEERING_CLAIM"
+    | "UNQUALIFIED_TOLERANCE_OR_PRESSURE";
   pattern: string;
   remedyAction: "BLOCK_PUBLISHING" | "WARN_AND_REVISE";
   explanation: string;
@@ -14,27 +18,41 @@ export interface GuardrailViolation {
   severity: "CRITICAL_BLOCKER" | "EDITORIAL_WARNING";
 }
 
+export const MANDATORY_ENGINEERING_DISCLAIMER =
+  "Notice: Industrial operating specifications, pressure ratings, and dimensional tolerances are nominal design guidelines adhering to DIN/ISO/ASME benchmarks. Actual operating conditions must be verified by a certified mechanical/chemical engineer before deployment.";
+
 export const DEFAULT_GUARDRAIL_RULES: ClaimGuardrailRule[] = [
   {
     id: "g1",
     category: "ABSOLUTE_ENGINEERING_CLAIM",
-    pattern: "100% leak-proof|zero maintenance forever|never fails|indestructible",
+    pattern: "100% leak-proof|zero maintenance forever|never fails|indestructible|guaranteed zero downtime",
     remedyAction: "BLOCK_PUBLISHING",
-    explanation: "Absolute engineering claims expose OEM to product liability lawsuits. Use qualified ISO 5208 Rate A leakage tolerance terminology.",
+    explanation:
+      "Absolute engineering claims expose OEM to direct product liability lawsuits. Use qualified ISO 5208 Rate A leakage tolerance terminology.",
   },
   {
     id: "g2",
     category: "FORBIDDEN_COMPETITOR",
-    pattern: "Parker Hannifin|Bosch Rexroth|SMC Corporation|Danfoss",
+    pattern: "Parker Hannifin|Bosch Rexroth|SMC Corporation|Danfoss|Eaton Vickers",
     remedyAction: "WARN_AND_REVISE",
-    explanation: "Explicit competitor brand naming without benchmark disclaimer risks trademark dispute. Use generic OEM equivalence notation.",
+    explanation:
+      "Explicit competitor brand naming without benchmark disclaimer risks trademark dispute. Use generic OEM cross-reference notation.",
   },
   {
     id: "g3",
     category: "UNVERIFIED_CERTIFICATION",
-    pattern: "AS9100 certified|ITAR compliant facility|FDA class III approved",
+    pattern: "AS9100 certified|ITAR compliant facility|FDA class III approved|ATEX Zone 0 explosion-proof",
     remedyAction: "BLOCK_PUBLISHING",
-    explanation: "Restricted aerospace/defense/medical certifications cannot be published without verifiable certificate on file.",
+    explanation:
+      "Restricted aerospace, defense, or explosive hazard certifications cannot be published without a verified compliance document on file.",
+  },
+  {
+    id: "g4",
+    category: "UNQUALIFIED_TOLERANCE_OR_PRESSURE",
+    pattern: "tolerance guaranteed without variance|infinite pressure rating|zero thermal expansion",
+    remedyAction: "BLOCK_PUBLISHING",
+    explanation:
+      "Physical impossibility claims violate engineering standards (ASME Y14.5 / ISO 2768-m). Specify qualified tolerance bands.",
   },
 ];
 
@@ -44,6 +62,7 @@ export function validateDraftAgainstGuardrails(
 ): {
   isPublishable: boolean;
   violations: GuardrailViolation[];
+  suggestedDisclaimer: string;
 } {
   const violations: GuardrailViolation[] = [];
 
@@ -67,5 +86,6 @@ export function validateDraftAgainstGuardrails(
   return {
     isPublishable: !hasBlockers,
     violations,
+    suggestedDisclaimer: MANDATORY_ENGINEERING_DISCLAIMER,
   };
 }
