@@ -46,7 +46,7 @@ export function PublicNavbar({ onOpenAuth, onOpenDemo, activeNav = "home" }: Pub
         </div>
 
         {/* Desktop Navigation Links with Mega-Menus */}
-        <nav aria-label="Main navigation" className="hidden lg:flex items-center gap-7 text-xs font-semibold text-slate-600">
+        <nav aria-label="Main navigation" className="hidden lg:flex items-center gap-6 text-sm font-semibold text-slate-700">
           {/* 1. Features Mega-Menu (Matches iFactory AI Solutions reference) */}
           <div
             className="relative"
@@ -59,7 +59,7 @@ export function PublicNavbar({ onOpenAuth, onOpenDemo, activeNav = "home" }: Pub
                 }`}
             >
               <span>Platform Features</span>
-              <span aria-hidden="true" className="text-[10px] text-slate-400">⌄</span>
+              <span aria-hidden="true" className="text-xs text-slate-400">⌄</span>
             </Link>
 
             {activeDropdown === "features" && (
@@ -274,7 +274,7 @@ export function PublicNavbar({ onOpenAuth, onOpenDemo, activeNav = "home" }: Pub
                 }`}
             >
               <span>Industries &amp; Verticals</span>
-              <span aria-hidden="true" className="text-[10px] text-slate-400">⌄</span>
+              <span aria-hidden="true" className="text-xs text-slate-400">⌄</span>
             </Link>
 
             {activeDropdown === "industries" && (
@@ -472,14 +472,14 @@ export function PublicNavbar({ onOpenAuth, onOpenDemo, activeNav = "home" }: Pub
             <button
               type="button"
               onClick={onOpenDemo}
-              className="px-3 py-1.5 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-100 hover:text-slate-900 text-xs font-bold transition cursor-pointer"
+              className="px-3.5 py-1.5 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-100 hover:text-slate-900 text-sm font-semibold transition cursor-pointer"
             >
               Book A Demo
             </button>
           ) : (
             <Link
               href="/demo"
-              className="px-3 py-1.5 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-100 hover:text-slate-900 text-xs font-bold transition cursor-pointer"
+              className="px-3.5 py-1.5 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-100 hover:text-slate-900 text-sm font-semibold transition cursor-pointer"
             >
               Book A Demo
             </Link>
@@ -490,14 +490,14 @@ export function PublicNavbar({ onOpenAuth, onOpenDemo, activeNav = "home" }: Pub
             <button
               type="button"
               onClick={() => onOpenAuth("login")}
-              className="px-3.5 py-1.5 rounded-xl text-slate-700 hover:text-slate-900 text-xs font-bold transition cursor-pointer"
+              className="px-3.5 py-1.5 rounded-xl text-slate-700 hover:text-slate-900 text-sm font-semibold transition cursor-pointer"
             >
               Sign In
             </button>
           ) : (
             <Link
               href="/auth/login"
-              className="px-3.5 py-1.5 rounded-xl text-slate-700 hover:text-slate-900 text-xs font-bold transition inline-block"
+              className="px-3.5 py-1.5 rounded-xl text-slate-700 hover:text-slate-900 text-sm font-semibold transition inline-block"
             >
               Sign In
             </Link>
@@ -508,14 +508,14 @@ export function PublicNavbar({ onOpenAuth, onOpenDemo, activeNav = "home" }: Pub
             <button
               type="button"
               onClick={() => onOpenAuth("register")}
-              className="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold tracking-tight shadow-md shadow-sky-600/20 transition cursor-pointer"
+              className="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-sm font-semibold tracking-tight shadow-md shadow-sky-600/20 transition cursor-pointer"
             >
               Launch Console &rarr;
             </button>
           ) : (
             <Link
               href="/dashboard"
-              className="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold tracking-tight shadow-md shadow-sky-600/20 transition inline-block"
+              className="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-sm font-semibold tracking-tight shadow-md shadow-sky-600/20 transition inline-block"
             >
               Launch Console &rarr;
             </Link>
