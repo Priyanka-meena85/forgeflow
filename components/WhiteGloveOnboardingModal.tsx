@@ -71,14 +71,14 @@ export function WhiteGloveOnboardingModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 overflow-y-auto">
-      <div className="relative w-full max-w-2xl bg-zinc-950 border border-zinc-800 rounded-xl shadow-2xl p-6 sm:p-8 text-zinc-100 my-8">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-3 sm:p-4 overflow-y-auto">
+      <div className="relative w-full max-w-2xl bg-zinc-950 border border-zinc-800 rounded-xl shadow-2xl p-5 sm:p-8 text-zinc-100 my-auto max-h-[90dvh] overflow-y-auto">
         <div className="flex items-center justify-between pb-4 border-b border-zinc-800">
           <div>
             <span className="px-2.5 py-0.5 text-xs font-mono bg-amber-950 text-amber-400 border border-amber-800 rounded">
               WHITE-GLOVE CONCIERGE
             </span>
-            <h2 className="text-xl font-bold mt-1 text-white">
+            <h2 className="text-lg sm:text-xl font-bold mt-1 text-white">
               Assisted Enterprise Implementation Sprint
             </h2>
           </div>
@@ -102,7 +102,7 @@ export function WhiteGloveOnboardingModal({
             <div className="space-y-4 text-xs">
               <div className="p-3 bg-zinc-900 border border-zinc-800 rounded">
                 <span className="font-mono text-zinc-400 uppercase">Commercial Terms:</span>
-                <div className="grid grid-cols-2 gap-2 mt-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
                   <div>
                     <span className="text-zinc-400">Implementation:</span>
                     <p className="font-bold text-white">{sow.commercials.implementationFee}</p>

@@ -1649,7 +1649,7 @@ function ForgeFlowWorkspace() {
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-slate-50 text-slate-900 font-sans antialiased">
       {/* SIDEBAR NAVIGATION - FIXED & STICKY LINEAR/STRIPE ENTERPRISE SHELL */}
-      <aside className="w-80 shrink-0 border-r border-slate-200 bg-white p-4 flex flex-col justify-between hidden md:flex shadow-xs select-none h-screen sticky top-0 z-20">
+      <aside className="w-72 xl:w-80 shrink-0 border-r border-slate-200 bg-white p-4 flex flex-col justify-between hidden lg:flex shadow-xs select-none h-screen sticky top-0 z-20">
         <div className="flex flex-col min-h-0 flex-1">
           {/* Official ForgeFlow Logo Header & Top Bar */}
           <div className="space-y-3 shrink-0 pb-3">
@@ -1974,7 +1974,7 @@ function ForgeFlowWorkspace() {
 
       {/* MOBILE SIDEBAR DRAWER OVERLAY */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-50 flex md:hidden animate-fade-in">
+        <div className="fixed inset-0 z-50 flex lg:hidden animate-fade-in">
           <div
             className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs transition-opacity"
             onClick={() => setMobileMenuOpen(false)}
@@ -2199,7 +2199,7 @@ function ForgeFlowWorkspace() {
               type="button"
               onClick={() => setMobileMenuOpen(true)}
               aria-label="Open navigation menu"
-              className="p-2 -ml-1 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 md:hidden cursor-pointer transition"
+              className="p-2 -ml-1 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 lg:hidden cursor-pointer transition"
             >
               <span className="css-icon-menu"></span>
             </button>
@@ -2262,7 +2262,7 @@ function ForgeFlowWorkspace() {
           </div>
         </header>
 
-        <nav aria-label="Workspace navigation" className="flex gap-1.5 overflow-x-auto border-b border-slate-200 bg-white/95 backdrop-blur-sm px-3 py-2 md:hidden scrollbar-none shadow-2xs">
+        <nav aria-label="Workspace navigation" className="flex gap-1.5 overflow-x-auto border-b border-slate-200 bg-white/95 backdrop-blur-sm px-3 py-2 lg:hidden scrollbar-none shadow-2xs">
           {navItems.map((item) => (
             <button
               key={item.label}
@@ -2850,8 +2850,8 @@ function ForgeFlowWorkspace() {
 
                     {/* Modal: Ingest Spec Sheet (PDF/Text) with Dropzone */}
             {showIngestModal && (
-              <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 animate-fade-in">
-                <div className="bg-white rounded-2xl max-w-2xl w-full p-6 space-y-4 shadow-2xl border border-slate-200">
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-3 sm:p-4 overflow-y-auto animate-fade-in">
+                <div className="bg-white rounded-2xl max-w-2xl w-full p-5 sm:p-6 space-y-4 shadow-2xl border border-slate-200 max-h-[90dvh] overflow-y-auto my-auto">
                   <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                     <div className="flex items-center gap-2.5">
                       <div className="w-8 h-8 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center font-bold text-sm"><span className="css-icon-doc"></span></div>
@@ -5197,8 +5197,8 @@ function ForgeFlowWorkspace() {
 
       {/* Modal: Quick Action Palette (Triggered by [+] button in sidebar) */}
       {showQuickActionPalette && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 animate-fade-in">
-          <div className="bg-white rounded-2xl max-w-xl w-full p-6 space-y-4 shadow-2xl border border-slate-200 animate-in zoom-in-95 duration-150">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-3 sm:p-4 overflow-y-auto animate-fade-in">
+          <div className="bg-white rounded-2xl max-w-xl w-full p-5 sm:p-6 space-y-4 shadow-2xl border border-slate-200 animate-in zoom-in-95 duration-150 max-h-[90dvh] overflow-y-auto my-auto">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-lg bg-sky-100 text-sky-700 flex items-center justify-center font-bold text-sm"><span className="css-icon-bolt"></span></div>
@@ -6022,9 +6022,9 @@ function ForgeFlowWorkspace() {
 
       {/* 1-Click Direct Headless CMS Publisher Modal */}
       {showCmsPublishModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs animate-fade-in">
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-lg w-full overflow-hidden flex flex-col font-humanist">
-            <div className="p-5 border-b border-slate-200 flex items-start justify-between bg-slate-50/80">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/50 backdrop-blur-xs overflow-y-auto animate-fade-in">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-lg w-full max-h-[90dvh] overflow-hidden flex flex-col font-humanist my-auto">
+            <div className="p-4 sm:p-5 border-b border-slate-200 flex items-start justify-between bg-slate-50/80 shrink-0">
               <div>
                 <div className="flex items-center gap-2">
                   <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-600 text-white font-bold text-xs">
@@ -6046,7 +6046,7 @@ function ForgeFlowWorkspace() {
               </button>
             </div>
 
-            <div className="p-6 space-y-4 text-xs">
+            <div className="p-4 sm:p-6 space-y-4 text-xs overflow-y-auto flex-1">
               {cmsPublishSuccess ? (
                 <div className="p-5 rounded-2xl bg-emerald-50 border border-emerald-200 space-y-3 animate-fade-in">
                   <div className="flex items-center gap-2 text-emerald-900 font-bold text-sm">

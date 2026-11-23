@@ -159,7 +159,7 @@ export function StepCadSchemaExtractor() {
             {result ? (
               activeTab === "Tolerances" ? (
                 <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-3 text-xs">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                     <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
                       <span className="text-[10px] font-mono uppercase font-bold text-slate-400 block">CAD Standard</span>
                       <strong className="text-slate-900 font-mono">{result.cadStandard}</strong>

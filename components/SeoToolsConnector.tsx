@@ -147,7 +147,7 @@ export function SeoToolsConnector() {
       {/* KPIs */}
       {rankings.length > 0 && (
         <>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
             {[
               { label: "Avg. Position", value: `#${avgPos}`, color: "text-indigo-700" },
               { label: "Top 3 Rankings", value: top3, color: "text-green-700" },

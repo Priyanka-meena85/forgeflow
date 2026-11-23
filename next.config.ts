@@ -25,7 +25,11 @@ const nextConfig: NextConfig = {
         headers: [
           {
             key: "X-Frame-Options",
-            value: "DENY",
+            value: "SAMEORIGIN",
+          },
+          {
+            key: "Content-Security-Policy",
+            value: "frame-ancestors 'self' https://vercel.com https://*.vercel.com https://*.vercel.app;",
           },
           {
             key: "X-Content-Type-Options",

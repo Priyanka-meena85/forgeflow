@@ -198,14 +198,14 @@ export function InteractiveDiagnosticStudio({ onActionMessage }: InteractiveDiag
             </div>
           </div>
 
-          <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 grid grid-cols-2 gap-3">
+          <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <div className="text-[10px] uppercase font-mono text-slate-400">Recommended Die Clearance (9%)</div>
               <div className="text-xl font-bold font-mono text-amber-400">
                 {clearanceMm.toFixed(3)} mm / side
               </div>
             </div>
-            <div className="text-right">
+            <div className="text-left sm:text-right">
               <div className="text-[10px] uppercase font-mono text-slate-400">Required Press Tonnage</div>
               <div className="text-xl font-bold font-mono text-emerald-400">
                 {tonnageMetric.toFixed(1)} Metric Tons
@@ -215,7 +215,7 @@ export function InteractiveDiagnosticStudio({ onActionMessage }: InteractiveDiag
         </div>
       )}
 
-      <div className="flex items-center justify-between pt-2 border-t border-slate-800 text-[11px] text-slate-400">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-2 border-t border-slate-800 text-[11px] text-slate-400">
         <span>Referenced: ASHRAE 90.1 • ISO 4406 • IATF 16949 Section 8.5</span>
         <button
           type="button"

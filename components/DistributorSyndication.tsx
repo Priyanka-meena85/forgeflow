@@ -166,7 +166,7 @@ export function DistributorSyndication() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2 border-t border-slate-100">
                 <button
                   onClick={() => handleToggle(hub)}
                   disabled={busyId === hub.id}

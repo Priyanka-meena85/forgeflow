@@ -511,7 +511,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                   </span>
                 </div>
 
-                <div className="flex gap-1 border-b border-slate-100 pb-2 mb-3 text-[11px] font-mono font-bold">
+                <div className="flex gap-1 border-b border-slate-100 pb-2 mb-3 text-[11px] font-mono font-bold overflow-x-auto scrollbar-none">
                   {[
                     { id: "taxonomy", label: "Spec Matrix" },
                     { id: "qa", label: "Closed QA" },
@@ -1699,8 +1699,8 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                     {simulatorScenarios[simulatorScenario].perplexity.summary}
                   </p>
 
-                  <div className="rounded-2xl border border-slate-800 overflow-hidden bg-slate-900">
-                    <table className="w-full text-left text-xs font-mono">
+                  <div className="rounded-2xl border border-slate-800 overflow-x-auto bg-slate-900">
+                    <table className="w-full text-left text-xs font-mono min-w-[480px]">
                       <thead>
                         <tr className="border-b border-slate-800 bg-slate-950 text-slate-400 text-[10px] uppercase">
                           <th className="py-2.5 px-4">Parameter</th>
@@ -2035,9 +2035,9 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
             </div>
 
             {/* Right Column: Two Floating Live Cards (Styled 1:1 with ForgeFlow Theme) */}
-            <div className="lg:col-span-5 flex items-start justify-center lg:justify-end gap-4 sm:gap-6 pt-4 lg:pt-0">
+            <div className="lg:col-span-5 flex flex-wrap sm:flex-nowrap items-center justify-center lg:justify-end gap-4 sm:gap-6 pt-4 lg:pt-0">
               {/* Card 1: Production Monitor */}
-              <div className="w-[210px] sm:w-[230px] rounded-2xl bg-white shadow-xl shadow-slate-300/40 border border-slate-200/80 overflow-hidden shrink-0">
+              <div className="w-full max-w-[260px] sm:w-[230px] rounded-2xl bg-white shadow-xl shadow-slate-300/40 border border-slate-200/80 overflow-hidden shrink-0">
                 <div className="bg-gradient-to-r from-slate-900 to-sky-950 px-4 py-3 text-white text-xs font-bold tracking-tight text-center sm:text-left flex items-center justify-between border-b border-sky-900/40">
                   <span className="flex items-center gap-1.5 font-mono">
                     <span className="css-icon-bolt text-sky-400"></span>
@@ -2091,7 +2091,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
               </div>
 
               {/* Card 2: AI Engine Citations */}
-              <div className="w-[210px] sm:w-[230px] rounded-2xl bg-white shadow-xl shadow-slate-300/40 border border-slate-200/80 overflow-hidden shrink-0">
+              <div className="w-full max-w-[260px] sm:w-[230px] rounded-2xl bg-white shadow-xl shadow-slate-300/40 border border-slate-200/80 overflow-hidden shrink-0">
                 <div className="bg-gradient-to-r from-sky-600 to-blue-700 px-4 py-3 text-white text-xs font-bold tracking-tight text-center sm:text-left flex items-center justify-between border-b border-sky-500/40">
                   <span className="flex items-center gap-1.5 font-mono">
                     <span className="css-icon-dot text-sky-500"></span>
@@ -2144,20 +2144,20 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
 
       {/* 13. BOOK A DEMO MODAL */}
       {demoModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
-          <div className="bg-white rounded-2xl border border-slate-200/90 p-8 shadow-2xl max-w-lg w-full relative">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150 overflow-y-auto">
+          <div className="bg-white rounded-2xl border border-slate-200/90 p-5 sm:p-8 shadow-2xl max-w-lg w-full relative max-h-[90dvh] overflow-y-auto my-auto">
             <button
               type="button"
               onClick={() => setDemoModalOpen(false)}
-              className="absolute top-5 right-5 text-slate-400 hover:text-slate-600 text-lg leading-none p-1 cursor-pointer"
+              className="absolute top-4 right-4 sm:top-5 sm:right-5 text-slate-400 hover:text-slate-600 text-lg leading-none p-1.5 cursor-pointer rounded-lg hover:bg-slate-100 transition"
               aria-label="Close"
             ><span className="css-icon-cross"></span></button>
 
-            <div className="mb-6 flex items-center gap-3 border-b border-slate-100 pb-4">
-              <Image src="/logo-icon.png" alt="ForgeFlow Logo" width={44} height={44} className="h-11 w-11 object-contain shrink-0" />
+            <div className="mb-5 flex items-center gap-3 border-b border-slate-100 pb-4">
+              <Image src="/logo-icon.png" alt="ForgeFlow Logo" width={44} height={44} className="h-10 w-10 sm:h-11 sm:w-11 object-contain shrink-0" />
               <div>
                 <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-sky-700">1-on-1 Walkthrough</p>
-                <h3 className="text-lg font-extrabold text-slate-900 tracking-tight">Schedule an Industrial AEO Demo</h3>
+                <h3 className="text-base sm:text-lg font-extrabold text-slate-900 tracking-tight">Schedule an Industrial AEO Demo</h3>
               </div>
             </div>
 
@@ -2184,7 +2184,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                   See how ForgeFlow maps your specific machinery models, parts catalogs, and operating failure modes into Google AI Overviews and Perplexity citations.
                 </p>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="block text-[11px] font-semibold uppercase tracking-wider text-slate-700 mb-1">
                       Full Name
@@ -2260,8 +2260,8 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
 
       {/* 14. AUTOMATED TIMED REPETITIVE SIGNUP POPUP (EVERY 3.5 MINUTES) */}
       {timedSignupOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in zoom-in-95 duration-200">
-          <div className="bg-white rounded-3xl border border-sky-100 p-7 sm:p-8 shadow-2xl max-w-md w-full relative">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in zoom-in-95 duration-200 overflow-y-auto">
+          <div className="bg-white rounded-3xl border border-sky-100 p-5 sm:p-8 shadow-2xl max-w-md w-full relative max-h-[90dvh] overflow-y-auto my-auto">
             <button
               type="button"
               onClick={() => setTimedSignupOpen(false)}

@@ -104,62 +104,64 @@ export function ErpStockBadgeWidget() {
           <span className="text-xs font-mono text-slate-400">Total Available: 47 Units</span>
         </div>
 
-        <table className="w-full text-left text-xs border-collapse">
-          <thead>
-            <tr className="bg-slate-50 text-slate-500 font-semibold border-b border-slate-200 uppercase tracking-wider">
-              <th className="p-3.5">Distributor Name</th>
-              <th className="p-3.5">Fulfillment Hub</th>
-              <th className="p-3.5 text-center">Available Stock</th>
-              <th className="p-3.5 text-center">Lead Time</th>
-              <th className="p-3.5 text-right">Unit Price</th>
-              <th className="p-3.5 text-center">Action</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100">
-            {stockList.map((item) => (
-              <tr key={item.id} className="hover:bg-slate-50/80 transition-colors">
-                <td className="p-3.5 font-bold text-slate-900">
-                  {item.distributorName}
-                  <span className="block text-[10px] font-mono text-slate-400 font-normal">
-                    Verified {item.verifiedStockDate}
-                  </span>
-                </td>
-                <td className="p-3.5 text-slate-600">{item.location}</td>
-                <td className="p-3.5 text-center">
-                  <span
-                    className={`inline-block px-2.5 py-0.5 rounded-full font-bold font-mono text-[11px] ${
-                      item.status === "IN_STOCK"
-                        ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                        : "bg-amber-50 text-amber-700 border border-amber-200"
-                    }`}
-                  >
-                    {item.unitsInStock} Units
-                  </span>
-                </td>
-                <td className="p-3.5 text-center font-mono text-slate-700 font-semibold">
-                  {item.leadTimeDays} Business Days
-                </td>
-                <td className="p-3.5 text-right font-bold text-slate-900 font-mono">
-                  ${item.unitPriceUsd.toLocaleString()}
-                </td>
-                <td className="p-3.5 text-center">
-                  <button
-                    onClick={() => handleRequestQuote(item)}
-                    className="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs transition-colors shadow-2xs"
-                  >
-                    Route RFQ
-                  </button>
-                </td>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs border-collapse min-w-[580px]">
+            <thead>
+              <tr className="bg-slate-50 text-slate-500 font-semibold border-b border-slate-200 uppercase tracking-wider">
+                <th className="p-3.5">Distributor Name</th>
+                <th className="p-3.5">Fulfillment Hub</th>
+                <th className="p-3.5 text-center">Available Stock</th>
+                <th className="p-3.5 text-center">Lead Time</th>
+                <th className="p-3.5 text-right">Unit Price</th>
+                <th className="p-3.5 text-center">Action</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {stockList.map((item) => (
+                <tr key={item.id} className="hover:bg-slate-50/80 transition-colors">
+                  <td className="p-3.5 font-bold text-slate-900">
+                    {item.distributorName}
+                    <span className="block text-[10px] font-mono text-slate-400 font-normal">
+                      Verified {item.verifiedStockDate}
+                    </span>
+                  </td>
+                  <td className="p-3.5 text-slate-600">{item.location}</td>
+                  <td className="p-3.5 text-center">
+                    <span
+                      className={`inline-block px-2.5 py-0.5 rounded-full font-bold font-mono text-[11px] ${
+                        item.status === "IN_STOCK"
+                          ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                          : "bg-amber-50 text-amber-700 border border-amber-200"
+                      }`}
+                    >
+                      {item.unitsInStock} Units
+                    </span>
+                  </td>
+                  <td className="p-3.5 text-center font-mono text-slate-700 font-semibold">
+                    {item.leadTimeDays} Business Days
+                  </td>
+                  <td className="p-3.5 text-right font-bold text-slate-900 font-mono">
+                    ${item.unitPriceUsd.toLocaleString()}
+                  </td>
+                  <td className="p-3.5 text-center">
+                    <button
+                      onClick={() => handleRequestQuote(item)}
+                      className="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs transition-colors shadow-2xs"
+                    >
+                      Route RFQ
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* RFQ Routing Modal */}
       {rfqModalOpen && selectedItem && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in">
-          <div className="bg-white rounded-3xl border border-slate-200 shadow-2xl max-w-lg w-full p-6 space-y-5">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto animate-fade-in">
+          <div className="bg-white rounded-3xl border border-slate-200 shadow-2xl max-w-lg w-full p-5 sm:p-6 space-y-5 max-h-[90dvh] overflow-y-auto my-auto">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div>
                 <h3 className="font-extrabold text-slate-900 text-base">
@@ -196,7 +198,7 @@ export function ErpStockBadgeWidget() {
                     className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white"
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="font-bold text-slate-700 block mb-1">Quantity Needed</label>
                     <input

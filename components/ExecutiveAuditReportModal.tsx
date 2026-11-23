@@ -70,8 +70,8 @@ export function ExecutiveAuditReportModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 overflow-y-auto">
-      <div className="relative w-full max-w-5xl bg-zinc-950 border border-zinc-800 rounded-xl shadow-2xl p-6 sm:p-8 text-zinc-100 my-8">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-3 sm:p-4 overflow-y-auto">
+      <div className="relative w-full max-w-5xl bg-zinc-950 border border-zinc-800 rounded-xl shadow-2xl p-5 sm:p-8 text-zinc-100 my-auto max-h-[90dvh] overflow-y-auto">
         {/* Header bar */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-zinc-800 gap-4">
           <div>

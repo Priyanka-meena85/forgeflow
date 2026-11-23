@@ -63,7 +63,7 @@ export function PublicNavbar({ onOpenAuth, onOpenDemo, activeNav = "home" }: Pub
             </Link>
 
             {activeDropdown === "features" && (
-              <div className="absolute top-full -left-12 w-[840px] p-5 bg-white rounded-2xl border border-slate-200 shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-100">
+              <div className="absolute top-full -left-12 w-[840px] max-w-[calc(100vw-3rem)] p-5 bg-white rounded-2xl border border-slate-200 shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-100 overflow-x-auto">
                 <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
                   <div className="flex items-center gap-2">
                     <span className="text-[10.5px] font-mono uppercase font-bold text-slate-400 tracking-wider">
@@ -278,7 +278,7 @@ export function PublicNavbar({ onOpenAuth, onOpenDemo, activeNav = "home" }: Pub
             </Link>
 
             {activeDropdown === "industries" && (
-              <div className="absolute top-full -left-48 w-[880px] p-5 bg-white rounded-2xl border border-slate-200 shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-100">
+              <div className="absolute top-full -left-48 lg:-left-64 xl:-left-48 w-[880px] max-w-[calc(100vw-3rem)] p-5 bg-white rounded-2xl border border-slate-200 shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-100 overflow-x-auto">
                 <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
                   <div className="flex items-center gap-2">
                     <span className="text-[10.5px] font-mono uppercase font-bold text-slate-400 tracking-wider">
@@ -544,43 +544,109 @@ export function PublicNavbar({ onOpenAuth, onOpenDemo, activeNav = "home" }: Pub
 
       {/* Mobile Drawer Overlay */}
       {mobileMenuOpen && (
-        <div className="lg:hidden border-b border-slate-200 bg-white px-4 pt-3 pb-6 space-y-4 shadow-xl">
+        <div className="lg:hidden border-b border-slate-200 bg-white px-4 pt-3 pb-6 space-y-4 shadow-xl max-h-[calc(100dvh-4rem)] overflow-y-auto overflow-touch">
           <nav aria-label="Mobile navigation" className="space-y-1">
             <Link
               href="/"
               onClick={() => setMobileMenuOpen(false)}
-              className="block px-3 py-2 rounded-xl text-sm font-bold text-slate-900 hover:bg-slate-50"
+              className="block px-3 py-2.5 rounded-xl text-sm font-bold text-slate-900 hover:bg-slate-50 transition"
             >
               Home
             </Link>
             <Link
               href="/features"
               onClick={() => setMobileMenuOpen(false)}
-              className="block px-3 py-2 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              className="block px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 transition"
             >
-              Platform Features Suite
+              Platform Features Suite (23 Modules)
             </Link>
             <Link
               href="/industries"
               onClick={() => setMobileMenuOpen(false)}
-              className="block px-3 py-2 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              className="block px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 transition"
             >
               Industries Directory (7 Sectors)
             </Link>
+
+            {/* Quick sector shortcuts for mobile */}
+            <div className="pl-3 pr-1 py-1 grid grid-cols-2 gap-1.5 text-[11px] font-mono">
+              <Link
+                href="/industries/hvac-commercial-refrigeration"
+                onClick={() => setMobileMenuOpen(false)}
+                className="px-2 py-1.5 rounded-lg bg-slate-50 hover:bg-sky-50 text-slate-600 hover:text-sky-700 border border-slate-200/60 truncate"
+              >
+                HVAC / Chillers
+              </Link>
+              <Link
+                href="/industries/food-beverage-manufacturing"
+                onClick={() => setMobileMenuOpen(false)}
+                className="px-2 py-1.5 rounded-lg bg-slate-50 hover:bg-sky-50 text-slate-600 hover:text-sky-700 border border-slate-200/60 truncate"
+              >
+                Sanitary / 3-A
+              </Link>
+              <Link
+                href="/industries/cnc-machining-tooling"
+                onClick={() => setMobileMenuOpen(false)}
+                className="px-2 py-1.5 rounded-lg bg-slate-50 hover:bg-sky-50 text-slate-600 hover:text-sky-700 border border-slate-200/60 truncate"
+              >
+                CNC &amp; Cutting
+              </Link>
+              <Link
+                href="/industries/industrial-hydraulics-fluid"
+                onClick={() => setMobileMenuOpen(false)}
+                className="px-2 py-1.5 rounded-lg bg-slate-50 hover:bg-sky-50 text-slate-600 hover:text-sky-700 border border-slate-200/60 truncate"
+              >
+                Hydraulics / ISO
+              </Link>
+            </div>
+
             <Link
               href="/integrations"
               onClick={() => setMobileMenuOpen(false)}
-              className="block px-3 py-2 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              className="block px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 transition"
             >
               CMS &amp; System Integrations
             </Link>
             <Link
               href="/pricing"
               onClick={() => setMobileMenuOpen(false)}
-              className="block px-3 py-2 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              className="block px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 transition"
             >
               Pricing &amp; Plans
             </Link>
+            <div className="pt-1 border-t border-slate-100 flex flex-wrap gap-2 px-2 text-xs font-medium text-slate-500">
+              <Link
+                href="/case-studies"
+                onClick={() => setMobileMenuOpen(false)}
+                className="hover:text-slate-900 py-1"
+              >
+                Case Studies
+              </Link>
+              <span>&bull;</span>
+              <Link
+                href="/blog"
+                onClick={() => setMobileMenuOpen(false)}
+                className="hover:text-slate-900 py-1"
+              >
+                Engine Blog
+              </Link>
+              <span>&bull;</span>
+              <Link
+                href="/roi-calculator"
+                onClick={() => setMobileMenuOpen(false)}
+                className="hover:text-slate-900 py-1"
+              >
+                ROI Calculator
+              </Link>
+              <span>&bull;</span>
+              <Link
+                href="/vs/clearscope"
+                onClick={() => setMobileMenuOpen(false)}
+                className="hover:text-slate-900 py-1"
+              >
+                vs Clearscope
+              </Link>
+            </div>
           </nav>
 
           <div className="pt-3 border-t border-slate-100 space-y-2">

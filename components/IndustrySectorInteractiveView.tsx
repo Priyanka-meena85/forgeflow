@@ -429,7 +429,7 @@ export function IndustrySectorInteractiveView({ sector }: IndustrySectorInteract
               <div className="text-3xl sm:text-4xl font-black text-emerald-400 font-mono">
                 ${calculatedPipeline.toLocaleString()}
               </div>
-              <div className="grid grid-cols-2 gap-3 pt-3 border-t border-slate-800 text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 border-t border-slate-800 text-xs">
                 <div>
                   <span className="text-[10px] font-mono text-slate-400 block">Estimated RFQs</span>
                   <span className="font-bold text-white font-mono">{estimatedInquiries} Inquiries</span>

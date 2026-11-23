@@ -140,8 +140,8 @@ export function RfqLeadManager({ onActionMessage }: RfqLeadManagerProps) {
 
       {/* Embed Modal */}
       {showEmbedModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
-          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-2xl max-w-lg w-full space-y-4 text-xs">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/50 backdrop-blur-xs overflow-y-auto">
+          <div className="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-2xl max-w-lg w-full space-y-4 text-xs max-h-[90dvh] overflow-y-auto my-auto">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <h4 className="font-bold text-slate-900 text-sm">Embed In-Page RFQ Hook</h4>
               <button

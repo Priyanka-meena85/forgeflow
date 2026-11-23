@@ -22,9 +22,9 @@ export function UnsavedChangesGuardModal({
       role="alertdialog"
       aria-modal="true"
       aria-labelledby="unsaved-modal-title"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in font-humanist"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto animate-fade-in font-humanist"
     >
-      <div className="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl border border-rose-200 animate-in zoom-in-95 duration-150">
+      <div className="bg-white rounded-2xl max-w-md w-full p-5 sm:p-6 space-y-4 shadow-2xl border border-rose-200 animate-in zoom-in-95 duration-150 max-h-[90dvh] overflow-y-auto my-auto">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center font-bold text-base shrink-0">
             <span className="css-icon-alert"></span>

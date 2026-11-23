@@ -280,8 +280,8 @@ export function ClientRoiReportPdfExport() {
           <h3 className="text-base font-bold text-slate-900">
             Top Performing Pages &amp; Direct RFQ Pipeline Attribution
           </h3>
-          <div className="rounded-2xl border border-slate-200 overflow-hidden">
-            <table className="w-full text-left text-xs border-collapse">
+          <div className="rounded-2xl border border-slate-200 overflow-x-auto">
+            <table className="w-full text-left text-xs border-collapse min-w-[540px]">
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 font-semibold uppercase tracking-wider">
                   <th className="p-3.5">Industrial Topic / Equipment</th>

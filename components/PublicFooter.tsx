@@ -212,11 +212,11 @@ export function PublicFooter() {
         </div>
 
         {/* Bottom Bar: Copyright & Compliance */}
-        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+        <div className="pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-slate-500 text-center md:text-left">
           <div>
             &copy; {new Date().getFullYear()} ForgeFlow Systems Inc. All rights reserved. Industrial SEO &amp; AEO Content Engine.
           </div>
-          <div className="flex items-center gap-6">
+          <div className="flex flex-wrap items-center justify-center md:justify-end gap-x-5 gap-y-2">
             <Link href="/pricing" className="hover:text-slate-800 transition">
               Pricing
             </Link>
@@ -232,7 +232,7 @@ export function PublicFooter() {
             <Link href="/trust" className="hover:text-slate-800 transition font-medium text-slate-700">
               Trust &amp; Security
             </Link>
-            <span>&bull;</span>
+            <span className="hidden sm:inline">&bull;</span>
             <span className="text-[11px] font-mono text-slate-400">Pure Software SaaS • Zero Hardware</span>
           </div>
         </div>

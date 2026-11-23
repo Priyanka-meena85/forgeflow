@@ -239,7 +239,7 @@ export function AbHeadlineTester() {
                   &ldquo;{test.variantA.headline}&rdquo;
                 </h4>
 
-                <div className="grid grid-cols-2 gap-2 text-xs">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
                   <div className="p-3 rounded-xl bg-white border border-slate-200">
                     <span className="text-slate-400 block text-[10px]">Actual GSC CTR</span>
                     <span className="text-base font-extrabold text-slate-900 font-mono">
@@ -285,7 +285,7 @@ export function AbHeadlineTester() {
                   &ldquo;{test.variantB.headline}&rdquo;
                 </h4>
 
-                <div className="grid grid-cols-2 gap-2 text-xs">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
                   <div className="p-3 rounded-xl bg-white border border-slate-200">
                     <span className="text-slate-400 block text-[10px]">Actual GSC CTR</span>
                     <span className="text-base font-extrabold text-slate-900 font-mono">
