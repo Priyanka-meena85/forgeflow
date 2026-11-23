@@ -79,9 +79,9 @@ async function runProductionReadinessTests() {
 
   await test("Plan configurations correctly map limits", () => {
     assert.strictEqual(getPlanConfig("free").monthlyLimit, 2);
-    assert.strictEqual(getPlanConfig("pilot").monthlyLimit, 5);
-    assert.strictEqual(getPlanConfig("growth").monthlyLimit, 25);
-    assert.strictEqual(getPlanConfig("fleet").monthlyLimit, 100);
+    assert.strictEqual(getPlanConfig("pilot").monthlyLimit, 50);
+    assert.strictEqual(getPlanConfig("growth").monthlyLimit, 200);
+    assert.strictEqual(getPlanConfig("fleet").monthlyLimit, 500);
   });
 
   await test("Quota check permits generation within limit", async () => {

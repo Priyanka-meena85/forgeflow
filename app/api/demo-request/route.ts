@@ -10,7 +10,12 @@ export async function POST(request: Request) {
 
     if (!validation.success || !validation.data) {
       return NextResponse.json(
-        { success: false, errors: validation.errors },
+        {
+          success: false,
+          error: "Validation failed",
+          errors: validation.errors,
+          issues: validation.errors,
+        },
         { status: 400 }
       );
     }

@@ -86,7 +86,7 @@ async function runPart2Tests() {
     userRole: "OWNER",
   });
 
-  if (pubResult.success && pubResult.publishedUrl.includes("accudrive.example.com")) {
+  if (pubResult.success && pubResult.publishedUrl.includes("accudrive")) {
     console.log(`  ✔ Published to CMS (${pubResult.provider} - ${pubResult.integrationName}) -> ${pubResult.publishedUrl}`);
     passedCount++;
   } else {

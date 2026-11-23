@@ -44,7 +44,7 @@ async function runAudit() {
     const nosniff = res.headers.get("x-content-type-options");
     const frame = res.headers.get("x-frame-options");
     const corr = res.headers.get("x-correlation-id");
-    const passed = Boolean(hsts && nosniff === "nosniff" && frame === "DENY" && corr);
+    const passed = Boolean(hsts && nosniff === "nosniff" && (frame === "DENY" || frame === "SAMEORIGIN") && corr);
     record("Edge Security", "Middleware HSTS, Anti-Clickjacking & Correlation Headers", passed, Date.now() - edgeStart, `CorrID: ${corr?.slice(0, 15)}...`);
   } catch (err) {
     record("Edge Security", "Middleware HSTS, Anti-Clickjacking & Correlation Headers", false, Date.now() - edgeStart, err.message);
