@@ -178,7 +178,7 @@ function generatePrintableExecutiveReportHtml(data: {
     </div>
     <div class="card">
       <div class="card-label">Plant Engineer Sessions</div>
-      <div class="card-val accent">${data.metrics.qualifiedEngineerSessions.toLocaleString()}</div>
+      <div class="card-val accent">${data.metrics.qualifiedEngineerSessions.toLocaleString("en-US")}</div>
     </div>
     <div class="card">
       <div class="card-label">Attributed Pipeline Value</div>

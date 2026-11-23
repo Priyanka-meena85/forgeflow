@@ -49,13 +49,15 @@ const DEFAULT_QUEUE: ScheduledPage[] = [
 
 let queue: ScheduledPage[] = [...DEFAULT_QUEUE];
 
-loadCloudCollection<ScheduledPage>("scheduled-publish", DEFAULT_QUEUE)
-  .then((data) => {
-    if (data && data.length > 0) {
-      queue = data;
-    }
-  })
-  .catch(() => {});
+if (typeof window === "undefined") {
+  loadCloudCollection<ScheduledPage>("scheduled-publish", DEFAULT_QUEUE)
+    .then((data) => {
+      if (data && data.length > 0) {
+        queue = data;
+      }
+    })
+    .catch(() => {});
+}
 
 export function listScheduledPages(): ScheduledPage[] {
   return [...queue].sort(

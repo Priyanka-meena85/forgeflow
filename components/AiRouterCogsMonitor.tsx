@@ -151,7 +151,7 @@ export function AiRouterCogsMonitor() {
                   <strong className="text-slate-900 font-semibold">{g.keyword}</strong>
                   <div className="flex items-center gap-2 text-[10px] font-mono text-slate-500 mt-0.5">
                     <span className="text-sky-800 font-bold">{g.modelUsed}</span> &bull; 
-                    <span>{g.tokensTotal.toLocaleString()} tokens</span> &bull; 
+                    <span>{g.tokensTotal.toLocaleString("en-US")} tokens</span> &bull; 
                     <span>{g.latencyMs}ms latency</span>
                   </div>
                 </div>

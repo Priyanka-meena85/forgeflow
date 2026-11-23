@@ -115,7 +115,7 @@ export function EnterpriseInvoicingManager({ invoices, onRefresh, onActionMessag
                 <td className="p-3 font-medium text-slate-900">{inv.companyName}</td>
                 <td className="p-3 font-mono text-slate-700">{inv.purchaseOrderNumber || "PO-PENDING"}</td>
                 <td className="p-3 uppercase font-mono text-slate-600">{inv.plan}</td>
-                <td className="p-3 font-bold text-slate-900">${inv.amountUsd.toLocaleString()}.00</td>
+                <td className="p-3 font-bold text-slate-900">${inv.amountUsd.toLocaleString("en-US")}.00</td>
                 <td className="p-3 font-mono text-slate-600">{inv.paymentTerms}</td>
                 <td className="p-3">
                   <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-100 text-amber-800 border border-amber-200">

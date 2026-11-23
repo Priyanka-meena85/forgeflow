@@ -1,5 +1,3 @@
-"use server";
-
 export type SupportedLocale = "hi" | "gu" | "mr" | "pa" | "en-IN";
 
 export interface LocaleConfig {

@@ -135,7 +135,7 @@ export function AeoCitationMonitor({ summary, queries, onRefresh, onActionMessag
             </div>
             {q.aiSnippetSummary && (
               <p className="text-slate-600 italic text-[11px] leading-relaxed">
-                "{q.aiSnippetSummary}"
+                &ldquo;{q.aiSnippetSummary}&rdquo;
               </p>
             )}
           </div>

@@ -9,6 +9,11 @@ const nextConfig: NextConfig = {
   /* config options here */
   cacheComponents: true,
   partialPrefetching: true,
+  images: {
+    remotePatterns: [
+      { protocol: "https", hostname: "**" },
+    ],
+  },
   turbopack: {
     root: process.cwd(),
     rules: {
@@ -17,6 +22,18 @@ const nextConfig: NextConfig = {
         as: "*.css",
       },
     },
+  },
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        path: false,
+        net: false,
+        tls: false,
+      };
+    }
+    return config;
   },
   async headers() {
     return [

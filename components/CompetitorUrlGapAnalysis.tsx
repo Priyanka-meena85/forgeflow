@@ -188,7 +188,7 @@ export function CompetitorUrlGapAnalysis() {
                         <div className="font-medium text-slate-800 max-w-64">{t.topic}</div>
                         <div className="text-slate-400 font-mono">{t.suggestedSlug}</div>
                       </td>
-                      <td className="p-3 font-mono font-bold text-slate-700">{t.estimatedVolume.toLocaleString()}</td>
+                      <td className="p-3 font-mono font-bold text-slate-700">{t.estimatedVolume.toLocaleString("en-US")}</td>
                       <td className={`p-3 font-semibold ${DIFF_COLORS[t.difficulty]}`}>{t.difficulty}</td>
                       <td className="p-3">
                         <span className={`rounded-full border px-2 py-0.5 text-xs font-semibold ${PRIORITY_COLORS[t.priority]}`}>

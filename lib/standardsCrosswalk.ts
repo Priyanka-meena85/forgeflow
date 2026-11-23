@@ -178,7 +178,7 @@ export function generateGlobalCrosswalk(input: SpecificationCrosswalkInput): Loc
       material: metal.en.grade,
       standards: "ANSI B11.2 / ASME B73.1",
       additionalProperty: [
-        { "@type": "PropertyValue", name: "Operating Pressure", value: `${pressurePsi.toLocaleString()} PSI` },
+        { "@type": "PropertyValue", name: "Operating Pressure", value: `${pressurePsi.toLocaleString("en-US")} PSI` },
         { "@type": "PropertyValue", name: "Operating Temperature", value: `${tempF}°F` },
         { "@type": "PropertyValue", name: "Radial Running Clearance", value: `${clearanceIn} in. (${clearanceMicrons} µm)` },
         { "@type": "PropertyValue", name: "Tightening Bolt Torque", value: `${torqueFtLb} ft-lb (${torqueNm} N·m)` },
@@ -253,7 +253,7 @@ export function generateGlobalCrosswalk(input: SpecificationCrosswalkInput): Loc
         tensileStrength: metal.en.tensile,
       },
       units: {
-        pressure: `${pressurePsi.toLocaleString()} PSI`,
+        pressure: `${pressurePsi.toLocaleString("en-US")} PSI`,
         temperature: `${tempF}°F Sump Limit`,
         clearance: `${clearanceIn} in. (${clearanceMicrons} µm)`,
         torque: `${torqueFtLb} ft-lb`,

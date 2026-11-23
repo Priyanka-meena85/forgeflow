@@ -97,7 +97,7 @@ export async function GET(request: Request) {
 - **Status**: ${d.status}
 - **Vertical**: ${d.vertical || "Industrial OEM"}
 - **Target Query**: \`${d.keyword}\`
-- **Pipeline Value**: $${(d.pipelineValueMin || 0).toLocaleString()} - $${(d.pipelineValueMax || 0).toLocaleString()}
+- **Pipeline Value**: $${(d.pipelineValueMin || 0).toLocaleString("en-US")} - $${(d.pipelineValueMax || 0).toLocaleString("en-US")}
 
 ## Summary
 ${d.summary}

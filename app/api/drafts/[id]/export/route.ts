@@ -39,7 +39,7 @@ export async function GET(
   const baseFilename = draft.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "content";
   const pipelineValueStr =
     draft.pipelineValueMin && draft.pipelineValueMax
-      ? `$${draft.pipelineValueMin.toLocaleString()} - $${draft.pipelineValueMax.toLocaleString()}`
+      ? `$${draft.pipelineValueMin.toLocaleString("en-US")} - $${draft.pipelineValueMax.toLocaleString("en-US")}`
       : "$50,000 - $250,000";
 
   const pageReview = await db.pageReview.findUnique({

@@ -40,14 +40,16 @@ const DEFAULT_CONFIG: WhiteLabelConfig = {
 const configs = new Map<string, WhiteLabelConfig>();
 configs.set("org_demo", DEFAULT_CONFIG);
 
-// Hydrate cloud persistence asynchronously
-loadCloudCollection<WhiteLabelConfig>("white-label", [DEFAULT_CONFIG])
-  .then((list) => {
-    for (const item of list) {
-      configs.set(item.orgId, item);
-    }
-  })
-  .catch(() => {});
+// Hydrate cloud persistence asynchronously on server only
+if (typeof window === "undefined") {
+  loadCloudCollection<WhiteLabelConfig>("white-label", [DEFAULT_CONFIG])
+    .then((list) => {
+      for (const item of list) {
+        configs.set(item.orgId, item);
+      }
+    })
+    .catch(() => {});
+}
 
 export function getWhiteLabelConfig(orgId: string): WhiteLabelConfig | null {
   return configs.get(orgId) ?? null;

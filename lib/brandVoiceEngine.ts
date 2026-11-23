@@ -1,5 +1,3 @@
-"use server";
-
 import { loadCloudCollection, saveCloudCollection } from "@/lib/cloudPersistence";
 
 export interface BrandVoiceProfile {
@@ -42,13 +40,15 @@ const DEFAULT_PROFILES: BrandVoiceProfile[] = [
 
 let profileStore: BrandVoiceProfile[] = [...DEFAULT_PROFILES];
 
-loadCloudCollection<BrandVoiceProfile>("brand-voice", DEFAULT_PROFILES)
-  .then((data) => {
-    if (data && data.length > 0) {
-      profileStore = data;
-    }
-  })
-  .catch(() => {});
+if (typeof window === "undefined") {
+  loadCloudCollection<BrandVoiceProfile>("brand-voice", DEFAULT_PROFILES)
+    .then((data) => {
+      if (data && data.length > 0) {
+        profileStore = data;
+      }
+    })
+    .catch(() => {});
+}
 
 export async function getBrandVoiceProfiles(orgId: string): Promise<BrandVoiceProfile[]> {
   return profileStore.filter((p) => p.orgId === orgId);

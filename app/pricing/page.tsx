@@ -392,7 +392,7 @@ export default function PricingPage() {
               <div>
                 <label htmlFor="slider-deal-value" className="flex justify-between text-xs font-bold text-slate-800 mb-1 cursor-pointer">
                   <span>Average Equipment Deal Value (ACV)</span>
-                  <span className="font-mono text-sky-700">${calcAvgDeal.toLocaleString()}</span>
+                  <span className="font-mono text-sky-700">${calcAvgDeal.toLocaleString("en-US")}</span>
                 </label>
                 <input
                   id="slider-deal-value"
@@ -435,7 +435,7 @@ export default function PricingPage() {
                   Estimated 12-Month Net New Pipeline
                 </div>
                 <div className="text-3xl sm:text-4xl font-black text-emerald-400 mt-2 font-mono">
-                  ${estimatedPipeline.toLocaleString()}
+                  ${estimatedPipeline.toLocaleString("en-US")}
                 </div>
                 <p className="text-[11px] text-slate-400 mt-1">
                   Based on capturing 22% CTR in Google SGE &amp; Perplexity citations

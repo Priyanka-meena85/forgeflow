@@ -262,7 +262,7 @@ export function LeadAttributionDashboard() {
                       {p.vertical}
                     </span>
                   </td>
-                  <td className="p-3 font-mono">{p.sessions.toLocaleString()}</td>
+                  <td className="p-3 font-mono">{p.sessions.toLocaleString("en-US")}</td>
                   <td className="p-3">
                     <span className="font-bold text-indigo-700">{p.rfqCount}</span>
                   </td>
@@ -315,7 +315,7 @@ export function LeadAttributionDashboard() {
               { label: "Pipeline Value", value: fmt(selectedPage.rfqValue) },
               { label: "Demo Requests", value: selectedPage.demoRequests },
               { label: "CVR", value: `${selectedPage.conversionRate}%` },
-              { label: "Sessions", value: selectedPage.sessions.toLocaleString() },
+              { label: "Sessions", value: selectedPage.sessions.toLocaleString("en-US") },
               { label: "Avg. Time on Page", value: fmtTime(selectedPage.avgTimeOnPage) },
               { label: "Top Lead Company", value: selectedPage.topCompany },
               { label: "Last Lead Date", value: selectedPage.lastLeadDate },

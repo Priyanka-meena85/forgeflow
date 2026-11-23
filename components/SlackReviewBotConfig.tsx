@@ -49,7 +49,7 @@ export function SlackReviewBotConfig({ onActionMessage }: SlackReviewBotConfigPr
             </span>
           </h3>
           <p className="text-xs text-slate-500 mt-0.5">
-            Dispatches automated review cards to your engineering team's private Slack/Teams channel with 1-click &lsquo;Approve Tolerances&rsquo; action buttons.
+            Dispatches automated review cards to your engineering team&apos;s private Slack/Teams channel with 1-click &lsquo;Approve Tolerances&rsquo; action buttons.
           </p>
         </div>
         <button

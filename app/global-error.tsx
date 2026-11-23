@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import Link from "next/link";
 
 export default function GlobalError({
   error,
@@ -45,9 +46,9 @@ export default function GlobalError({
             <button className="btn-primary" onClick={() => reset()}>
               Try Again
             </button>
-            <a className="btn-secondary" href="/">
+            <Link className="btn-secondary" href="/">
               Home
-            </a>
+            </Link>
           </div>
         </div>
       </body>

@@ -30,8 +30,27 @@ export function RfqLeadManager({ onActionMessage }: RfqLeadManagerProps) {
   }, []);
 
   useEffect(() => {
-    fetchLeads();
-  }, [fetchLeads]);
+    let ignore = false;
+    async function load() {
+      setLoading(true);
+      try {
+        const res = await fetch("/api/leads");
+        const data = await res.json();
+        if (!ignore && res.ok && data.success) {
+          setLeads(data.leads || []);
+          setTotalPipeline(data.totalPipelineUsd || 0);
+        }
+      } catch {
+        // Graceful fallback
+      } finally {
+        if (!ignore) setLoading(false);
+      }
+    }
+    load();
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
   const copyEmbedCode = () => {
     const code = `<div class="forgeflow-rfq-widget" data-org="seed-org-industrial" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin:28px 0;">

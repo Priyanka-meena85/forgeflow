@@ -1307,7 +1307,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                   <div>
                     <div className="flex justify-between items-center text-xs font-bold text-slate-800 mb-1.5">
                       <span>Average Deal Value (ACV)</span>
-                      <span className="font-mono text-xs text-slate-900 font-bold">${calcAvgDeal.toLocaleString()}</span>
+                      <span className="font-mono text-xs text-slate-900 font-bold">${calcAvgDeal.toLocaleString("en-US")}</span>
                     </div>
                     <input
                       type="range"
@@ -1330,7 +1330,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                     Transparent Projected Pipeline
                   </div>
                   <div className="text-3xl font-black font-mono text-white mt-1">
-                    ${estimatedAnnualPipeline.toLocaleString()}
+                    ${estimatedAnnualPipeline.toLocaleString("en-US")}
                   </div>
                   <div className="text-xs text-slate-400 mt-0.5">
                     Estimated annual pipeline value generated
@@ -1340,19 +1340,19 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                 <div className="space-y-2 border-t border-slate-800 pt-4 text-xs font-mono">
                   <div className="flex justify-between text-slate-300">
                     <span className="text-slate-400">Annual Impressions:</span>
-                    <span className="font-bold text-white">{annualImpressions.toLocaleString()}</span>
+                    <span className="font-bold text-white">{annualImpressions.toLocaleString("en-US")}</span>
                   </div>
                   <div className="flex justify-between text-slate-300">
                     <span className="text-slate-400">Target Organic Clicks:</span>
-                    <span className="font-bold text-sky-400">{annualClicks.toLocaleString()}</span>
+                    <span className="font-bold text-sky-400">{annualClicks.toLocaleString("en-US")}</span>
                   </div>
                   <div className="flex justify-between text-slate-300">
                     <span className="text-slate-400">Qualified RFQ Inquiries:</span>
-                    <span className="font-bold text-emerald-400">{annualLeads.toLocaleString()}</span>
+                    <span className="font-bold text-emerald-400">{annualLeads.toLocaleString("en-US")}</span>
                   </div>
                   <div className="flex justify-between text-slate-300">
                     <span className="text-slate-400">Projected Closed Deals:</span>
-                    <span className="font-bold text-purple-400">{annualClosedDeals.toLocaleString()}</span>
+                    <span className="font-bold text-purple-400">{annualClosedDeals.toLocaleString("en-US")}</span>
                   </div>
                 </div>
 
@@ -1360,7 +1360,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                 <div className="p-3 rounded-xl bg-slate-800/80 border border-slate-700/80 text-[10px] font-mono text-slate-300 space-y-1">
                   <div className="text-sky-400 font-bold uppercase">Formula:</div>
                   <div className="leading-relaxed">
-                    {calcPages} pages &times; {calcSearches} searches/mo &times; 12 mo &times; {calcCtr}% CTR &times; {calcLeadConv}% conv &times; {calcCloseRate}% close &times; ${calcAvgDeal.toLocaleString()} ACV
+                    {calcPages} pages &times; {calcSearches} searches/mo &times; 12 mo &times; {calcCtr}% CTR &times; {calcLeadConv}% conv &times; {calcCloseRate}% close &times; ${calcAvgDeal.toLocaleString("en-US")} ACV
                   </div>
                 </div>
 

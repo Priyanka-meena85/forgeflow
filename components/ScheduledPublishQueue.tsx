@@ -35,7 +35,7 @@ export function ScheduledPublishQueue() {
   const [slug, setSlug] = useState("");
   const [cmsTarget, setCmsTarget] = useState<ScheduledPage["cmsTarget"]>("WORDPRESS");
   const [cmsEndpoint, setCmsEndpoint] = useState("https://specs.accudrive.io/wp-json/wp/v2/posts");
-  const [scheduledAt, setScheduledAt] = useState(
+  const [scheduledAt, setScheduledAt] = useState(() =>
     new Date(Date.now() + 3600_000).toISOString().slice(0, 16)
   );
   const [sitemapXml, setSitemapXml] = useState("");

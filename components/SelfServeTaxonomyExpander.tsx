@@ -166,7 +166,7 @@ export function SelfServeTaxonomyExpander() {
               </h3>
               <p className="text-xs text-slate-500 mt-1">
                 Parent Vertical: <strong>{proposal.vertical}</strong> &bull; Est. Search Volume:{" "}
-                <strong>{proposal.projectedSearchVolume.toLocaleString()}/mo</strong> &bull; Projected RFQs:{" "}
+                <strong>{proposal.projectedSearchVolume.toLocaleString("en-US")}/mo</strong> &bull; Projected RFQs:{" "}
                 <strong className="text-emerald-700">+{proposal.projectedRfqsYearly}/yr</strong>
               </p>
             </div>

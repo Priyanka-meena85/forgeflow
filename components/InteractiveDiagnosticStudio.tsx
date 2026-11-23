@@ -139,11 +139,11 @@ export function InteractiveDiagnosticStudio({ onActionMessage }: InteractiveDiag
                 onChange={(e) => setHydraulicHoseId(Number(e.target.value))}
                 className="w-full bg-slate-800 border border-slate-600 rounded px-2.5 py-1.5 text-white"
               >
-                <option value={0.5}>0.50 in (1/2")</option>
-                <option value={0.75}>0.75 in (3/4")</option>
-                <option value={1.0}>1.00 in (1")</option>
-                <option value={1.25}>1.25 in (1-1/4")</option>
-                <option value={1.5}>1.50 in (1-1/2")</option>
+                <option value={0.5}>0.50 in (1/2&quot;)</option>
+                <option value={0.75}>0.75 in (3/4&quot;)</option>
+                <option value={1.0}>1.00 in (1&quot;)</option>
+                <option value={1.25}>1.25 in (1-1/4&quot;)</option>
+                <option value={1.5}>1.50 in (1-1/2&quot;)</option>
               </select>
             </div>
           </div>

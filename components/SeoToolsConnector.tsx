@@ -195,7 +195,7 @@ export function SeoToolsConnector() {
                           <div className="text-slate-400 font-mono text-xs">{r.url}</div>
                         </td>
                         <td className="p-3 font-mono font-bold text-indigo-700">#{r.position}</td>
-                        <td className="p-3 font-mono">{r.volume.toLocaleString()}</td>
+                        <td className="p-3 font-mono">{r.volume.toLocaleString("en-US")}</td>
                         <td className="p-3">
                           <span className={`font-semibold ${r.difficulty <= 30 ? "text-green-600" : r.difficulty <= 50 ? "text-amber-600" : "text-red-600"}`}>
                             {r.difficulty}

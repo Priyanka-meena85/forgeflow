@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import dynamic from "next/dynamic";
+import type { UserRole } from "@prisma/client";
 import { AuthProvider, useAuth } from "@/components/AuthProvider";
 import type { OemDoc } from "@/components/OemRagManager";
 import type { AeoQuery } from "@/components/AeoCitationMonitor";
@@ -110,7 +111,7 @@ function AnimatedCounter({ value, prefix = "", suffix = "" }: { value: number; p
   return (
     <span>
       {prefix}
-      {displayValue.toLocaleString()}
+      {displayValue.toLocaleString("en-US")}
       {suffix}
     </span>
   );
@@ -946,7 +947,7 @@ function ForgeFlowWorkspace() {
   const dynamicPipelineValue = useMemo(() => {
     const baseMin = 75000 + (selectedEquipmentIndex * 45000) + (selectedFailureIndex * 20000);
     const baseMax = baseMin * 3 + (selectedStandardIndex * 50000);
-    return `$${baseMin.toLocaleString()} - $${baseMax.toLocaleString()}`;
+    return `$${baseMin.toLocaleString("en-US")} - $${baseMax.toLocaleString("en-US")}`;
   }, [selectedEquipmentIndex, selectedFailureIndex, selectedStandardIndex]);
 
   const dynamicSpecRisk = useMemo(() => {
@@ -5039,7 +5040,7 @@ function ForgeFlowWorkspace() {
             </div>
 
             {/* Team Members & Application Engineers (RBAC & Invitations) */}
-            <TeamManager currentUserRole={user?.role as any} onActionMessage={setActionMessage} />
+            <TeamManager currentUserRole={user?.role as UserRole | undefined} onActionMessage={setActionMessage} />
 
             {/* Slack & Microsoft Teams Review Bot Card */}
             <SlackReviewBotConfig onActionMessage={setActionMessage} />

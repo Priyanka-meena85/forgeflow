@@ -96,13 +96,13 @@ export function CrmPipelineAttribution() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-5">
           <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
             <span className="text-[10px] font-mono uppercase font-bold text-slate-500">Total Influenced Pipeline</span>
-            <p className="text-2xl font-black text-slate-900 font-humanist">${pipelineTotal.toLocaleString()} USD</p>
+            <p className="text-2xl font-black text-slate-900 font-humanist">${pipelineTotal.toLocaleString("en-US")} USD</p>
             <p className="text-[10px] text-slate-500 font-mono">3 Active Tier-1 Accounts</p>
           </div>
 
           <div className="p-4 rounded-xl bg-emerald-50/70 border border-emerald-200 space-y-1">
             <span className="text-[10px] font-mono uppercase font-bold text-emerald-800">Closed-Won Contract Revenue</span>
-            <p className="text-2xl font-black text-emerald-700 font-humanist">${closedWon.toLocaleString()} USD</p>
+            <p className="text-2xl font-black text-emerald-700 font-humanist">${closedWon.toLocaleString("en-US")} USD</p>
             <p className="text-[10px] text-emerald-800 font-mono">100% Attributed to AEO Specs</p>
           </div>
 
@@ -150,7 +150,7 @@ export function CrmPipelineAttribution() {
 
                 <div className="text-right shrink-0">
                   <span className="text-base font-black text-slate-900 block font-mono">
-                    ${deal.dealAmount.toLocaleString()}
+                    ${deal.dealAmount.toLocaleString("en-US")}
                   </span>
                   <span className="text-[10px] font-mono text-slate-500">{deal.touchpointsCount} Organic Touches</span>
                 </div>

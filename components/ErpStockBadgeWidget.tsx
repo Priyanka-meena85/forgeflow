@@ -53,6 +53,9 @@ const DEFAULT_STOCK_ITEMS: DistributorStockItem[] = [
 export function ErpStockBadgeWidget() {
   const [stockList, setStockList] = useState<DistributorStockItem[]>(DEFAULT_STOCK_ITEMS);
   const [selectedItem, setSelectedItem] = useState<DistributorStockItem | null>(null);
+  const [defaultDeliveryDate] = useState(() =>
+    new Date(Date.now() + 86400000 * 7).toISOString().slice(0, 10)
+  );
   const [rfqModalOpen, setRfqModalOpen] = useState(false);
   const [rfqSubmitted, setRfqSubmitted] = useState(false);
 
@@ -141,7 +144,7 @@ export function ErpStockBadgeWidget() {
                     {item.leadTimeDays} Business Days
                   </td>
                   <td className="p-3.5 text-right font-bold text-slate-900 font-mono">
-                    ${item.unitPriceUsd.toLocaleString()}
+                    ${item.unitPriceUsd.toLocaleString("en-US")}
                   </td>
                   <td className="p-3.5 text-center">
                     <button
@@ -215,7 +218,7 @@ export function ErpStockBadgeWidget() {
                     <input
                       required
                       type="date"
-                      defaultValue={new Date(Date.now() + 86400000 * 7).toISOString().slice(0, 10)}
+                      defaultValue={defaultDeliveryDate}
                       className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white"
                     />
                   </div>
@@ -241,7 +244,7 @@ export function ErpStockBadgeWidget() {
                     type="submit"
                     className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow-xs"
                   >
-                    Send Direct RFQ (${(selectedItem.unitPriceUsd * 4).toLocaleString()})
+                    Send Direct RFQ (${(selectedItem.unitPriceUsd * 4).toLocaleString("en-US")})
                   </button>
                 </div>
               </form>

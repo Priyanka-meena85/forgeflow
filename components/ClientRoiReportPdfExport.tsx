@@ -207,10 +207,10 @@ export function ClientRoiReportPdfExport() {
               Organic Clicks
             </span>
             <div className="text-2xl sm:text-3xl font-black text-slate-900 mt-2">
-              {data.totalOrganicClicks.toLocaleString()}
+              {data.totalOrganicClicks.toLocaleString("en-US")}
             </div>
             <p className="text-xs text-slate-500 mt-1">
-              {data.totalOrganicImpressions.toLocaleString()} Technical Impressions
+              {data.totalOrganicImpressions.toLocaleString("en-US")} Technical Impressions
             </p>
           </div>
 
@@ -305,7 +305,7 @@ export function ClientRoiReportPdfExport() {
                       {art.rfqs}
                     </td>
                     <td className="p-3.5 text-right font-bold text-emerald-700 font-mono">
-                      ${art.pipelineUsd.toLocaleString()}
+                      ${art.pipelineUsd.toLocaleString("en-US")}
                     </td>
                   </tr>
                 ))}

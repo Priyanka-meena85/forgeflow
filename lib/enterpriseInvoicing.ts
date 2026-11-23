@@ -75,7 +75,7 @@ export async function createEnterpriseInvoiceRequest(args: {
       paymentTerms: terms,
     },
     details: {
-      summary: `Generated Net-30 enterprise invoice for ${args.companyName} (${poNum}) totaling $${amount.toLocaleString()} USD.`,
+      summary: `Generated Net-30 enterprise invoice for ${args.companyName} (${poNum}) totaling $${amount.toLocaleString("en-US")} USD.`,
     },
   });
 
@@ -186,15 +186,15 @@ export function generatePrintableInvoiceHtml(inv: InvoiceDetails): string {
         </td>
         <td>12 Months (Annual)</td>
         <td style="text-align: right;">100 Pages / Mo</td>
-        <td style="text-align: right; font-weight: 600;">$${inv.amountUsd.toLocaleString()}.00</td>
+        <td style="text-align: right; font-weight: 600;">$${inv.amountUsd.toLocaleString("en-US")}.00</td>
       </tr>
     </tbody>
   </table>
 
   <div class="total-box">
-    <div class="total-row"><span>Subtotal:</span><span>$${inv.amountUsd.toLocaleString()}.00</span></div>
+    <div class="total-row"><span>Subtotal:</span><span>$${inv.amountUsd.toLocaleString("en-US")}.00</span></div>
     <div class="total-row"><span>Applicable Tax (0.0% B2B):</span><span>$0.00</span></div>
-    <div class="total-row grand"><span>Total Due (${inv.paymentTerms}):</span><span>$${inv.amountUsd.toLocaleString()}.00</span></div>
+    <div class="total-row grand"><span>Total Due (${inv.paymentTerms}):</span><span>$${inv.amountUsd.toLocaleString("en-US")}.00</span></div>
   </div>
 
   <div class="remit-box">

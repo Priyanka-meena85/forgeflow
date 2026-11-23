@@ -18,14 +18,16 @@ export function OnboardingChecklistWidget({
   const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
-    try {
-      const savedCollapsed = window.localStorage.getItem("forgeflow_checklist_collapsed");
-      if (savedCollapsed === "true") setCollapsed(true);
-      const savedDismissed = window.localStorage.getItem("forgeflow_checklist_dismissed");
-      if (savedDismissed === "true") setDismissed(true);
-    } catch {
-      // LocalStorage unavailable
-    }
+    queueMicrotask(() => {
+      try {
+        const savedCollapsed = window.localStorage.getItem("forgeflow_checklist_collapsed");
+        if (savedCollapsed === "true") setCollapsed(true);
+        const savedDismissed = window.localStorage.getItem("forgeflow_checklist_dismissed");
+        if (savedDismissed === "true") setDismissed(true);
+      } catch {
+        // LocalStorage unavailable
+      }
+    });
   }, []);
 
   const toggleCollapse = () => {

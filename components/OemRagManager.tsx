@@ -107,7 +107,7 @@ export function OemRagManager({ documents, onRefresh, onActionMessage }: OemRagM
               </span>
             </div>
             <p className="text-slate-600 text-[11px] line-clamp-2 italic leading-relaxed">
-              "{doc.snippet}"
+              &ldquo;{doc.snippet}&rdquo;
             </p>
             <div className="pt-1 border-t border-slate-200/80 flex flex-wrap gap-1">
               {doc.extractedSpecs?.slice(0, 3).map((spec, sIdx) => (

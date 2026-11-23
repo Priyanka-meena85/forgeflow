@@ -88,11 +88,11 @@ export function MdfCoOpBilling() {
           <div className="flex items-center gap-6 shrink-0">
             <div>
               <p className="text-[10px] font-mono text-slate-400 uppercase">Total OEM Co-Op Cap</p>
-              <p className="text-2xl font-black text-slate-900 font-humanist">${availableBudget.toLocaleString()}</p>
+              <p className="text-2xl font-black text-slate-900 font-humanist">${availableBudget.toLocaleString("en-US")}</p>
             </div>
             <div className="border-l border-slate-200 pl-6">
               <p className="text-[10px] font-mono text-slate-400 uppercase">Available Dealer Balance</p>
-              <p className="text-2xl font-black text-emerald-600 font-humanist">${remainingBudget.toLocaleString()}</p>
+              <p className="text-2xl font-black text-emerald-600 font-humanist">${remainingBudget.toLocaleString("en-US")}</p>
             </div>
           </div>
         </div>
@@ -137,7 +137,7 @@ export function MdfCoOpBilling() {
 
                   <div className="text-right shrink-0">
                     <span className="text-base font-black text-emerald-700 block font-mono">
-                      ${claim.claimAmountUsd.toLocaleString()} USD
+                      ${claim.claimAmountUsd.toLocaleString("en-US")} USD
                     </span>
                     <span className="text-[10px] font-mono text-slate-400">100% OEM Reimbursed</span>
                   </div>

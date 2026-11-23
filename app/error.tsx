@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import Link from "next/link";
 
 export default function ErrorPage({
   error,
@@ -38,12 +39,12 @@ export default function ErrorPage({
           >
             Retry Request
           </button>
-          <a
+          <Link
             href="/"
             className="px-5 py-2.5 rounded-xl border border-slate-700 hover:bg-slate-800 text-slate-300 font-bold text-xs uppercase tracking-wider transition"
           >
             Return to Console
-          </a>
+          </Link>
         </div>
       </div>
     </div>

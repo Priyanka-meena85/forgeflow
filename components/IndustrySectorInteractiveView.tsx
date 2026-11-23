@@ -392,7 +392,7 @@ export function IndustrySectorInteractiveView({ sector }: IndustrySectorInteract
               <div>
                 <label className="flex justify-between text-xs font-bold text-slate-800 mb-1 cursor-pointer">
                   <span>Average Equipment Deal Value (ACV)</span>
-                  <span className="font-mono text-sky-700">${dealAcv.toLocaleString()}</span>
+                  <span className="font-mono text-sky-700">${dealAcv.toLocaleString("en-US")}</span>
                 </label>
                 <input
                   type="range"
@@ -427,7 +427,7 @@ export function IndustrySectorInteractiveView({ sector }: IndustrySectorInteract
                 Estimated 12-Month Net New Pipeline
               </span>
               <div className="text-3xl sm:text-4xl font-black text-emerald-400 font-mono">
-                ${calculatedPipeline.toLocaleString()}
+                ${calculatedPipeline.toLocaleString("en-US")}
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 border-t border-slate-800 text-xs">
                 <div>

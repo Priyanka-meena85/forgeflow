@@ -94,11 +94,11 @@ export function GoogleSearchConsoleSync() {
             </div>
             <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80">
               <span className="text-[10px] font-mono text-slate-500 uppercase block">Monthly Impr</span>
-              <span className="text-base font-extrabold text-sky-700">{summary.monthlyImpressions.toLocaleString()}</span>
+              <span className="text-base font-extrabold text-sky-700">{summary.monthlyImpressions.toLocaleString("en-US")}</span>
             </div>
             <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80">
               <span className="text-[10px] font-mono text-slate-500 uppercase block">Monthly Clicks</span>
-              <span className="text-base font-extrabold text-emerald-700">{summary.monthlyClicks.toLocaleString()}</span>
+              <span className="text-base font-extrabold text-emerald-700">{summary.monthlyClicks.toLocaleString("en-US")}</span>
             </div>
             <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80">
               <span className="text-[10px] font-mono text-slate-500 uppercase block">Avg CTR</span>

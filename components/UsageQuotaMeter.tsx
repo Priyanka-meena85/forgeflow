@@ -152,10 +152,10 @@ export function UsageQuotaMeter() {
               <div>
                 <div className="flex justify-between items-baseline mb-2">
                   <span className="text-2xl font-black text-slate-900 font-mono">
-                    {m.used.toLocaleString()}
+                    {m.used.toLocaleString("en-US")}
                   </span>
                   <span className="text-xs text-slate-500 font-mono">
-                    / {m.limit.toLocaleString()} {m.unit}
+                    / {m.limit.toLocaleString("en-US")} {m.unit}
                   </span>
                 </div>
 
@@ -178,7 +178,7 @@ export function UsageQuotaMeter() {
                 <span>
                   Remaining:{" "}
                   <strong className="text-slate-800">
-                    {(m.limit - m.used).toLocaleString()} {m.unit}
+                    {(m.limit - m.used).toLocaleString("en-US")} {m.unit}
                   </strong>
                 </span>
                 {isWarning && (
