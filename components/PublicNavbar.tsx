@@ -454,6 +454,15 @@ export function PublicNavbar({ onOpenAuth, onOpenDemo, activeNav = "home" }: Pub
           >
             Pricing
           </Link>
+
+          {/* 5. Free Industrial SEO & AEO Scanner Link */}
+          <Link
+            href="/audit"
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 transition font-bold"
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span>Free Audit</span>
+          </Link>
         </nav>
 
         {/* Right Action Buttons */}

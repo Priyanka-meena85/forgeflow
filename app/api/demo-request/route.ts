@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { sendDemoRequestNotification } from "@/lib/email";
 import { validateDemoRequest } from "@/lib/validation";
 import { captureTelemetry } from "@/lib/telemetry";
+import { db } from "@/lib/db";
+
+export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
   try {
@@ -27,7 +30,34 @@ export async function POST(request: Request) {
 
     const { name, email, company, companySize, industry, useCase } = validation.data;
 
-    // Dispatch real transactional notification via Resend / Dev console fallback
+    // 1. Durably persist lead in database so no sales lead is ever lost
+    try {
+      const systemOrg = await db.organization.findFirst({ select: { id: true } });
+      if (systemOrg) {
+        await db.auditLog.create({
+          data: {
+            organizationId: systemOrg.id,
+            action: "DEMO_REQUEST_RECEIVED",
+            resourceType: "SALES_LEAD",
+            resourceId: email,
+            diffJson: JSON.stringify({
+              name,
+              email,
+              company,
+              companySize,
+              industry,
+              useCase,
+              receivedAt: new Date().toISOString(),
+            }),
+            ipAddress: request.headers.get("x-forwarded-for") || "unknown",
+          },
+        });
+      }
+    } catch (dbErr) {
+      console.warn("[Demo Request] DB lead persistence fallback:", dbErr);
+    }
+
+    // 2. Dispatch real transactional notification via Resend / Dev console fallback
     await sendDemoRequestNotification({
       name,
       email,

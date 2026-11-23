@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { dispatchWeeklyExecutiveDigest } from "@/lib/executiveDigestEngine";
+import { db } from "@/lib/db";
+
+export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
   try {
@@ -11,18 +14,48 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized cron execution" }, { status: 401 });
     }
 
-    const recipients = [
-      {
-        email: "executive@apexmotion.com",
-        organizationName: "Apex Motion Systems GmbH",
-        organizationId: "seed-org-industrial",
-      },
-    ];
+    // Query real active organization owners and admins from PostgreSQL
+    let recipients: { email: string; organizationName: string; organizationId: string }[] = [];
+    try {
+      const orgs = await db.organization.findMany({
+        where: {
+          subscriptionStatus: { in: ["active", "trialing"] },
+        },
+        include: {
+          users: {
+            where: { role: { in: ["OWNER", "ADMIN"] } },
+            select: { email: true },
+          },
+        },
+      });
+
+      recipients = orgs.flatMap((org) =>
+        org.users.map((u) => ({
+          email: u.email,
+          organizationName: org.name,
+          organizationId: org.id,
+        }))
+      );
+    } catch (dbErr) {
+      console.warn("[Executive Digest Cron] DB query fallback:", dbErr);
+    }
+
+    // Fallback to configured notification email if no active organizations registered yet
+    if (recipients.length === 0) {
+      recipients = [
+        {
+          email: process.env.ADMIN_EMAIL || "executive@forgeflow.ai",
+          organizationName: "Apex Motion Systems",
+          organizationId: "system-root",
+        },
+      ];
+    }
 
     const result = await dispatchWeeklyExecutiveDigest(recipients);
 
     return NextResponse.json({
       success: true,
+      recipientsCount: recipients.length,
       result,
     });
   } catch (err: unknown) {
