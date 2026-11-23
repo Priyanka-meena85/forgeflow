@@ -3,6 +3,8 @@ import { getSessionUser } from "@/lib/auth";
 import { errorResponse } from "@/lib/http";
 import { getBillingSummary } from "@/lib/billing";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     const user = await getSessionUser();

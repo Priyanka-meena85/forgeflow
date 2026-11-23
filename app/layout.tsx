@@ -11,6 +11,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://forgeflow.industrial.com"),
   title: "ForgeFlow | Enterprise Industrial SEO & AEO Content Engine",
   description:
     "Plan • Generate • Optimize • Grow. Pre-built industrial taxonomies, closed-loop structural QA validation, and native AEO/GEO schema for manufacturing and industrial B2B companies.",
@@ -22,7 +23,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="h-full antialiased">
+    <html lang="en" className="h-full antialiased" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -31,7 +32,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           rel="stylesheet"
         />
       </head>
-      <body className="min-h-full flex flex-col font-humanist bg-[#fafaf9] text-stone-900 selection:bg-sky-100 selection:text-sky-900">
+      <body className="min-h-full flex flex-col font-humanist bg-[#fafaf9] text-stone-900 selection:bg-sky-100 selection:text-sky-900" suppressHydrationWarning>
         {children}
         <CookieConsentBanner />
         <AnalyticsScript />

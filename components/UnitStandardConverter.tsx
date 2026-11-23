@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { StandardConversionPair } from "@/app/api/tools/convert-standards/route";
 
 export function UnitStandardConverter() {
@@ -30,9 +30,9 @@ export function UnitStandardConverter() {
   };
 
   // Initial load
-  useState(() => {
+  useEffect(() => {
     void fetchConversions("hvac");
-  });
+  }, []);
 
   const handleCopy = (text: string, idx: number) => {
     navigator.clipboard.writeText(text);

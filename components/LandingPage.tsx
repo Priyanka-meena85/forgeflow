@@ -1329,7 +1329,7 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                   <div className="text-[10px] font-mono font-bold text-sky-400 uppercase tracking-wider">
                     Transparent Projected Pipeline
                   </div>
-                  <div className="text-3xl font-black font-mono text-white mt-1">
+                  <div className="text-3xl font-black font-mono text-white mt-1" suppressHydrationWarning>
                     ${estimatedAnnualPipeline.toLocaleString("en-US")}
                   </div>
                   <div className="text-xs text-slate-400 mt-0.5">
@@ -1340,26 +1340,26 @@ export function LandingPage({ onAuthenticated, defaultAuthMode }: LandingPagePro
                 <div className="space-y-2 border-t border-slate-800 pt-4 text-xs font-mono">
                   <div className="flex justify-between text-slate-300">
                     <span className="text-slate-400">Annual Impressions:</span>
-                    <span className="font-bold text-white">{annualImpressions.toLocaleString("en-US")}</span>
+                    <span className="font-bold text-white" suppressHydrationWarning>{annualImpressions.toLocaleString("en-US")}</span>
                   </div>
                   <div className="flex justify-between text-slate-300">
                     <span className="text-slate-400">Target Organic Clicks:</span>
-                    <span className="font-bold text-sky-400">{annualClicks.toLocaleString("en-US")}</span>
+                    <span className="font-bold text-sky-400" suppressHydrationWarning>{annualClicks.toLocaleString("en-US")}</span>
                   </div>
                   <div className="flex justify-between text-slate-300">
                     <span className="text-slate-400">Qualified RFQ Inquiries:</span>
-                    <span className="font-bold text-emerald-400">{annualLeads.toLocaleString("en-US")}</span>
+                    <span className="font-bold text-emerald-400" suppressHydrationWarning>{annualLeads.toLocaleString("en-US")}</span>
                   </div>
                   <div className="flex justify-between text-slate-300">
                     <span className="text-slate-400">Projected Closed Deals:</span>
-                    <span className="font-bold text-purple-400">{annualClosedDeals.toLocaleString("en-US")}</span>
+                    <span className="font-bold text-purple-400" suppressHydrationWarning>{annualClosedDeals.toLocaleString("en-US")}</span>
                   </div>
                 </div>
 
                 {/* Step-by-Step Formula Box */}
                 <div className="p-3 rounded-xl bg-slate-800/80 border border-slate-700/80 text-[10px] font-mono text-slate-300 space-y-1">
                   <div className="text-sky-400 font-bold uppercase">Formula:</div>
-                  <div className="leading-relaxed">
+                  <div className="leading-relaxed" suppressHydrationWarning>
                     {calcPages} pages &times; {calcSearches} searches/mo &times; 12 mo &times; {calcCtr}% CTR &times; {calcLeadConv}% conv &times; {calcCloseRate}% close &times; ${calcAvgDeal.toLocaleString("en-US")} ACV
                   </div>
                 </div>

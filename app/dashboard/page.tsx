@@ -165,28 +165,29 @@ function ForgeFlowWorkspace() {
   const [viewMode, setViewMode] = useState<"EXECUTIVE" | "POWER_STUDIO">("POWER_STUDIO");
   const [activeTab, setActiveTab] = useState<TabKey>("Mission Control");
   const [selectedVertical, setSelectedVertical] = useState<string>("Food & beverage manufacturing");
-  const [form, setForm] = useState(() => {
-    if (typeof window === "undefined" || !user?.organization?.id) return defaultForm;
+  const [form, setForm] = useState(defaultForm);
+
+  useEffect(() => {
+    if (!user?.organization?.id) return;
     try {
       const saved = window.localStorage.getItem(`forgeflow.preferences.${user.organization.id}`);
-      if (!saved) return defaultForm;
+      if (!saved) return;
       const value: unknown = JSON.parse(saved);
-      if (!value || typeof value !== "object") throw new Error("Saved preferences are invalid.");
+      if (!value || typeof value !== "object") return;
       const preferences = value as Partial<typeof defaultForm>;
-      return {
-        ...defaultForm,
-        voiceRegister: typeof preferences.voiceRegister === "string" ? preferences.voiceRegister : defaultForm.voiceRegister,
-        fluffSanitizer: typeof preferences.fluffSanitizer === "boolean" ? preferences.fluffSanitizer : defaultForm.fluffSanitizer,
-        answerCapsuleDefault: typeof preferences.answerCapsuleDefault === "boolean" ? preferences.answerCapsuleDefault : defaultForm.answerCapsuleDefault,
-        allowlistOnly: typeof preferences.allowlistOnly === "boolean" ? preferences.allowlistOnly : defaultForm.allowlistOnly,
-        allowedDomains: typeof preferences.allowedDomains === "string" ? preferences.allowedDomains : defaultForm.allowedDomains,
-        bannedWords: typeof preferences.bannedWords === "string" ? preferences.bannedWords : defaultForm.bannedWords,
-      };
-    } catch (error) {
-      console.error("Could not read saved preferences:", error);
-      return defaultForm;
+      setForm((prev) => ({
+        ...prev,
+        voiceRegister: typeof preferences.voiceRegister === "string" ? preferences.voiceRegister : prev.voiceRegister,
+        fluffSanitizer: typeof preferences.fluffSanitizer === "boolean" ? preferences.fluffSanitizer : prev.fluffSanitizer,
+        answerCapsuleDefault: typeof preferences.answerCapsuleDefault === "boolean" ? preferences.answerCapsuleDefault : prev.answerCapsuleDefault,
+        allowlistOnly: typeof preferences.allowlistOnly === "boolean" ? preferences.allowlistOnly : prev.allowlistOnly,
+        allowedDomains: typeof preferences.allowedDomains === "string" ? preferences.allowedDomains : prev.allowedDomains,
+        bannedWords: typeof preferences.bannedWords === "string" ? preferences.bannedWords : prev.bannedWords,
+      }));
+    } catch {
+      // LocalStorage fallback
     }
-  });
+  }, [user?.organization?.id]);
   const [reviewDrafts, setReviewDrafts] = useState<Draft[]>([]);
   const [selectedDraftId, setSelectedDraftId] = useState<string | number>("");
   const [actionMessage, setActionMessage] = useState("");
