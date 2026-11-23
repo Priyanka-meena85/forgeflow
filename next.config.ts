@@ -7,8 +7,6 @@ const nextConfig: NextConfig = {
       "postgresql://postgres:postgres@localhost:5432/industrial_seo_saas?schema=public",
   },
   /* config options here */
-  cacheComponents: true,
-  partialPrefetching: true,
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "**" },
