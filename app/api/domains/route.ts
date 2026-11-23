@@ -7,7 +7,6 @@ export async function GET() {
   const config = getWhiteLabelConfig("org_demo");
   return NextResponse.json({
     success: true,
-    status: "ok",
-    whiteLabelConfig: config,
+    domains: config ? [config.customDomain] : [],
   });
 }

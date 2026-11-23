@@ -9,12 +9,17 @@ export async function POST(request: Request) {
     const validation = validateDemoRequest(rawBody);
 
     if (!validation.success || !validation.data) {
+      const errorMap = validation.errors || {};
+      const issues = Object.entries(errorMap).map(([field, message]) => ({
+        field,
+        message,
+      }));
       return NextResponse.json(
         {
           success: false,
           error: "Validation failed",
-          errors: validation.errors,
-          issues: validation.errors,
+          errors: errorMap,
+          issues,
         },
         { status: 400 }
       );
