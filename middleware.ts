@@ -36,8 +36,12 @@ export function middleware(request: NextRequest) {
     );
   }
 
-  // Gracefully handle Vercel deployment query endpoints
-  if (pathname.startsWith("/api/v6/deployments")) {
+  // Gracefully handle Vercel deployment query endpoints (v1, v6, v13, dashboard, etc.)
+  if (
+    pathname.includes("/deployments") ||
+    pathname.startsWith("/api/v1/dashboard") ||
+    /^\/api\/v\d+\/deployments/.test(pathname)
+  ) {
     return NextResponse.json(
       {
         id: "dpl_deployment_ok",
